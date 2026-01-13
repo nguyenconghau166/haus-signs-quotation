@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAUS SIGNS - Detailed Quotation Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">H</div>
+        <div class="logo-text">
+          <span class="logo-name">HAUS SIGNS</span>
+          <span class="logo-tagline">Detailed Quotation Tool</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="previewBtn" class="btn btn-secondary">
+          <span class="icon">👁️</span> Preview
+        </button>
+        <button id="copyImageBtn" class="btn btn-secondary">
+          <span class="icon">📋</span> Copy Image
+        </button>
+        <button id="exportPdfBtn" class="btn btn-primary">
+          <span class="icon">📄</span> Export PDF
+        </button>
+        <button id="exportImageBtn" class="btn btn-secondary">
+          <span class="icon">🖼️</span> Export Image
+        </button>
+      </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="signage">
+        <span class="tab-icon">🔤</span>
+        Signage
+      </button>
+      <button class="tab-btn" data-tab="lightbox">
+        <span class="tab-icon">💡</span>
+        Lightbox
+      </button>
+      <button class="tab-btn" data-tab="quotation">
+        <span class="tab-icon">📋</span>
+        Quotation
+      </button>
+      <button class="tab-btn" data-tab="settings" id="settingsTabBtn" style="display: none;">
+        <span class="tab-icon">⚙️</span>
+        Settings
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Tab: Signage -->
+      <section class="tab-content active" id="signage-tab">
+        <!-- Raised Letters Section -->
+        <div class="card">
+          <h2 class="card-title">🔤 Raised Letters</h2>
+          <p class="card-subtitle">Add raised letter lines with different sizes and types</p>
+
+          <div class="letter-rows" id="letterRows">
+            <!-- Letter rows will be added here by JS -->
+          </div>
+
+          <button id="addLetterBtn" class="btn btn-ghost">
+            <span class="icon">➕</span> Add Letter Row
+          </button>
+        </div>
+
+        <!-- Logo Section -->
+        <div class="card">
+          <h2 class="card-title">🎨 Raised Logo</h2>
+          <p class="card-subtitle">Enter logo dimensions (length × width)</p>
+
+          <div class="form-grid logo-panel-grid">
+            <div class="form-group full-width">
+              <label for="logoName">Logo Content</label>
+              <input type="text" id="logoName" placeholder="E.g: HAUS SIGNS Logo">
+            </div>
+            <div class="form-group">
+              <label for="logoType">Logo Type</label>
+              <select id="logoType">
+                <option value="frontLit">Acrylic Front Lit</option>
+                <option value="backLit">Acrylic Back Lit</option>
+                <option value="allLit">Acrylic All Lit</option>
+                <option value="3d">3D Non-LED</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="logoLengthInches">Length (inches)</label>
+              <input type="number" id="logoLengthInches" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="logoLength">Length (cm)</label>
+              <input type="number" id="logoLength" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="logoWidthInches">Width (inches)</label>
+              <input type="number" id="logoWidthInches" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="logoWidth">Width (cm)</label>
+              <input type="number" id="logoWidth" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group result-display">
+              <label>Price</label>
+              <div class="result-value" id="logoResult">0 ₱</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alu Panel Section -->
+        <div class="card">
+          <h2 class="card-title">📐 Alu Background Panel</h2>
+          <p class="card-subtitle">Enter panel dimensions (length × width)</p>
+
+          <div class="form-grid logo-panel-grid">
+            <div class="form-group full-width">
+              <label for="panelName">Note</label>
+              <input type="text" id="panelName" placeholder="E.g: Main signage panel">
+            </div>
+            <div class="form-group">
+              <label for="panelLengthInches">Length (inches)</label>
+              <input type="number" id="panelLengthInches" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="panelLength">Length (cm)</label>
+              <input type="number" id="panelLength" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="panelWidthInches">Width (inches)</label>
+              <input type="number" id="panelWidthInches" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="panelWidth">Width (cm)</label>
+              <input type="number" id="panelWidth" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group result-display">
+              <label>Price</label>
+              <div class="result-value" id="panelResult">0 ₱</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Signage Summary -->
+        <div class="card summary-card">
+          <h2 class="card-title">📊 Signage Summary</h2>
+          <div class="summary-table" id="signageSummary">
+            <!-- Summary will be generated by JS -->
+          </div>
+          <div class="summary-actions">
+            <button id="addToQuotationBtn" class="btn btn-primary">
+              <span class="icon">➕</span> Add to Quotation
+            </button>
+            <button id="clearSignageBtn" class="btn btn-ghost">
+              <span class="icon">🗑️</span> Clear All
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Lightbox -->
+      <section class="tab-content" id="lightbox-tab">
+        <div class="card">
+          <h2 class="card-title">💡 Select Lightbox Style</h2>
+
+          <div class="lightbox-styles" id="lightboxStyles">
+            <!-- Lightbox style cards will be generated by JS -->
+          </div>
+        </div>
+
+        <div class="card" id="lightboxConfig" style="display: none;">
+          <h2 class="card-title" id="selectedStyleName">Style 1 - Flat Lightbox</h2>
+
+          <div class="size-options">
+            <h3 class="section-label">Select Size</h3>
+            <div class="size-buttons" id="sizeButtons">
+              <!-- Size buttons will be generated by JS -->
+            </div>
+          </div>
+
+          <div class="custom-size" id="customSizeInputs" style="display: none;">
+            <h3 class="section-label">Custom Size</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="customWidth">Width (cm)</label>
+                <input type="number" id="customWidth" placeholder="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="customHeight">Height (cm)</label>
+                <input type="number" id="customHeight" placeholder="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="customDepth">Depth (cm)</label>
+                <input type="number" id="customDepth" placeholder="0" min="0">
+              </div>
+              <div class="lightbox-size-warning" id="lightboxSizeWarning" style="display: none;"></div>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="lightboxQty">Quantity</label>
+              <input type="number" id="lightboxQty" value="1" min="1">
+            </div>
+            <div class="form-group result-display">
+              <label>Price</label>
+              <div class="result-value" id="lightboxResult">0 ₱</div>
+            </div>
+          </div>
+
+          <div class="summary-actions">
+            <button id="addLightboxToQuotationBtn" class="btn btn-primary">
+              <span class="icon">➕</span> Add to Quotation
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab: Quotation -->
+      <section class="tab-content" id="quotation-tab">
+        <div class="card">
+          <h2 class="card-title">📋 Customer Information</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="customerName">Customer Name *</label>
+              <input type="text" id="customerName" placeholder="Enter customer name" required>
+            </div>
+            <div class="form-group">
+              <label for="quoteDate">Quotation Date</label>
+              <input type="date" id="quoteDate">
+            </div>
+            <div class="form-group full-width">
+              <label for="address">Address</label>
+              <input type="text" id="address" placeholder="Enter address">
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" placeholder="Enter phone number">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">🛒 Product List</h2>
+          <div class="items-table-container">
+            <table class="items-table simple" id="itemsTable">
+              <thead>
+                <tr>
+                  <th class="col-desc">Product</th>
+                  <th class="col-price">Price</th>
+                  <th class="col-action"></th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody">
+                <!-- Items will be added here by JS -->
+              </tbody>
+            </table>
+            <button id="addItemBtn" class="btn btn-ghost">
+              <span class="icon">➕</span> Add Manually
+            </button>
+          </div>
+
+          <!-- Installation Option -->
+          <div class="installation-section">
+            <label class="checkbox-label">
+              <input type="checkbox" id="installationCheck">
+              <span class="checkmark"></span>
+              <span>Include installation fee</span>
+            </label>
+            <div class="installation-price" id="installationPriceSection" style="display: none;">
+              <label for="installationPrice">Installation Fee (₱)</label>
+              <input type="number" id="installationPrice" value="0" min="0" placeholder="Enter installation fee">
+            </div>
+          </div>
+
+          <div class="totals-section">
+            <div class="total-row">
+              <span>Down Payment (DP):</span>
+              <input type="number" id="dpAmount" value="0" min="0">
+            </div>
+            <div class="total-row subtotal">
+              <span>Subtotal:</span>
+              <span id="subtotalDisplay">0</span>
+            </div>
+            <div class="total-row total">
+              <span>Balance:</span>
+              <span id="totalDisplay">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">🖼️ Mockup Images</h2>
+          <p class="card-subtitle">Drag and drop, click to select, or Ctrl+V to paste images</p>
+          <div class="image-upload-area" id="imageUploadArea">
+            <div class="upload-placeholder" id="uploadPlaceholder">
+              <span class="upload-icon">📁</span>
+              <span class="upload-text">Drop images here, click to select, or Ctrl+V to paste</span>
+              <span class="upload-hint">Supported: JPG, PNG, WEBP</span>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" multiple hidden>
+          </div>
+          <div class="image-previews" id="imagePreviews"></div>
+        </div>
+      </section>
+
+      <!-- Tab: Settings -->
+      <section class="tab-content" id="settings-tab">
+        <div class="card">
+          <h2 class="card-title">⚙️ Unit Price Settings</h2>
+          <p class="card-subtitle">Adjust unit prices for each product type (PHP/m²)</p>
+
+          <div class="settings-grid">
+            <div class="settings-group">
+              <h3 class="settings-group-title">Raised Letters</h3>
+              <div class="form-group">
+                <label for="priceLetterFrontLit">Acrylic Front Lit</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceLetterFrontLit" value="18000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="priceLetterBackLit">Acrylic Back Lit</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceLetterBackLit" value="18000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="priceLetterAllLit">Acrylic All Lit</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceLetterAllLit" value="20000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="priceLetter3D">3D Non-LED (ACP + Sintra)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceLetter3D" value="5500" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <h3 class="settings-group-title">Alu Panel & Lightbox</h3>
+              <div class="form-group">
+                <label for="priceAluPanel">Alu Panel</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceAluPanel" value="2000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="priceLightbox">Lightbox (all styles)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceLightbox" value="10000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button id="saveSettingsBtn" class="btn btn-primary">
+              <span class="icon">💾</span> Save Settings
+            </button>
+            <button id="resetSettingsBtn" class="btn btn-secondary">
+              <span class="icon">🔄</span> Reset to Default
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">📐 Lightbox Formula</h2>
+          <p class="card-subtitle">Edit the area calculation formula for each lightbox style. Use variables: w (width),
+            h
+            (height), d (depth) - unit is cm. Result is in m².</p>
+
+          <div class="lightbox-formula-list" id="lightboxFormulaList">
+            <!-- Formulas will be generated by JS -->
+          </div>
+
+          <div class="settings-actions" style="margin-top: 1rem;">
+            <button id="saveLightboxFormulasBtn" class="btn btn-primary">
+              <span class="icon">💾</span> Save Formula
+            </button>
+            <button id="resetLightboxFormulasBtn" class="btn btn-secondary">
+              <span class="icon">🔄</span> Reset to Default
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">📖 Other Formulas</h2>
+          <div class="formula-info">
+            <div class="formula-item">
+              <span class="formula-label">Raised letters:</span>
+              <span class="formula-value">10cm height letter = 0.011 m²/letter</span>
+            </div>
+            <div class="formula-item">
+              <span class="formula-label">Formula:</span>
+              <span class="formula-value">(Height / 10) × 0.011 × Letter Count = Area (m²)</span>
+            </div>
+            <div class="formula-item">
+              <span class="formula-label">Logo/Panel:</span>
+              <span class="formula-value">Length × Width / 10000 = Area (m²)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preview Section -->
+      <section class="preview-section" id="previewSection">
+        <div class="preview-header">
+          <h2>📄 Quotation Preview</h2>
+          <button id="closePreview" class="btn btn-ghost">✕ Close</button>
+        </div>
+        <div class="preview-container" id="previewContainer">
+          <!-- Preview content will be generated here -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- PDF Template (hidden) -->
+  <div id="pdfTemplate" class="pdf-template">
+    <div class="pdf-content premium">
+      <div class="pdf-page">
+        <!-- Header with gradient bar -->
+        <div class="pdf-header-bar"></div>
+
+        <!-- Company Header -->
+        <div class="pdf-header-section">
+          <div class="pdf-logo-section">
+            <div class="pdf-logo-icon">
+              <img src="/public/logo.png" alt="HAUS SIGNS" class="company-logo-img">
+            </div>
+            <div class="pdf-logo-text">
+              <span class="pdf-company-name">HAUS SIGNS</span>
+              <span class="pdf-company-tagline">Premium Signage Solutions</span>
+            </div>
+          </div>
+          <div class="pdf-title-section">
+            <h1 class="pdf-main-title">QUOTATION</h1>
+            <div class="pdf-quote-number">
+              <span class="quote-label">Quote #:</span>
+              <span class="quote-value" id="pdfQuoteNumber">QT-2026-001</span>
+            </div>
+            <div class="pdf-quote-date">
+              <span class="quote-label">Date:</span>
+              <span class="quote-value" id="pdfDate"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="pdf-customer-section">
+          <div class="pdf-section-title">
+            <span class="section-icon">👤</span>
+            CUSTOMER INFORMATION
+          </div>
+          <div class="pdf-customer-grid">
+            <div class="customer-field">
+              <span class="field-label">Client Name:</span>
+              <span class="field-value" id="pdfCustomerName"></span>
+            </div>
+            <div class="customer-field">
+              <span class="field-label">Phone:</span>
+              <span class="field-value" id="pdfPhone"></span>
+            </div>
+            <div class="customer-field full">
+              <span class="field-label">Address:</span>
+              <span class="field-value" id="pdfAddress"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="pdf-items-section">
+          <table class="pdf-items-table premium">
+            <thead>
+              <tr>
+                <th class="col-desc">DESCRIPTION</th>
+                <th class="col-qty">QUANTITY</th>
+                <th class="col-price">UNIT PRICE</th>
+                <th class="col-total">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody id="pdfItemsBody">
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals Section -->
+        <div class="pdf-totals-section">
+          <div class="pdf-totals-box">
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <span id="pdfSubtotal">0</span>
+            </div>
+            <div class="total-row">
+              <span>Down Payment:</span>
+              <span id="pdfDP">0</span>
+            </div>
+            <div class="total-row grand">
+              <span>GRAND TOTAL:</span>
+              <span id="pdfTotal">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Layout Images -->
+        <div class="pdf-images-section" id="pdfImagesSection">
+          <div class="pdf-section-title small">
+            <span class="section-icon">🖼️</span>
+            LAYOUT PREVIEW <span class="on-next-page">(on the next page)</span>
+          </div>
+          <div class="pdf-images-list" id="pdfLayoutImage">
+          </div>
+        </div>
+
+        <!-- Payment & Bank Info -->
+        <div class="pdf-footer-grid">
+          <div class="pdf-payment-terms">
+            <div class="terms-title">
+              <span class="icon">💳</span> Payment Terms
+            </div>
+            <ul class="terms-list">
+              <li><strong>30% deposit</strong> required to proceed with the order</li>
+              <li><strong>70% balance</strong> upon completion, prior to delivery/installation</li>
+            </ul>
+            <div class="terms-note">
+              <strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not
+              included. This is a NON-VAT receipt.
+            </div>
+          </div>
+
+          <div class="pdf-bank-info">
+            <div class="bank-title">Bank Transfer Details</div>
+            <div class="bank-logo">BDO</div>
+            <div class="bank-details">
+              <p><strong>Account Name:</strong> HausSigns</p>
+              <p><strong>Account No:</strong> 003890144424</p>
+            </div>
+            <div class="qr-code">
+              <img src="/public/qr-code.png" alt="BDO QR Code" class="qr-code-img">
+              <span>Scan to pay</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="pdf-trust-section">
+          <div class="trust-badge">
+            <div class="badge-icon">🏆</div>
+            <span>12 Months Warranty</span>
+          </div>
+          <div class="trust-badge">
+            <div class="badge-icon">✅</div>
+            <span>Quality Guaranteed</span>
+          </div>
+          <div class="trust-badge">
+            <div class="badge-icon">🛡️</div>
+            <span>Licensed & Insured</span>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pdf-footer-bar">
+          <div class="footer-content">
+            <span>📍 Street, Manotok Subdivision, 15 F. Lazaro, Valenzuela, 1440 Metro Manila, Philippines</span>
+            <span>📞 09105 838383</span>
+            <span>🌐 www.haussigns.com</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="data.js"></script>
+  <script src="calculator.js"></script>
+  <script src="settings.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
