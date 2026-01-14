@@ -531,9 +531,44 @@ function setupLightboxListeners() {
     // Quantity input
     document.getElementById('lightboxQty').addEventListener('input', updateLightboxCalculation);
 
-    // Custom size inputs
-    ['customWidth', 'customHeight', 'customDepth'].forEach(id => {
-        document.getElementById(id).addEventListener('input', updateLightboxCalculation);
+    // Custom size inputs - Inches (auto-convert to cm)
+    document.getElementById('customWidthInches').addEventListener('input', (e) => {
+        const inches = parseFloat(e.target.value) || 0;
+        const cm = Math.round(inches * INCH_TO_CM * 10) / 10;
+        document.getElementById('customWidth').value = cm || '';
+        updateLightboxCalculation();
+    });
+    document.getElementById('customHeightInches').addEventListener('input', (e) => {
+        const inches = parseFloat(e.target.value) || 0;
+        const cm = Math.round(inches * INCH_TO_CM * 10) / 10;
+        document.getElementById('customHeight').value = cm || '';
+        updateLightboxCalculation();
+    });
+    document.getElementById('customDepthInches').addEventListener('input', (e) => {
+        const inches = parseFloat(e.target.value) || 0;
+        const cm = Math.round(inches * INCH_TO_CM * 10) / 10;
+        document.getElementById('customDepth').value = cm || '';
+        updateLightboxCalculation();
+    });
+
+    // Custom size inputs - CM (auto-convert to inches)
+    document.getElementById('customWidth').addEventListener('input', (e) => {
+        const cm = parseFloat(e.target.value) || 0;
+        const inches = Math.round(cm / INCH_TO_CM * 10) / 10;
+        document.getElementById('customWidthInches').value = inches || '';
+        updateLightboxCalculation();
+    });
+    document.getElementById('customHeight').addEventListener('input', (e) => {
+        const cm = parseFloat(e.target.value) || 0;
+        const inches = Math.round(cm / INCH_TO_CM * 10) / 10;
+        document.getElementById('customHeightInches').value = inches || '';
+        updateLightboxCalculation();
+    });
+    document.getElementById('customDepth').addEventListener('input', (e) => {
+        const cm = parseFloat(e.target.value) || 0;
+        const inches = Math.round(cm / INCH_TO_CM * 10) / 10;
+        document.getElementById('customDepthInches').value = inches || '';
+        updateLightboxCalculation();
     });
 
     // Add to quotation
@@ -722,8 +757,11 @@ function addLightboxToQuotation() {
     document.querySelectorAll('.lightbox-style-card').forEach(card => card.classList.remove('selected'));
     document.getElementById('lightboxConfig').style.display = 'none';
     document.getElementById('lightboxQty').value = '1';
+    document.getElementById('customWidthInches').value = '';
     document.getElementById('customWidth').value = '';
+    document.getElementById('customHeightInches').value = '';
     document.getElementById('customHeight').value = '';
+    document.getElementById('customDepthInches').value = '';
     document.getElementById('customDepth').value = '';
     document.getElementById('lightboxResult').textContent = '0 ₱';
 

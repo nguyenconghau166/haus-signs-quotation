@@ -190,18 +190,30 @@
 
           <div class="custom-size" id="customSizeInputs" style="display: none;">
             <h3 class="section-label">Custom Size</h3>
-            <div class="form-grid">
+            <div class="form-grid lightbox-custom-grid">
+              <div class="form-group">
+                <label for="customWidthInches">Width (inches)</label>
+                <input type="number" id="customWidthInches" placeholder="0" min="0" step="0.1">
+              </div>
               <div class="form-group">
                 <label for="customWidth">Width (cm)</label>
-                <input type="number" id="customWidth" placeholder="0" min="0">
+                <input type="number" id="customWidth" placeholder="0" min="0" step="0.1">
+              </div>
+              <div class="form-group">
+                <label for="customHeightInches">Height (inches)</label>
+                <input type="number" id="customHeightInches" placeholder="0" min="0" step="0.1">
               </div>
               <div class="form-group">
                 <label for="customHeight">Height (cm)</label>
-                <input type="number" id="customHeight" placeholder="0" min="0">
+                <input type="number" id="customHeight" placeholder="0" min="0" step="0.1">
+              </div>
+              <div class="form-group">
+                <label for="customDepthInches">Depth (inches)</label>
+                <input type="number" id="customDepthInches" placeholder="0" min="0" step="0.1">
               </div>
               <div class="form-group">
                 <label for="customDepth">Depth (cm)</label>
-                <input type="number" id="customDepth" placeholder="0" min="0">
+                <input type="number" id="customDepth" placeholder="0" min="0" step="0.1">
               </div>
               <div class="lightbox-size-warning" id="lightboxSizeWarning" style="display: none;"></div>
             </div>
