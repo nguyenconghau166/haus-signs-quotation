@@ -136,10 +136,24 @@ function calculateLightboxArea(styleId, size, customDimensions = null) {
 function calculateLightboxPrice(styleId, size, quantity, customDimensions, prices) {
     const area = calculateLightboxArea(styleId, size, customDimensions);
     const pricePerSqm = prices.lightbox || DEFAULT_PRICES.lightbox;
-    const unitPrice = area * pricePerSqm;
-    const totalPrice = unitPrice * quantity;
+    const baseUnitPrice = area * pricePerSqm;
+    const baseTotalPrice = baseUnitPrice * quantity;
 
-    return { area, unitPrice, totalPrice, quantity };
+    // Small order markup rules (same as letters):
+    // - Orders under 3000 PHP: +30%
+    // - Orders under 5000 PHP: +20%
+    let markupPercent = 0;
+    if (baseTotalPrice > 0 && baseTotalPrice < 3000) {
+        markupPercent = 30;
+    } else if (baseTotalPrice >= 3000 && baseTotalPrice < 5000) {
+        markupPercent = 20;
+    }
+
+    const markup = baseTotalPrice * (markupPercent / 100);
+    const totalPrice = baseTotalPrice + markup;
+    const unitPrice = quantity > 0 ? totalPrice / quantity : 0;
+
+    return { area, unitPrice, totalPrice, quantity, markupPercent, markup };
 }
 
 /**
