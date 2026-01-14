@@ -354,7 +354,12 @@ function renderLetterRows() {
 }
 
 // Minimum letter height in cm
-const MIN_LETTER_HEIGHT = 15;
+const MIN_LETTER_HEIGHT = 15;      // For LED letters (Front Lit, Back Lit, All Lit)
+const MIN_LETTER_HEIGHT_3D = 8;    // For 3D Non-LED letters
+
+function getMinHeightForType(letterType) {
+    return letterType === '3d' ? MIN_LETTER_HEIGHT_3D : MIN_LETTER_HEIGHT;
+}
 
 function updateLetterCalculation(id) {
     const letter = state.letters.find(l => l.id === id);
@@ -363,9 +368,10 @@ function updateLetterCalculation(id) {
     const priceEl = document.querySelector(`.letter-price[data-id="${id}"]`);
     if (!priceEl) return;
 
-    // Validate minimum height
-    if (letter.height > 0 && letter.height < MIN_LETTER_HEIGHT) {
-        priceEl.textContent = `⚠️ Minimum ${MIN_LETTER_HEIGHT}cm`;
+    // Validate minimum height based on letter type
+    const minHeight = getMinHeightForType(letter.type);
+    if (letter.height > 0 && letter.height < minHeight) {
+        priceEl.textContent = `⚠️ Minimum ${minHeight}cm`;
         priceEl.style.color = 'var(--danger)';
         letter.isValid = false;
         updateSignageSummary();
@@ -405,7 +411,8 @@ function updateSignageSummary() {
 
     // Letters (skip invalid ones)
     state.letters.forEach((letter, index) => {
-        if (letter.height >= MIN_LETTER_HEIGHT && letter.charCount > 0 && letter.isValid !== false) {
+        const minHeight = getMinHeightForType(letter.type);
+        if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
             const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
             const typeInfo = LETTER_TYPES.find(t => t.id === letter.type);
             const displayName = letter.name || `Raised Letters ${index + 1}`;
@@ -461,7 +468,8 @@ function updateSignageSummary() {
 function addSignageToQuotation() {
     // Add letters (skip invalid ones)
     state.letters.forEach((letter, index) => {
-        if (letter.height >= MIN_LETTER_HEIGHT && letter.charCount > 0 && letter.isValid !== false) {
+        const minHeight = getMinHeightForType(letter.type);
+        if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
             const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
             const typeInfo = LETTER_TYPES.find(t => t.id === letter.type);
             const displayName = letter.name || `Raised Letters`;
