@@ -354,11 +354,14 @@ function renderLetterRows() {
 }
 
 // Minimum letter height in cm
-const MIN_LETTER_HEIGHT = 15;      // For LED letters (Front Lit, Back Lit, All Lit)
-const MIN_LETTER_HEIGHT_3D = 8;    // For 3D Non-LED letters
+const MIN_LETTER_HEIGHT = 15;         // For Front Lit & All Lit letters
+const MIN_LETTER_HEIGHT_BACKLIT = 10; // For Back Lit letters
+const MIN_LETTER_HEIGHT_3D = 8;       // For 3D Non-LED letters
 
 function getMinHeightForType(letterType) {
-    return letterType === '3d' ? MIN_LETTER_HEIGHT_3D : MIN_LETTER_HEIGHT;
+    if (letterType === '3d') return MIN_LETTER_HEIGHT_3D;
+    if (letterType === 'backLit') return MIN_LETTER_HEIGHT_BACKLIT;
+    return MIN_LETTER_HEIGHT;
 }
 
 function updateLetterCalculation(id) {
