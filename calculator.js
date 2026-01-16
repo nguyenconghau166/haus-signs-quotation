@@ -162,9 +162,9 @@ function calculateLightboxPrice(styleId, size, quantity, customDimensions, price
  * @returns {string} Formatted number
  */
 function formatNumber(num) {
-    return num.toLocaleString('en-US', {
+    return Math.round(num).toLocaleString('en-US', {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 0
     });
 }
 

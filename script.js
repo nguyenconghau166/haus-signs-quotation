@@ -757,7 +757,7 @@ function addLightboxToQuotation() {
     );
 
     state.quotationItems.push({
-        description: `${style.name} - ${sizeLabel}${quantity > 1 ? ` x ${quantity}` : ''}`,
+        description: `${style.name} - ${sizeLabel}`,
         price: result.totalPrice
     });
 
