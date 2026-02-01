@@ -3,8 +3,8 @@
  * Calculation Functions
  */
 
-// Formula: 10cm height = 0.011 m² per character
-const LETTER_AREA_FACTOR = 0.011;
+// Formula: Area = 0.95 * (height in meters)² per character
+const LETTER_AREA_COEFFICIENT = 0.95;
 
 /**
  * Calculate letter area in m²
@@ -14,8 +14,9 @@ const LETTER_AREA_FACTOR = 0.011;
  */
 function calculateLetterArea(heightCm, charCount) {
     if (!heightCm || !charCount) return 0;
-    // Formula: (height / 10) * 0.011 * charCount
-    return (heightCm / 10) * LETTER_AREA_FACTOR * charCount;
+    // Formula: 0.95 * (height in meters)² * charCount
+    const heightInMeters = heightCm / 100;
+    return LETTER_AREA_COEFFICIENT * (heightInMeters * heightInMeters) * charCount;
 }
 
 /**
