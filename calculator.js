@@ -3,8 +3,8 @@
  * Calculation Functions
  */
 
-// Formula: Area = 0.95 * (height in meters)² per character
-const LETTER_AREA_COEFFICIENT = 0.95;
+// Formula: Area = 0.9 * (height in meters)² per character
+const LETTER_AREA_COEFFICIENT = 0.9;
 
 /**
  * Calculate letter area in m²
