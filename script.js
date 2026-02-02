@@ -57,6 +57,7 @@ function init() {
     setupQuotationListeners();
     setupImageListeners();
     setupExportListeners();
+    setupAnchorPricingListeners(); // Anchor pricing comparison
     setupSecretSettingsAccess(); // Hidden settings access
 
     // Initial render
@@ -1300,6 +1301,29 @@ function updateAllCalculations() {
 
     // Update summary
     updateSignageSummary();
+}
+
+// ==================== Anchor Pricing ====================
+function setupAnchorPricingListeners() {
+    // Currently just placeholder - prices are static examples
+    // In future, could link this to actual quotation items
+    updateAnchorPricing();
+}
+
+// Update anchor pricing display with dynamic calculations
+function updateAnchorPricing() {
+    // Example prices for demonstration (from sales process document)
+    const acrylicBasePrice = 12000;  // Best Value (Recommended)
+    const inoxPrice = acrylicBasePrice * 2;  // Anchor Price = 2x Acrylic
+    const economyPrice = acrylicBasePrice * 0.5;  // Economy = 50% of Acrylic
+
+    const savings = inoxPrice - acrylicBasePrice;
+
+    // Update display
+    document.getElementById('anchorInoxPrice').textContent = `₱ ${formatNumber(inoxPrice)}`;
+    document.getElementById('anchorAcrylicPrice').textContent = `₱ ${formatNumber(acrylicBasePrice)}`;
+    document.getElementById('anchorEconomyPrice').textContent = `₱ ${formatNumber(economyPrice)}`;
+    document.getElementById('anchorSavings').textContent = `SAVE ₱ ${formatNumber(savings)} vs Premium!`;
 }
 
 // ==================== Start ====================
