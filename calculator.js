@@ -14,7 +14,7 @@ const LETTER_AREA_COEFFICIENT = 0.9;
  */
 function calculateLetterArea(heightCm, charCount) {
     if (!heightCm || !charCount) return 0;
-    // Formula: 0.95 * (height in meters)² * charCount
+    // Formula: 0.9 * (height in meters)² * charCount
     const heightInMeters = heightCm / 100;
     return LETTER_AREA_COEFFICIENT * (heightInMeters * heightInMeters) * charCount;
 }

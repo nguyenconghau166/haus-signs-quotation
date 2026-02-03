@@ -59,8 +59,10 @@ function initSettingsForm(prices) {
     document.getElementById('priceLetterBackLit').value = prices.letterBackLit;
     document.getElementById('priceLetterAllLit').value = prices.letterAllLit;
     document.getElementById('priceLetter3D').value = prices.letter3D;
+    document.getElementById('priceLetterInox').value = prices.letterInox;
     document.getElementById('priceAluPanel').value = prices.aluPanel;
     document.getElementById('priceLightbox').value = prices.lightbox;
+    document.getElementById('anchorMultiplier').value = prices.anchorMultiplier;
 }
 
 /**
@@ -73,8 +75,10 @@ function getPricesFromForm() {
         letterBackLit: parseFloat(document.getElementById('priceLetterBackLit').value) || DEFAULT_PRICES.letterBackLit,
         letterAllLit: parseFloat(document.getElementById('priceLetterAllLit').value) || DEFAULT_PRICES.letterAllLit,
         letter3D: parseFloat(document.getElementById('priceLetter3D').value) || DEFAULT_PRICES.letter3D,
+        letterInox: parseFloat(document.getElementById('priceLetterInox').value) || DEFAULT_PRICES.letterInox,
         aluPanel: parseFloat(document.getElementById('priceAluPanel').value) || DEFAULT_PRICES.aluPanel,
-        lightbox: parseFloat(document.getElementById('priceLightbox').value) || DEFAULT_PRICES.lightbox
+        lightbox: parseFloat(document.getElementById('priceLightbox').value) || DEFAULT_PRICES.lightbox,
+        anchorMultiplier: parseFloat(document.getElementById('anchorMultiplier').value) || DEFAULT_PRICES.anchorMultiplier
     };
 }
 

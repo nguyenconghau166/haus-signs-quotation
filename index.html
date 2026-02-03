@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="anchor-pricing.css">
 </head>
 
 <body>
@@ -47,6 +48,10 @@
       <button class="tab-btn" data-tab="lightbox">
         <span class="tab-icon">💡</span>
         Lightbox
+      </button>
+      <button class="tab-btn" data-tab="anchor">
+        <span class="tab-icon">⚖️</span>
+        Anchor Pricing
       </button>
       <button class="tab-btn" data-tab="quotation">
         <span class="tab-icon">📋</span>
@@ -238,6 +243,323 @@
         </div>
       </section>
 
+      <!--Tab: Anchor Pricing -->
+      <section class="tab-content" id="anchor-tab">
+        <div class="card">
+          <h2 class="card-title">⚖️ Price Comparison Quotation</h2>
+          <p class="card-subtitle">Displaying pricing options for products configured in Signage tab</p>
+
+          <!-- Customer Information -->
+          <div style="background: var(--bg-input); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>👤</span> Customer Information
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+              <div class="input-group">
+                <label for="customerName">Customer Name *</label>
+                <input type="text" id="customerName" placeholder="e.g., John Doe">
+              </div>
+              <div class="input-group">
+                <label for="customerCompany">Company Name</label>
+                <input type="text" id="customerCompany" placeholder="e.g., ABC Corporation">
+              </div>
+              <div class="input-group">
+                <label for="customerPhone">Phone Number</label>
+                <input type="tel" id="customerPhone" placeholder="e.g., +63 912 345 6789">
+              </div>
+              <div class="input-group">
+                <label for="customerEmail">Email</label>
+                <input type="email" id="customerEmail" placeholder="e.g., customer@email.com">
+              </div>
+            </div>
+          </div>
+
+          <!-- Product List from Signage -->
+          <div id="anchorProductList">
+            <!-- Will be populated by JavaScript from Signage tab data -->
+            <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+              <div style="font-size: 3.5rem; margin-bottom: 1rem;">📦</div>
+              <div style="font-size: 1.1rem; font-weight: 500;">No products configured yet</div>
+              <div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Add letters, logo, or panel in the
+                Signage tab first</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Comparison Cards -->
+        <div class="card" id="anchorComparisonCard" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 class="card-title" style="margin: 0;">💰 3 Pricing Options</h2>
+            <button id="generateAnchorQuotation" class="btn btn-secondary">
+              <span class="icon">📄</span> Generate Quotation
+            </button>
+          </div>
+          <div class="anchor-comparison-grid" id="anchorComparisonGrid">
+            <!-- Premium Option - Inox (Premium Price) -->
+            <div class="anchor-card premium">
+              <div class="anchor-badge">PREMIUM STAINLESS LETTER</div>
+              <div class="anchor-header">
+                <div class="anchor-number">1</div>
+                <h3>Stainless Steel (Inox)</h3>
+              </div>
+              <div class="anchor-description">
+                <p>💎 Premium quality</p>
+                <p>🌟 15+ years durability</p>
+                <p>⚠️ Most expensive option</p>
+              </div>
+              <div class="anchor-price" id="anchorPricePremium">0 ₱</div>
+              <button class="btn btn-secondary anchor-add-btn" id="addAnchorPremium">
+                <span class="icon">➕</span> Add to Quotation
+              </button>
+            </div>
+
+            <!-- Recommended Option - Acrylic Front Lit -->
+            <div class="anchor-card recommended">
+              <div class="anchor-badge recommended-badge">⭐ BEST VALUE</div>
+              <div class="anchor-header">
+                <div class="anchor-number">2</div>
+                <h3>Acrylic Front Lit</h3>
+              </div>
+
+              <!-- Product Information -->
+              <div id="anchorProductInfo"
+                style="background: rgba(22, 163, 74, 0.1); padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem; line-height: 1.6;">
+                <div style="font-weight: 600; color: #16a34a; margin-bottom: 0.5rem;">📦 PRODUCT DETAILS:</div>
+                <!-- Will be populated by JavaScript -->
+              </div>
+
+              <div class="anchor-description">
+                <p>✨ Great quality & value</p>
+                <p>⚡ Energy efficient LED</p>
+                <p>🎨 Vibrant colors</p>
+              </div>
+              <div class="anchor-price" id="anchorPriceRecommended">0 ₱</div>
+              <div class="anchor-savings" id="anchorSavings">Save 0 ₱ vs Inox!</div>
+              <button class="btn btn-primary anchor-add-btn" id="addAnchorRecommended">
+                <span class="icon">➕</span> Add to Quotation
+              </button>
+            </div>
+
+            <!-- Budget Option - 3D Non-LED -->
+            <div class="anchor-card budget">
+              <div class="anchor-badge">BUDGET</div>
+              <div class="anchor-header">
+                <div class="anchor-number">3</div>
+                <h3>3D Non-LED</h3>
+              </div>
+              <div class="anchor-description">
+                <p>💰 Most affordable</p>
+                <p>🎨 Clean look</p>
+                <p>💡 No electricity cost</p>
+              </div>
+              <div class="anchor-price" id="anchorPriceBudget">0 ₱</div>
+              <button class="btn btn-ghost anchor-add-btn" id="addAnchorBudget">
+                <span class="icon">➕</span> Add to Quotation
+              </button>
+            </div>
+          </div>
+
+          <div class="summary-actions">
+            <button id="addAllAnchorOptions" class="btn btn-primary">
+              <span class="icon">📋</span> Add All 3 Options to Quotation
+            </button>
+            <button id="generateAnchorQuotation" class="btn btn-secondary">
+              <span class="icon">📄</span> Generate Quotation Document
+            </button>
+            <button id="clearAnchorBtn" class="btn btn-ghost">
+              <span class="icon">🗑️</span> Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Quotation Preview Document -->
+        <div class="card" id="anchorQuotationPreview" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 class="card-title" style="margin: 0;">📄 Quotation Document</h2>
+            <button class="btn btn-primary" id="copyAnchorQuotation">
+              <span class="icon">📋</span> Copy to Clipboard
+            </button>
+          </div>
+
+          <!-- Full Quotation Document -->
+          <div id="anchorQuotationDocument"
+            style="background: white; color: #1e293b; padding: 2.5rem; border-radius: 12px; font-family: 'Inter', sans-serif;">
+            <!-- Company Header -->
+            <div
+              style="text-align: center; margin-bottom: 2rem; border-bottom: 3px solid #2563eb; padding-bottom: 1.5rem;">
+              <div
+                style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <img src="logo.png" alt="Haus Signs Logo" style="width: 60px; height: 60px; object-fit: contain;">
+                <div style="font-size: 2.25rem; font-weight: 700; color: #2563eb; letter-spacing: -0.5px;">HAUS SIGNS
+                </div>
+              </div>
+              <div style="font-size: 1rem; color: #64748b; font-weight: 500;">Professional Signage Solutions</div>
+              <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 0.5rem; line-height: 1.6;">
+                📍 Street, Manotok Subdivision, 15 F. Lazaro, Valenzuela, 1440 Metro Manila
+              </div>
+              <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 0.25rem; line-height: 1.6;">
+                📞 Contact: 09105 838383 | 📧 Email: signs.haus@gmail.com
+              </div>
+            </div>
+
+            <!-- Quotation Header -->
+            <div style="display: grid; grid-template-columns: repeat(    2, 1fr); gap: 2rem; margin-bottom: 2.5rem;">
+              <div>
+                <div
+                  style="font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; font-size: 0.9rem; letter-spacing: 0.5px;">
+                  QUOTATION TO:</div>
+                <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 3px solid #2563eb;">
+                  <div style="color: #475569; font-size: 0.9rem; line-height: 1.8;" id="anchorCustomerInfo">
+                    <!-- Customer info will be populated by JavaScript -->
+                  </div>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div
+                  style="font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; font-size: 0.9rem; letter-spacing: 0.5px;">
+                  QUOTATION DETAILS</div>
+                <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-right: 3px solid #2563eb;">
+                  <div style="color: #475569; font-size: 0.9rem; line-height: 1.8;">
+                    <div><strong>Quote #:</strong> <span id="anchorQuoteNumber">QT-2026-XXX</span></div>
+                    <div><strong>Date:</strong> <span id="anchorQuoteDate">Feb 03, 2026</span></div>
+                    <div><strong>Valid Until:</strong> <span id="anchorQuoteValidUntil">Mar 05, 2026</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Specification -->
+            <div
+              style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 1.5rem; border-radius: 10px; margin-bottom: 2.5rem; border: 1px solid #e2e8f0;">
+              <div
+                style="font-weight: 700; color: #0f172a; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>📦</span> PRODUCT SPECIFICATION
+              </div>
+              <div style="font-size: 0.95rem; color: #475569; line-height: 1.8;" id="anchorProductSpec">
+                <!-- Will be populated by JavaScript -->
+              </div>
+            </div>
+
+            <!-- Pricing Options Cards -->
+            <div style="margin-bottom: 2.5rem;">
+              <div style="font-weight: 700; color: #0f172a; margin-bottom: 1.5rem; font-size: 1.1rem;">💰 3 PRICING
+                OPTIONS
+              </div>
+              <div style="display: flex; align-items: center; gap: 1.25rem;">
+                <!-- Option 1: Premium Stainless Steel -->
+                <div
+                  style="background: #1e293b; border: 2px solid #7c3aed; border-radius: 12px; padding: 1.5rem; position: relative; flex: 1;">
+                  <div
+                    style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #7c3aed; color: white; padding: 0.35rem 1rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; white-space: nowrap;">
+                    PREMIUM STAINLESS LETTER</div>
+                  <div style="text-align: center; margin-top: 1rem;">
+                    <div style="font-size: 1.05rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">Stainless
+                      Steel (Inox)</div>
+                    <div
+                      style="font-size: 0.8rem; color: #94a3b8; text-align: left; line-height: 1.8; margin-bottom: 1.5rem;">
+                      <div>💎 Premium quality</div>
+                      <div>⭐ 15+ years durability</div>
+                      <div>⚠️ Most expensive option</div>
+                    </div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: white;" id="anchorDocPricePremium">0 ₱</div>
+                  </div>
+                </div>
+
+                <!-- Option 2: Best Value Acrylic (ENLARGED & PROMINENT) -->
+                <div
+                  style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 4px solid #10b981; border-radius: 16px; padding: 2rem; position: relative; flex: 1.3; box-shadow: 0 0 40px rgba(16, 185, 129, 0.5), 0 10px 30px rgba(0, 0, 0, 0.3); transform: scale(1.05);">
+                  <div
+                    style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.5rem 1.5rem; border-radius: 25px; font-size: 0.85rem; font-weight: 800; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+                    ⭐ BEST VALUE ⭐</div>
+                  <div style="text-align: center; margin-top: 1.2rem;">
+                    <div
+                      style="font-size: 1.3rem; font-weight: 800; color: #10b981; margin-bottom: 1rem; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">
+                      Acrylic
+                      Front Lit</div>
+                    <div
+                      style="background: rgba(16, 185, 129, 0.2); padding: 0.9rem; border-radius: 10px; margin-bottom: 1.2rem; border: 1px solid rgba(16, 185, 129, 0.3);">
+                      <div style="font-size: 0.8rem; font-weight: 700; color: #10b981; margin-bottom: 0.6rem;">📦
+                        PRODUCT DETAILS:</div>
+                      <div style="font-size: 0.8rem; color: #cbd5e1; text-align: left; line-height: 1.6;"
+                        id="anchorDocProductDetails">
+                        <!-- Product details will be inserted here -->
+                      </div>
+                    </div>
+                    <div
+                      style="font-size: 0.85rem; color: #94a3b8; text-align: left; line-height: 1.8; margin-bottom: 1.2rem;">
+                      <div>✨ Great quality & value</div>
+                      <div>⚡ Energy efficient LED</div>
+                      <div>🎨 Vibrant colors</div>
+                    </div>
+                    <div
+                      style="font-size: 2.4rem; font-weight: 800; color: #10b981; margin-bottom: 0.6rem; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);"
+                      id="anchorDocPriceRecommended">0 ₱</div>
+                    <div
+                      style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%); color: #10b981; font-weight: 800; font-size: 0.8rem; padding: 0.6rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.4);"
+                      id="anchorDocSavings">
+                      <!-- Savings will be shown here -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Option 3: Budget Build-up letter Non-LED -->
+                <div
+                  style="background: #1e293b; border: 2px solid #3b82f6; border-radius: 12px; padding: 1.5rem; position: relative; flex: 1;">
+                  <div
+                    style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #3b82f6; color: white; padding: 0.35rem 1rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700;">
+                    BUDGET</div>
+                  <div style="text-align: center; margin-top: 1rem;">
+                    <div style="font-size: 1.05rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">Build-up
+                      letter<br>Non-LED
+                    </div>
+                    <div
+                      style="font-size: 0.8rem; color: #94a3b8; text-align: left; line-height: 1.8; margin-bottom: 1.5rem;">
+                      <div>💰 Most affordable</div>
+                      <div>🎨 Clean look</div>
+                      <div>⚡ No electricity cost</div>
+                    </div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: white;" id="anchorDocPriceBudget">0 ₱</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Terms & Notes -->
+            <div
+              style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1.5rem; border-left: 4px solid #f59e0b; border-radius: 8px; margin-bottom: 2rem;">
+              <div
+                style="font-weight: 700; color: #92400e; margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>📌</span> IMPORTANT NOTES
+              </div>
+              <ul style="margin: 0; padding-left: 1.5rem; color: #78350f; font-size: 0.875rem; line-height: 1.8;">
+                <li><strong>Validity:</strong> This quotation is valid for <strong>10 days</strong> from the date above
+                </li>
+                <li><strong>Preliminary Pricing:</strong> This is a preliminary quotation for price comparison purposes
+                  only. The final accurate pricing (there may be slight changes) will be sent together with the design
+                  mockup after completion</li>
+                <li><strong>Installation:</strong> Price does not include installation fees. Installation fees are
+                  quoted separately and depend on installation location and height</li>
+                <li><strong>Production Time:</strong> 3-10 working days after design confirmation</li>
+              </ul>
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; padding-top: 2rem; border-top: 2px solid #e2e8f0;">
+              <div style="font-size: 0.9rem; color: #64748b; line-height: 1.8; margin-bottom: 1rem;">
+                For questions, clarifications, or to proceed with your order,<br>
+                please contact us at the details provided above.
+              </div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: #2563eb; margin-bottom: 0.5rem;">
+                Thank you for choosing HAUS SIGNS! 🌟
+              </div>
+              <div style="font-size: 0.8rem; color: #94a3b8;">
+                We look forward to serving you and bringing your vision to life.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Tab: Quotation -->
       <section class="tab-content" id="quotation-tab">
         <div class="card">
@@ -363,6 +685,22 @@
                   <span class="unit">₱/m²</span>
                 </div>
               </div>
+              <div class="form-group">
+                <label for="priceLetterInox">Stainless Steel (Inox) - Premium</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceLetterInox" value="45000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="anchorMultiplier">Premium Price Multiplier</label>
+                <div class="input-with-unit">
+                  <input type="number" id="anchorMultiplier" value="2.5" min="1" step="0.1">
+                  <span class="unit">×</span>
+                </div>
+                <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Inox price = Acrylic price
+                  × this multiplier</small>
+              </div>
             </div>
 
             <div class="settings-group">
@@ -419,15 +757,15 @@
           <div class="formula-info">
             <div class="formula-item">
               <span class="formula-label">Raised letters:</span>
-              <span class="formula-value">10cm height letter = 0.011 m²/letter</span>
+              <span class="formula-value">Area = 0.9 × (Height in meters)² × Letter Count</span>
             </div>
             <div class="formula-item">
-              <span class="formula-label">Formula:</span>
-              <span class="formula-value">(Height / 10) × 0.011 × Letter Count = Area (m²)</span>
+              <span class="formula-label">Example:</span>
+              <span class="formula-value">10cm height letter = 0.9 × (0.1)² × 1 = 0.009 m²/letter</span>
             </div>
             <div class="formula-item">
               <span class="formula-label">Logo/Panel:</span>
-              <span class="formula-value">Length × Width / 10000 = Area (m²)</span>
+              <span class="formula-value">Area (m²) = Length (cm) × Width (cm) / 10000</span>
             </div>
           </div>
         </div>

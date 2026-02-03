@@ -18,13 +18,7 @@ const state = {
     },
     quotationItems: [],
     images: [],
-    dp: 0,
-    customer: {
-        name: localStorage.getItem('customerName') || '',
-        company: localStorage.getItem('customerCompany') || '',
-        phone: localStorage.getItem('customerPhone') || '',
-        email: localStorage.getItem('customerEmail') || ''
-    }
+    dp: 0
 };
 
 // ==================== Initialize ====================
@@ -245,13 +239,6 @@ function removeLetterRow(id) {
 // Conversion constant: 1 inch = 2.54 cm
 const INCH_TO_CM = 2.54;
 
-// Utility function to count characters (excluding spaces, periods, commas)
-function countCharacters(text) {
-    if (!text) return 0;
-    // Exclude spaces, periods, commas from count
-    return text.replace(/[ .,]/g, '').length;
-}
-
 function renderLetterRows() {
     const container = document.getElementById('letterRows');
 
@@ -280,7 +267,7 @@ function renderLetterRows() {
         <input type="number" class="letter-height" data-id="${letter.id}" 
                value="${letter.height || ''}" placeholder="10" min="0" step="0.1">
       </div>
-      <div class="form-group" style="display: none;">
+      <div class="form-group">
         <label>Letter Count</label>
         <input type="number" class="letter-count" data-id="${letter.id}" 
                value="${letter.charCount || ''}" placeholder="0" min="0">
@@ -300,13 +287,6 @@ function renderLetterRows() {
             const letter = state.letters.find(l => l.id === id);
             if (letter) {
                 letter.name = e.target.value;
-                // Auto-count characters from content
-                letter.charCount = countCharacters(e.target.value);
-                // Update the hidden input field value
-                const countInput = container.querySelector(`.letter-count[data-id="${id}"]`);
-                if (countInput) countInput.value = letter.charCount;
-                // Recalculate price based on new character count
-                updateLetterCalculation(id);
                 updateSignageSummary();
             }
         });
@@ -377,11 +357,6 @@ function renderLetterRows() {
             const id = parseInt(e.target.dataset.id);
             removeLetterRow(id);
         });
-    });
-
-    // Update calculations for all existing letters
-    state.letters.forEach(letter => {
-        updateLetterCalculation(letter.id);
     });
 }
 
@@ -1375,45 +1350,6 @@ function setupAnchorPricingListeners() {
             setTimeout(() => updateAnchorPricing(), 100);
         });
     }
-
-    // Customer information listeners
-    const customerNameInput = document.getElementById('customerName');
-    if (customerNameInput) {
-        customerNameInput.addEventListener('input', (e) => {
-            state.customer.name = e.target.value;
-            localStorage.setItem('customerName', e.target.value);
-        });
-    }
-
-    const customerCompanyInput = document.getElementById('customerCompany');
-    if (customerCompanyInput) {
-        customerCompanyInput.addEventListener('input', (e) => {
-            state.customer.company = e.target.value;
-            localStorage.setItem('customerCompany', e.target.value);
-        });
-    }
-
-    const customerPhoneInput = document.getElementById('customerPhone');
-    if (customerPhoneInput) {
-        customerPhoneInput.addEventListener('input', (e) => {
-            state.customer.phone = e.target.value;
-            localStorage.setItem('customerPhone', e.target.value);
-        });
-    }
-
-    const customerEmailInput = document.getElementById('customerEmail');
-    if (customerEmailInput) {
-        customerEmailInput.addEventListener('input', (e) => {
-            state.customer.email = e.target.value;
-            localStorage.setItem('customerEmail', e.target.value);
-        });
-    }
-
-    // Initialize customer input values from state
-    if (customerNameInput) customerNameInput.value = state.customer.name;
-    if (customerCompanyInput) customerCompanyInput.value = state.customer.company;
-    if (customerPhoneInput) customerPhoneInput.value = state.customer.phone;
-    if (customerEmailInput) customerEmailInput.value = state.customer.email;
 }
 
 function updateAnchorPricing() {
@@ -1447,6 +1383,7 @@ function updateAnchorPricing() {
                     <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
                         <div><strong>Type:</strong> ${typeName}</div>
                         <div><strong>Height:</strong> ${letter.height} cm</div>
+                        <div><strong>Count:</strong> ${letter.charCount} letters</div>
                     </div>
                 </div>
             `;
@@ -1461,6 +1398,8 @@ function updateAnchorPricing() {
                 <div style="font-weight: 600; margin-bottom: 0.5rem;">🎨 ${state.logo.name || 'Logo'}</div>
                 <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
                     <div><strong>Type:</strong> ${typeName}</div>
+                    <div><strong>Dimensions:</strong> ${state.logo.length} cm × ${state.logo.width} cm</div>
+                    <div><strong>Area:</strong> ${((state.logo.length * state.logo.width) / 10000).toFixed(2)} m²</div>
                 </div>
             </div>
         `;
@@ -1471,6 +1410,10 @@ function updateAnchorPricing() {
         productListHTML += `
             <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
                 <div style="font-weight: 600; margin-bottom: 0.5rem;">📋 ${state.panel.name || 'Background Panel'}</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                    <div><strong>Dimensions:</strong> ${state.panel.length} cm × ${state.panel.width} cm</div>
+                    <div><strong>Area:</strong> ${((state.panel.length * state.panel.width) / 10000).toFixed(2)} m²</div>
+                </div>
             </div>
         `;
     }
@@ -1495,8 +1438,9 @@ function updateAnchorPricing() {
             const recommendedResult = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
             recommendedTotal += recommendedResult.price;
 
-            // Budget = 75% of Best Value
-            budgetTotal += recommendedResult.price * 0.75;
+            // Budget = 3D
+            const budgetResult = calculateLetterPrice(letter.height, letter.charCount, '3d', state.prices);
+            budgetTotal += budgetResult.price;
 
             const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
             productInfoHTML += `
@@ -1516,8 +1460,8 @@ function updateAnchorPricing() {
         const recommendedResult = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
         recommendedTotal += recommendedResult.price;
 
-        // Budget = 75% of Best Value
-        budgetTotal += recommendedResult.price * 0.75;
+        const budgetResult = calculateLogoPrice(state.logo.length, state.logo.width, '3d', state.prices);
+        budgetTotal += budgetResult.price;
 
         const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
         const area = ((state.logo.length * state.logo.width) / 10000).toFixed(2);
@@ -1539,8 +1483,8 @@ function updateAnchorPricing() {
         // Recommended = Actual panel price
         recommendedTotal += panelBasePrice;
 
-        // Budget = 75% of Best Value
-        budgetTotal += panelBasePrice * 0.75;
+        // Budget = 0.7x panel price
+        budgetTotal += panelBasePrice * 0.7;
 
         const area = ((state.panel.length * state.panel.width) / 10000).toFixed(2);
         productInfoHTML += `
@@ -1641,36 +1585,17 @@ function generateAnchorQuotationDocument() {
         return;
     }
 
-    // Validate customer information
-    if (!state.customer.name) {
-        showNotification('Please enter customer name!', 'error');
-        return;
-    }
-
     // Update calculations
     updateAnchorPricing();
 
-    // Populate customer information in QUOTATION TO section
-    const customerInfoHTML = `
-        <div><strong>Name:</strong> ${state.customer.name}</div>
-        ${state.customer.company ? `<div><strong>Company:</strong> ${state.customer.company}</div>` : ''}
-        <div><strong>Phone:</strong> ${state.customer.phone}</div>
-        ${state.customer.email ? `<div><strong>Email:</strong> ${state.customer.email}</div>` : ''}
-    `;
-    document.getElementById('anchorCustomerInfo').innerHTML = customerInfoHTML;
-
-    // Build product specification (without customer information)
-    let productSpec = '';
-
-    // Add products section
-    productSpec += '<div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; color: #2563eb;">📦 Products</div>';
-    productSpec += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+    // Build product specification
+    let productSpec = '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
 
     if (state.letters && state.letters.length > 0) {
         state.letters.forEach((letter, index) => {
             const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
             productSpec += `
-                <div><strong>${index + 1}. ${letter.name || `Letters #${index + 1}`}:</strong> ${typeName} - ${letter.height}cm height</div>
+                <div><strong>${index + 1}. ${letter.name || `Letters #${index + 1}`}:</strong> ${typeName} - ${letter.height}cm height × ${letter.charCount} letters</div>
             `;
         });
     }
@@ -1700,24 +1625,6 @@ function generateAnchorQuotationDocument() {
 
     // Update quotation document
     document.getElementById('anchorProductSpec').innerHTML = productSpec;
-
-    // Populate product details in the Best Value card
-    let productDetailsHTML = '';
-    if (state.letters && state.letters.length > 0) {
-        state.letters.forEach((letter, index) => {
-            const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productDetailsHTML += `<div><strong>${letter.name || `#${index + 1}`}:</strong><br>${typeName} - ${letter.height}cm</div>`;
-        });
-    }
-    if (state.logo && state.logo.length > 0 && state.logo.width > 0) {
-        const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        productDetailsHTML += `<div><strong>Logo:</strong><br>${typeName} - ${state.logo.length}cm × ${state.logo.width}cm</div>`;
-    }
-    if (state.panel && state.panel.length > 0 && state.panel.width > 0) {
-        productDetailsHTML += `<div><strong>Panel:</strong><br>${state.panel.length}cm × ${state.panel.width}cm</div>`;
-    }
-    document.getElementById('anchorDocProductDetails').innerHTML = productDetailsHTML;
-
     document.getElementById('anchorDocPricePremium').textContent = premiumPriceText;
     document.getElementById('anchorDocPriceRecommended').textContent = recommendedPriceText;
     document.getElementById('anchorDocPriceBudget').textContent = budgetPriceText;
@@ -1727,7 +1634,7 @@ function generateAnchorQuotationDocument() {
     const today = new Date();
     const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
     const validUntil = new Date(today);
-    validUntil.setDate(validUntil.getDate() + 10); // Changed from 30 to 10 days
+    validUntil.setDate(validUntil.getDate() + 30);
     const validUntilStr = validUntil.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 
     const quoteNumber = `QT-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
@@ -1746,12 +1653,6 @@ function generateAnchorQuotationDocument() {
 }
 
 function copyAnchorQuotationToClipboard() {
-    // Check for file protocol limitation
-    if (window.location.protocol === 'file:') {
-        alert('⚠️ BROWSER SECURITY LIMITATION\n\nCannot copy image when opening file directly (file://).\n\nPlease open this app via Localhost to use this feature.\n(Check your terminal for the localhost link, usually http://localhost:8080)');
-        return;
-    }
-
     const quotationDoc = document.getElementById('anchorQuotationDocument');
 
     if (!quotationDoc) {
@@ -1759,41 +1660,23 @@ function copyAnchorQuotationToClipboard() {
         return;
     }
 
-    const btn = document.getElementById('copyAnchorQuotation');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="icon">⏳</span> Copying...';
+    // Create a range and selection
+    const range = document.createRange();
+    range.selectNode(quotationDoc);
 
-    // Use html2canvas to convert to image and copy to clipboard
-    html2canvas(quotationDoc, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-    }).then(canvas => {
-        canvas.toBlob(async blob => {
-            try {
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        'image/png': blob
-                    })
-                ]);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
 
-                btn.disabled = false;
-                btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
-                showNotification('Quotation image copied to clipboard!', 'success');
-            } catch (err) {
-                console.error('Failed to copy image:', err);
-                btn.disabled = false;
-                btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
-                showNotification('Failed to copy. Try "Export Image" button instead.', 'error');
-            }
-        }, 'image/png');
-    }).catch(error => {
-        console.error('Error generating image:', error);
-        btn.disabled = false;
-        btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
-        showNotification('Error generating image. Please try again!', 'error');
-    });
+    try {
+        // Try to copy HTML
+        document.execCommand('copy');
+        selection.removeAllRanges();
+        showNotification('Quotation copied to clipboard! Paste it into your email or document.', 'success');
+    } catch (err) {
+        console.error('Copy failed:', err);
+        showNotification('Copy failed. Please select and copy manually (Ctrl+C / Cmd+C).', 'error');
+    }
 }
 
 
@@ -1801,6 +1684,428 @@ function copyAnchorQuotationToClipboard() {
 
 
 
+
+
+
+state.anchor.letter.heightInches = inches;
+state.anchor.letter.height = Math.round(inches * INCH_TO_CM * 10) / 10;
+document.getElementById('anchorLetterHeight').value = state.anchor.letter.height || '';
+updateAnchorCalculation();
+});
+
+document.getElementById('anchorLetterHeight').addEventListener('input', (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.anchor.letter.height = cm;
+    state.anchor.letter.heightInches = Math.round(cm / INCH_TO_CM * 10) / 10;
+    document.getElementById('anchorLetterHeightInches').value = state.anchor.letter.heightInches || '';
+    updateAnchorCalculation();
+});
+
+document.getElementById('anchorLetterCount').addEventListener('input', (e) => {
+    state.anchor.letter.charCount = parseInt(e.target.value) || 0;
+    updateAnchorCalculation();
+});
+
+// Logo inputs
+document.getElementById('anchorLogoName').addEventListener('input', (e) => {
+    state.anchor.logo.name = e.target.value;
+});
+
+document.getElementById('anchorLogoLengthInches').addEventListener('input', (e) => {
+    const inches = parseFloat(e.target.value) || 0;
+    state.anchor.logo.lengthInches = inches;
+    state.anchor.logo.length = Math.round(inches * INCH_TO_CM * 10) / 10;
+    document.getElementById('anchorLogoLength').value = state.anchor.logo.length || '';
+    updateAnchorCalculation();
+});
+
+document.getElementById('anchorLogoLength').addEventListener('input', (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.anchor.logo.length = cm;
+    state.anchor.logo.lengthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
+    document.getElementById('anchorLogoLengthInches').value = state.anchor.logo.lengthInches || '';
+    updateAnchorCalculation();
+});
+
+document.getElementById('anchorLogoWidthInches').addEventListener('input', (e) => {
+    const inches = parseFloat(e.target.value) || 0;
+    state.anchor.logo.widthInches = inches;
+    state.anchor.logo.width = Math.round(inches * INCH_TO_CM * 10) / 10;
+    document.getElementById('anchorLogoWidth').value = state.anchor.logo.width || '';
+    updateAnchorCalculation();
+});
+
+document.getElementById('anchorLogoWidth').addEventListener('input', (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.anchor.logo.width = cm;
+    state.anchor.logo.widthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
+    document.getElementById('anchorLogoWidthInches').value = state.anchor.logo.widthInches || '';
+    updateAnchorCalculation();
+});
+
+// Panel inputs
+document.getElementById('anchorPanelName').addEventListener('input', (e) => {
+    state.anchor.panel.name = e.target.value;
+});
+
+document.getElementById('anchorPanelLengthInches').addEventListener('input', (e) => {
+    const inches = parseFloat(e.target.value) || 0;
+    state.anchor.panel.lengthInches = inches;
+    state.anchor.panel.length = Math.round(inches * INCH_TO_CM * 10) / 10;
+    document.getElementById('anchorPanelLength').value = state.anchor.panel.length || '';
+    updateAnchorCalculation();
+});
+
+document.getElementById('anchorPanelLength').addEventListener('input', (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.anchor.panel.length = cm;
+    state.anchor.panel.lengthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
+    document.getElementById('anchorPanelLengthInches').value = state.anchor.panel.lengthInches || '';
+    updateAnchorCalculation();
+});
+
+document.getElementById('anchorPanelWidthInches').addEventListener('input', (e) => {
+    const inches = parseFloat(e.target.value) || 0;
+    state.anchor.panel.widthInches = inches;
+    state.anchor.panel.width = Math.round(inches * INCH_TO_CM * 10) / 10;
+    document.getElementById('anchorPanelWidth').value = state.anchor.panel.width || '';
+    updateAnchorCalculation();
+});
+
+document.getElementById('anchorPanelWidth').addEventListener('input', (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.anchor.panel.width = cm;
+    state.anchor.panel.widthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
+    document.getElementById('anchorPanelWidthInches').value = state.anchor.panel.widthInches || '';
+    updateAnchorCalculation();
+});
+
+// Add to quotation buttons
+document.getElementById('addAnchorPremium').addEventListener('click', () => addAnchorOption('premium'));
+document.getElementById('addAnchorRecommended').addEventListener('click', () => addAnchorOption('recommended'));
+document.getElementById('addAnchorBudget').addEventListener('click', () => addAnchorOption('budget'));
+document.getElementById('addAllAnchorOptions').addEventListener('click', addAllAnchorOptions);
+document.getElementById('clearAnchorBtn').addEventListener('click', clearAnchor);
+
+// Quotation document buttons
+document.getElementById('generateAnchorQuotation').addEventListener('click', generateAnchorQuotationDocument);
+document.getElementById('copyAnchorQuotation').addEventListener('click', copyAnchorQuotationToClipboard);
+}
+
+function generateAnchorQuotationDocument() {
+    const productType = state.anchor.productType;
+    let isValid = false;
+    let productSpec = '';
+
+    // Validate and build product specification
+    if (productType === 'letter') {
+        const { name, height, charCount } = state.anchor.letter;
+        if (height >= MIN_LETTER_HEIGHT && charCount > 0) {
+            isValid = true;
+            productSpec = `
+                <div><strong>Product:</strong> Raised Letters</div>
+                <div><strong>Content:</strong> ${name || 'Custom Letters'}</div>
+                <div><strong>Height:</strong> ${height} cm (${state.anchor.letter.heightInches.toFixed(1)} inches)</div>
+                <div><strong>Quantity:</strong> ${charCount} letters</div>
+            `;
+        }
+    } else if (productType === 'logo') {
+        const { name, length, width } = state.anchor.logo;
+        if (length > 0 && width > 0) {
+            isValid = true;
+            productSpec = `
+                <div><strong>Product:</strong> Raised Logo</div>
+                <div><strong>Name:</strong> ${name || 'Custom Logo'}</div>
+                <div><strong>Dimensions:</strong> ${length} cm × ${width} cm (${state.anchor.logo.lengthInches.toFixed(1)}" × ${state.anchor.logo.widthInches.toFixed(1)}")</div>
+                <div><strong>Area:</strong> ${((length * width) / 10000).toFixed(2)} m²</div>
+            `;
+        }
+    } else if (productType === 'panel') {
+        const { name, length, width } = state.anchor.panel;
+        if (length > 0 && width > 0) {
+            isValid = true;
+            productSpec = `
+                <div><strong>Product:</strong> Alu Background Panel</div>
+                <div><strong>Name:</strong> ${name || 'Background Panel'}</div>
+                <div><strong>Dimensions:</strong> ${length} cm × ${width} cm (${state.anchor.panel.lengthInches.toFixed(1)}" × ${state.anchor.panel.widthInches.toFixed(1)}")</div>
+                <div><strong>Area:</strong> ${((length * width) / 10000).toFixed(2)} m²</div>
+            `;
+        }
+    }
+
+    if (!isValid) {
+        showNotification('Please enter valid product dimensions first!', 'error');
+        return;
+    }
+
+    // Calculate prices (reuse existing calculation)
+    updateAnchorCalculation();
+
+    // Get calculated prices from the comparison cards
+    const premiumPriceText = document.getElementById('anchorPricePremium').textContent;
+    const recommendedPriceText = document.getElementById('anchorPriceRecommended').textContent;
+    const budgetPriceText = document.getElementById('anchorPriceBudget').textContent;
+    const savingsText = document.getElementById('anchorSavings').textContent;
+
+    // Update quotation document
+    document.getElementById('anchorProductSpec').innerHTML = productSpec;
+    document.getElementById('anchorDocPricePremium').textContent = premiumPriceText;
+    document.getElementById('anchorDocPriceRecommended').textContent = recommendedPriceText;
+    document.getElementById('anchorDocPriceBudget').textContent = budgetPriceText;
+    document.getElementById('anchorDocSavings').textContent = savingsText || '';
+
+    // Update date and quotation number
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    const validUntil = new Date(today);
+    validUntil.setDate(validUntil.getDate() + 30);
+    const validUntilStr = validUntil.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+
+    const quoteNumber = `QT-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+
+    document.getElementById('anchorQuoteDate').textContent = dateStr;
+    document.getElementById('anchorQuoteValidUntil').textContent = validUntilStr;
+    document.getElementById('anchorQuoteNumber').textContent = quoteNumber;
+
+    // Show quotation preview
+    document.getElementById('anchorQuotationPreview').style.display = 'block';
+
+    // Scroll to preview
+    document.getElementById('anchorQuotationPreview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    showNotification('Quotation document generated! You can now copy it to clipboard.', 'success');
+}
+
+function copyAnchorQuotationToClipboard() {
+    const quotationDoc = document.getElementById('anchorQuotationDocument');
+
+    if (!quotationDoc) {
+        showNotification('No quotation to copy!', 'error');
+        return;
+    }
+
+    // Create a range and selection
+    const range = document.createRange();
+    range.selectNode(quotationDoc);
+
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    try {
+        // Try to copy HTML
+        document.execCommand('copy');
+        selection.removeAllRanges();
+        showNotification('Quotation copied to clipboard! Paste it into your email or document.', 'success');
+    } catch (err) {
+        console.error('Copy failed:', err);
+        showNotification('Copy failed. Please select and copy manually (Ctrl+C / Cmd+C).', 'error');
+    }
+}
+
+function showAnchorInputs(productType) {
+    document.getElementById('anchorLetterInputs').style.display = productType === 'letter' ? 'block' : 'none';
+    document.getElementById('anchorLogoInputs').style.display = productType === 'logo' ? 'block' : 'none';
+    document.getElementById('anchorPanelInputs').style.display = productType === 'panel' ? 'block' : 'none';
+}
+
+function updateAnchorCalculation() {
+    const productType = state.anchor.productType;
+    let premiumPrice = 0, recommendedPrice = 0, budgetPrice = 0;
+
+    if (productType === 'letter') {
+        const { height, charCount } = state.anchor.letter;
+        if (height >= MIN_LETTER_HEIGHT && charCount > 0) {
+            const inoxResult = calculateLetterPrice(height, charCount, 'inox', state.prices);
+            const acrylicResult = calculateLetterPrice(height, charCount, 'frontLit', state.prices);
+            const budgetResult = calculateLetterPrice(height, charCount, '3d', state.prices);
+            premiumPrice = inoxResult.price;
+            recommendedPrice = acrylicResult.price;
+            budgetPrice = budgetResult.price;
+        }
+    } else if (productType === 'logo') {
+        const { length, width } = state.anchor.logo;
+        if (length > 0 && width > 0) {
+            const inoxResult = calculateLogoPrice(length, width, 'inox', state.prices);
+            const acrylicResult = calculateLogoPrice(length, width, 'frontLit', state.prices);
+            const budgetResult = calculateLogoPrice(length, width, '3d', state.prices);
+            premiumPrice = inoxResult.price;
+            recommendedPrice = acrylicResult.price;
+            budgetPrice = budgetResult.price;
+        }
+    } else if (productType === 'panel') {
+        const { length, width } = state.anchor.panel;
+        if (length > 0 && width > 0) {
+            const result = calculatePanelPrice(length, width, state.prices);
+            premiumPrice = result.price * 2; // 2x for anchor
+            recommendedPrice = result.price;
+            budgetPrice = result.price * 0.7; // 70% for budget
+        }
+    }
+
+    const savings = premiumPrice - recommendedPrice;
+
+    // Update display
+    document.getElementById('anchorPricePremium').textContent = `${formatNumber(premiumPrice)} ₱`;
+    document.getElementById('anchorPriceRecommended').textContent = `${formatNumber(recommendedPrice)} ₱`;
+    document.getElementById('anchorPriceBudget').textContent = `${formatNumber(budgetPrice)} ₱`;
+    document.getElementById('anchorSavings').textContent = savings > 0 ? `Save ${formatNumber(savings)} ₱ vs Inox!` : '';
+}
+
+function addAnchorOption(optionType) {
+    const productType = state.anchor.productType;
+    let description = '';
+    let price = 0;
+    let letterType = '';
+
+    if (productType === 'letter') {
+        const { name, height, charCount } = state.anchor.letter;
+        if (height < MIN_LETTER_HEIGHT || charCount === 0) {
+            showNotification('Please enter valid letter dimensions (min 15cm height) and count!', 'error');
+            return;
+        }
+
+        if (optionType === 'premium') {
+            letterType = 'inox';
+            const typeInfo = LETTER_TYPES.find(t => t.id === 'inox');
+            const result = calculateLetterPrice(height, charCount, 'inox', state.prices);
+            price = result.price;
+            description = `${name || 'Letters'} - ${typeInfo?.name || 'Inox'} (${height}cm x ${charCount} letters) - PREMIUM ANCHOR`;
+        } else if (optionType === 'recommended') {
+            letterType = 'frontLit';
+            const typeInfo = LETTER_TYPES.find(t => t.id === 'frontLit');
+            const result = calculateLetterPrice(height, charCount, 'frontLit', state.prices);
+            price = result.price;
+            description = `${name || 'Letters'} - ${typeInfo?.name || 'Acrylic Front Lit'} (${height}cm x ${charCount} letters) - RECOMMENDED`;
+        } else {
+            letterType = '3d';
+            const typeInfo = LETTER_TYPES.find(t => t.id === '3d');
+            const result = calculateLetterPrice(height, charCount, '3d', state.prices);
+            price = result.price;
+            description = `${name || 'Letters'} - ${typeInfo?.name || '3D Non-LED'} (${height}cm x ${charCount} letters) - BUDGET`;
+        }
+    } else if (productType === 'logo') {
+        const { name, length, width } = state.anchor.logo;
+        if (length === 0 || width === 0) {
+            showNotification('Please enter valid logo dimensions!', 'error');
+            return;
+        }
+
+        if (optionType === 'premium') {
+            const typeInfo = LETTER_TYPES.find(t => t.id === 'inox');
+            const result = calculateLogoPrice(length, width, 'inox', state.prices);
+            price = result.price;
+            description = `${name || 'Logo'} - ${typeInfo?.name || 'Inox'} (${length}×${width}cm) - PREMIUM ANCHOR`;
+        } else if (optionType === 'recommended') {
+            const typeInfo = LETTER_TYPES.find(t => t.id === 'frontLit');
+            const result = calculateLogoPrice(length, width, 'frontLit', state.prices);
+            price = result.price;
+            description = `${name || 'Logo'} - ${typeInfo?.name || 'Acrylic Front Lit'} (${length}×${width}cm) - RECOMMENDED`;
+        } else {
+            const typeInfo = LETTER_TYPES.find(t => t.id === '3d');
+            const result = calculateLogoPrice(length, width, '3d', state.prices);
+            price = result.price;
+            description = `${name || 'Logo'} - ${typeInfo?.name || '3D Non-LED'} (${length}×${width}cm) - BUDGET`;
+        }
+    } else if (productType === 'panel') {
+        const { name, length, width } = state.anchor.panel;
+        if (length === 0 || width === 0) {
+            showNotification('Please enter valid panel dimensions!', 'error');
+            return;
+        }
+
+        const result = calculatePanelPrice(length, width, state.prices);
+        if (optionType === 'premium') {
+            price = result.price * 2;
+            description = `${name || 'Alu Panel'} Premium (${length}×${width}cm) - ANCHOR PRICE`;
+        } else if (optionType === 'recommended') {
+            price = result.price;
+            description = `${name || 'Alu Panel'} (${length}×${width}cm) - RECOMMENDED`;
+        } else {
+            price = result.price * 0.7;
+            description = `${name || 'Alu Panel'} Budget (${length}×${width}cm) - BUDGET`;
+        }
+    }
+
+    if (price > 0) {
+        state.quotationItems.push({ description, price });
+        renderQuotationItems();
+
+        // Switch to quotation tab
+        document.querySelector('[data-tab="quotation"]').click();
+
+        const optionName = optionType === 'premium' ? 'Premium (Inox)' : optionType === 'recommended' ? 'Recommended (Acrylic)' : 'Budget (3D)';
+        showNotification(`${optionName} option added to quotation!`, 'success');
+    }
+}
+
+function addAllAnchorOptions() {
+    const productType = state.anchor.productType;
+
+    // Validate inputs based on product type
+    if (productType === 'letter') {
+        const { height, charCount } = state.anchor.letter;
+        if (height < MIN_LETTER_HEIGHT || charCount === 0) {
+            showNotification('Please enter valid letter dimensions (min 15cm height) and count!', 'error');
+            return;
+        }
+    } else if (productType === 'logo') {
+        const { length, width } = state.anchor.logo;
+        if (length === 0 || width === 0) {
+            showNotification('Please enter valid logo dimensions!', 'error');
+            return;
+        }
+    } else if (productType === 'panel') {
+        const { length, width } = state.anchor.panel;
+        if (length === 0 || width === 0) {
+            showNotification('Please enter valid panel dimensions!', 'error');
+            return;
+        }
+    }
+
+    // Add all 3 options
+    addAnchorOption('premium');
+    addAnchorOption('recommended');
+    addAnchorOption('budget');
+
+    showNotification('All 3 options added to quotation!', 'success');
+}
+
+function clearAnchor() {
+    state.anchor = {
+        productType: 'letter',
+        letter: { name: '', height: 0, heightInches: 0, charCount: 0 },
+        logo: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
+        panel: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 }
+    };
+
+    // Clear letter inputs
+    document.getElementById('anchorLetterName').value = '';
+    document.getElementById('anchorLetterHeightInches').value = '';
+    document.getElementById('anchorLetterHeight').value = '';
+    document.getElementById('anchorLetterCount').value = '';
+
+    // Clear logo inputs
+    document.getElementById('anchorLogoName').value = '';
+    document.getElementById('anchorLogoLengthInches').value = '';
+    document.getElementById('anchorLogoLength').value = '';
+    document.getElementById('anchorLogoWidthInches').value = '';
+    document.getElementById('anchorLogoWidth').value = '';
+
+    // Clear panel inputs
+    document.getElementById('anchorPanelName').value = '';
+    document.getElementById('anchorPanelLengthInches').value = '';
+    document.getElementById('anchorPanelLength').value = '';
+    document.getElementById('anchorPanelWidthInches').value = '';
+    document.getElementById('anchorPanelWidth').value = '';
+
+    // Reset product type to letter
+    document.getElementById('anchorProductType').value = 'letter';
+    showAnchorInputs('letter');
+
+    // Update display
+    updateAnchorCalculation();
+}
+
 // ==================== Start ====================
 document.addEventListener('DOMContentLoaded', init);
-
