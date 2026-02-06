@@ -1487,13 +1487,12 @@ function updateAnchorPricing() {
     // Calculate letters
     if (hasLetters) {
         state.letters.forEach((letter, index) => {
-            // Premium = Inox price (2.5x multiplier applied via settings)
-            const inoxResult = calculateLetterPrice(letter.height, letter.charCount, 'inox', state.prices);
-            premiumTotal += inoxResult.price;
-
             // Recommended = Actual selected type
             const recommendedResult = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
             recommendedTotal += recommendedResult.price;
+
+            // Premium = 1.9x Best Value (Recommended) price - User request
+            premiumTotal += recommendedResult.price * 1.9;
 
             // Budget = 75% of Best Value
             budgetTotal += recommendedResult.price * 0.75;
@@ -1510,11 +1509,12 @@ function updateAnchorPricing() {
 
     // Calculate logo
     if (hasLogo) {
-        const inoxResult = calculateLogoPrice(state.logo.length, state.logo.width, 'inox', state.prices);
-        premiumTotal += inoxResult.price;
-
+        // Recommended = Actual selected type
         const recommendedResult = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
         recommendedTotal += recommendedResult.price;
+
+        // Premium = Same as Recommended (User request: only letters get 1.9x multiplier)
+        premiumTotal += recommendedResult.price;
 
         // Budget = 75% of Best Value
         budgetTotal += recommendedResult.price * 0.75;
@@ -1533,8 +1533,8 @@ function updateAnchorPricing() {
     if (hasPanel) {
         const panelBasePrice = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
 
-        // Premium = 2.5x panel price (simulating Inox)
-        premiumTotal += panelBasePrice * state.prices.anchorMultiplier;
+        // Premium = Same as Recommended (User request: only letters get multiplier)
+        premiumTotal += panelBasePrice;
 
         // Recommended = Actual panel price
         recommendedTotal += panelBasePrice;
