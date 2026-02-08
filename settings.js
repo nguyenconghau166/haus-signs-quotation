@@ -55,10 +55,8 @@ function resetPrices() {
  * @param {object} prices - Current prices
  */
 function initSettingsForm(prices) {
-    document.getElementById('priceLetterFrontLit').value = prices.letterFrontLit;
-    document.getElementById('priceLetterBackLit').value = prices.letterBackLit;
-    document.getElementById('priceLetterAllLit').value = prices.letterAllLit;
-    document.getElementById('priceLetter3D').value = prices.letter3D;
+    document.getElementById('priceLetterIlluminated').value = prices.letterIlluminated;
+    document.getElementById('priceLetterNonIlluminated').value = prices.letterNonIlluminated;
     document.getElementById('priceLetterInox').value = prices.letterInox;
     document.getElementById('priceAluPanel').value = prices.aluPanel;
     document.getElementById('priceLightbox').value = prices.lightbox;
@@ -71,10 +69,8 @@ function initSettingsForm(prices) {
  */
 function getPricesFromForm() {
     return {
-        letterFrontLit: parseFloat(document.getElementById('priceLetterFrontLit').value) || DEFAULT_PRICES.letterFrontLit,
-        letterBackLit: parseFloat(document.getElementById('priceLetterBackLit').value) || DEFAULT_PRICES.letterBackLit,
-        letterAllLit: parseFloat(document.getElementById('priceLetterAllLit').value) || DEFAULT_PRICES.letterAllLit,
-        letter3D: parseFloat(document.getElementById('priceLetter3D').value) || DEFAULT_PRICES.letter3D,
+        letterIlluminated: parseFloat(document.getElementById('priceLetterIlluminated').value) || DEFAULT_PRICES.letterIlluminated,
+        letterNonIlluminated: parseFloat(document.getElementById('priceLetterNonIlluminated').value) || DEFAULT_PRICES.letterNonIlluminated,
         letterInox: parseFloat(document.getElementById('priceLetterInox').value) || DEFAULT_PRICES.letterInox,
         aluPanel: parseFloat(document.getElementById('priceAluPanel').value) || DEFAULT_PRICES.aluPanel,
         lightbox: parseFloat(document.getElementById('priceLightbox').value) || DEFAULT_PRICES.lightbox,

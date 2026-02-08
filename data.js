@@ -5,22 +5,18 @@
 
 // Default prices (PHP per m²)
 const DEFAULT_PRICES = {
-  letterFrontLit: 18000,    // Mica Front Lit Letters
-  letterBackLit: 18000,     // Mica Back Lit Letters
-  letterAllLit: 20000,      // Mica All Lit Letters
-  letter3D: 5500,           // 3D Non-LED Letters (ACP + Sintra)
-  letterInox: 45000,        // Stainless Steel (Inox) - Premium Price (2.5x Acrylic)
-  aluPanel: 2000,           // Alu Background Panel
+  letterIlluminated: 20000, // Illuminated dimensional letter sign (LED)
+  letterNonIlluminated: 5500, // Non-illuminated dimensional letter sign
+  letterInox: 45000,        // Stainless Steel (Inox) - Premium Price
+  aluPanel: 2000,           // Alu Background Panel (Sign Board)
   lightbox: 10000,          // Lightbox (all styles)
   anchorMultiplier: 2.5     // Anchor price multiplier for Inox
 };
 
 // Letter type options
 const LETTER_TYPES = [
-  { id: 'frontLit', name: 'Acrylic Front Lit Letters', priceKey: 'letterFrontLit' },
-  { id: 'backLit', name: 'Acrylic Back Lit Letters', priceKey: 'letterBackLit' },
-  { id: 'allLit', name: 'Acrylic All Lit Letters', priceKey: 'letterAllLit' },
-  { id: '3d', name: '3D Non-LED Letters (ACP + Sintra)', priceKey: 'letter3D' },
+  { id: 'illuminated', name: 'Illuminated dimensional letter sign', priceKey: 'letterIlluminated' },
+  { id: 'nonIlluminated', name: 'Non-illuminated dimensional letter sign', priceKey: 'letterNonIlluminated' },
   { id: 'inox', name: 'Stainless Steel (Inox) - Anchor Price', priceKey: 'letterInox' }
 ];
 

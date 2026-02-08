@@ -94,10 +94,8 @@
             <div class="form-group">
               <label for="logoType">Logo Type</label>
               <select id="logoType">
-                <option value="frontLit">Acrylic Front Lit</option>
-                <option value="backLit">Acrylic Back Lit</option>
-                <option value="allLit">Acrylic All Lit</option>
-                <option value="3d">3D Non-LED</option>
+                <option value="illuminated">Illuminated (LED)</option>
+                <option value="nonIlluminated">Non-illuminated</option>
               </select>
             </div>
             <div class="form-group">
@@ -313,12 +311,18 @@
               </button>
             </div>
 
-            <!-- Recommended Option - Acrylic Front Lit -->
+            <!-- Recommended Option - Illuminated Letter Sign -->
             <div class="anchor-card recommended">
               <div class="anchor-badge recommended-badge">⭐ BEST VALUE</div>
               <div class="anchor-header">
                 <div class="anchor-number">2</div>
-                <h3>Acrylic Front Lit</h3>
+                <h3>Illuminated Letter Sign</h3>
+              </div>
+
+              <!-- FREE Sign Board Banner -->
+              <div id="anchorFreeSignBoard"
+                style="background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%); color: #1e293b; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; font-weight: 700; animation: pulse 2s infinite;">
+                🎁 FREE BONUS: Sign Board Included!
               </div>
 
               <!-- Product Information -->
@@ -332,6 +336,7 @@
                 <p>✨ Great quality & value</p>
                 <p>⚡ Energy efficient LED</p>
                 <p>🎨 Vibrant colors</p>
+                <p>🎁 FREE Sign Board!</p>
               </div>
               <div class="anchor-price" id="anchorPriceRecommended">0 ₱</div>
               <div class="anchor-savings" id="anchorSavings">Save 0 ₱ vs Inox!</div>
@@ -340,12 +345,12 @@
               </button>
             </div>
 
-            <!-- Budget Option - 3D Non-LED -->
+            <!-- Budget Option - Non-illuminated Letter Sign -->
             <div class="anchor-card budget">
               <div class="anchor-badge">BUDGET</div>
               <div class="anchor-header">
                 <div class="anchor-number">3</div>
-                <h3>3D Non-LED</h3>
+                <h3>Non-illuminated Letter</h3>
               </div>
               <div class="anchor-description">
                 <p>💰 Most affordable</p>
@@ -465,7 +470,7 @@
                   </div>
                 </div>
 
-                <!-- Option 2: Best Value Acrylic (ENLARGED & PROMINENT) -->
+                <!-- Option 2: Best Value Illuminated Letter (ENLARGED & PROMINENT) -->
                 <div
                   style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 4px solid #10b981; border-radius: 16px; padding: 2rem; position: relative; flex: 1.3; box-shadow: 0 0 40px rgba(16, 185, 129, 0.5), 0 10px 30px rgba(0, 0, 0, 0.3); transform: scale(1.05);">
                   <div
@@ -473,9 +478,13 @@
                     ⭐ BEST VALUE ⭐</div>
                   <div style="text-align: center; margin-top: 1.2rem;">
                     <div
-                      style="font-size: 1.3rem; font-weight: 800; color: #10b981; margin-bottom: 1rem; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">
-                      Acrylic
-                      Front Lit</div>
+                      style="font-size: 1.3rem; font-weight: 800; color: #10b981; margin-bottom: 0.5rem; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">
+                      Illuminated<br>Letter Sign</div>
+                    <!-- FREE Sign Board Banner -->
+                    <div
+                      style="background: linear-gradient(135deg, #ffd700 0%, #ff9500 100%); color: #1e293b; padding: 0.5rem; border-radius: 6px; margin-bottom: 0.8rem; font-weight: 700; font-size: 0.75rem;">
+                      🎁 FREE BONUS: Sign Board Included!
+                    </div>
                     <div
                       style="background: rgba(16, 185, 129, 0.2); padding: 0.9rem; border-radius: 10px; margin-bottom: 1.2rem; border: 1px solid rgba(16, 185, 129, 0.3);">
                       <div style="font-size: 0.8rem; font-weight: 700; color: #10b981; margin-bottom: 0.6rem;">📦
@@ -490,6 +499,7 @@
                       <div>✨ Great quality & value</div>
                       <div>⚡ Energy efficient LED</div>
                       <div>🎨 Vibrant colors</div>
+                      <div>🎁 FREE Sign Board!</div>
                     </div>
                     <div
                       style="font-size: 2.4rem; font-weight: 800; color: #10b981; margin-bottom: 0.6rem; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);"
@@ -502,15 +512,15 @@
                   </div>
                 </div>
 
-                <!-- Option 3: Budget Build-up letter Non-LED -->
+                <!-- Option 3: Budget Non-illuminated Letter -->
                 <div
                   style="background: #1e293b; border: 2px solid #3b82f6; border-radius: 12px; padding: 1.5rem; position: relative; flex: 1;">
                   <div
                     style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #3b82f6; color: white; padding: 0.35rem 1rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700;">
                     BUDGET</div>
                   <div style="text-align: center; margin-top: 1rem;">
-                    <div style="font-size: 1.05rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">Build-up
-                      letter<br>Non-LED
+                    <div style="font-size: 1.05rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">
+                      Non-illuminated<br>Letter Sign
                     </div>
                     <div
                       style="font-size: 0.8rem; color: #94a3b8; text-align: left; line-height: 1.8; margin-bottom: 1.5rem;">
@@ -658,30 +668,16 @@
             <div class="settings-group">
               <h3 class="settings-group-title">Raised Letters</h3>
               <div class="form-group">
-                <label for="priceLetterFrontLit">Acrylic Front Lit</label>
+                <label for="priceLetterIlluminated">Illuminated dimensional letter sign (LED)</label>
                 <div class="input-with-unit">
-                  <input type="number" id="priceLetterFrontLit" value="18000" min="0">
+                  <input type="number" id="priceLetterIlluminated" value="20000" min="0">
                   <span class="unit">₱/m²</span>
                 </div>
               </div>
               <div class="form-group">
-                <label for="priceLetterBackLit">Acrylic Back Lit</label>
+                <label for="priceLetterNonIlluminated">Non-illuminated dimensional letter sign</label>
                 <div class="input-with-unit">
-                  <input type="number" id="priceLetterBackLit" value="18000" min="0">
-                  <span class="unit">₱/m²</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="priceLetterAllLit">Acrylic All Lit</label>
-                <div class="input-with-unit">
-                  <input type="number" id="priceLetterAllLit" value="20000" min="0">
-                  <span class="unit">₱/m²</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="priceLetter3D">3D Non-LED (ACP + Sintra)</label>
-                <div class="input-with-unit">
-                  <input type="number" id="priceLetter3D" value="5500" min="0">
+                  <input type="number" id="priceLetterNonIlluminated" value="5500" min="0">
                   <span class="unit">₱/m²</span>
                 </div>
               </div>

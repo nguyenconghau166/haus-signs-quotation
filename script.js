@@ -7,7 +7,7 @@
 const state = {
     prices: {},
     letters: [],
-    logo: { name: '', type: 'frontLit', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
+    logo: { name: '', type: 'illuminated', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
     panel: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
     lightbox: { style: null, size: null, quantity: 1, customDimensions: null },
     anchor: {
@@ -226,7 +226,7 @@ function addLetterRow() {
     const letterData = {
         id: Date.now(),
         name: '',
-        type: 'frontLit',
+        type: 'illuminated',
         height: 0,
         heightInches: 0,
         charCount: 0
@@ -386,13 +386,11 @@ function renderLetterRows() {
 }
 
 // Minimum letter height in cm
-const MIN_LETTER_HEIGHT = 15;         // For Front Lit & All Lit letters
-const MIN_LETTER_HEIGHT_BACKLIT = 10; // For Back Lit letters
-const MIN_LETTER_HEIGHT_3D = 8;       // For 3D Non-LED letters
+const MIN_LETTER_HEIGHT = 15;         // For Illuminated letters
+const MIN_LETTER_HEIGHT_NON_ILLUMINATED = 8; // For Non-illuminated letters
 
 function getMinHeightForType(letterType) {
-    if (letterType === '3d') return MIN_LETTER_HEIGHT_3D;
-    if (letterType === 'backLit') return MIN_LETTER_HEIGHT_BACKLIT;
+    if (letterType === 'nonIlluminated') return MIN_LETTER_HEIGHT_NON_ILLUMINATED;
     return MIN_LETTER_HEIGHT;
 }
 
@@ -501,6 +499,9 @@ function updateSignageSummary() {
 }
 
 function addSignageToQuotation() {
+    // Track if any illuminated products are added
+    let hasIlluminatedProduct = false;
+
     // Add letters (skip invalid ones)
     state.letters.forEach((letter, index) => {
         const minHeight = getMinHeightForType(letter.type);
@@ -512,6 +513,11 @@ function addSignageToQuotation() {
                 description: `${displayName} - ${typeInfo?.name || ''} (${letter.height}cm x ${letter.charCount} letters)`,
                 price: result.price
             });
+
+            // Check if illuminated
+            if (letter.type === 'illuminated') {
+                hasIlluminatedProduct = true;
+            }
         }
     });
 
@@ -524,6 +530,11 @@ function addSignageToQuotation() {
             description: `${displayName} - ${typeInfo?.name || ''} (${state.logo.length}×${state.logo.width}cm)`,
             price: result.price
         });
+
+        // Check if illuminated
+        if (state.logo.type === 'illuminated') {
+            hasIlluminatedProduct = true;
+        }
     }
 
     // Add panel
@@ -536,22 +547,30 @@ function addSignageToQuotation() {
         });
     }
 
+    // Add FREE Sign Board bonus for illuminated orders
+    if (hasIlluminatedProduct) {
+        state.quotationItems.push({
+            description: '🎁 FREE BONUS: Sign Board (Alu Panel Background) - Gift for Illuminated Letter Orders',
+            price: 0
+        });
+    }
+
     renderQuotationItems();
     clearSignage();
 
     // Switch to quotation tab
     document.querySelector('[data-tab="quotation"]').click();
 
-    showNotification('Added to quotation!', 'success');
+    showNotification('Added to quotation!' + (hasIlluminatedProduct ? ' 🎁 FREE Sign Board included!' : ''), 'success');
 }
 
 function clearSignage() {
     state.letters = [];
     addLetterRow();
 
-    state.logo = { name: '', type: 'frontLit', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
+    state.logo = { name: '', type: 'illuminated', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
     document.getElementById('logoName').value = '';
-    document.getElementById('logoType').value = 'frontLit';
+    document.getElementById('logoType').value = 'illuminated';
     document.getElementById('logoLengthInches').value = '';
     document.getElementById('logoLength').value = '';
     document.getElementById('logoWidthInches').value = '';
