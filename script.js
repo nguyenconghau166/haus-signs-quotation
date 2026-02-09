@@ -550,7 +550,7 @@ function addSignageToQuotation() {
     // Add FREE Sign Board bonus for illuminated orders
     if (hasIlluminatedProduct) {
         state.quotationItems.push({
-            description: '🎁 FREE BONUS: Sign Board (Alu Panel Background) - Gift for Illuminated Letter Orders',
+            description: '🎁 FREE BONUS: Sign Board/Frame (Alu Panel Background) - Gift for Illuminated Letter Orders',
             price: 0
         });
     }
@@ -561,7 +561,7 @@ function addSignageToQuotation() {
     // Switch to quotation tab
     document.querySelector('[data-tab="quotation"]').click();
 
-    showNotification('Added to quotation!' + (hasIlluminatedProduct ? ' 🎁 FREE Sign Board included!' : ''), 'success');
+    showNotification('Added to quotation!' + (hasIlluminatedProduct ? ' 🎁 FREE Sign Board/Frame included!' : ''), 'success');
 }
 
 function clearSignage() {
