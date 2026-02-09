@@ -7,6 +7,7 @@
 const DEFAULT_PRICES = {
   letterIlluminated: 20000, // Illuminated dimensional letter sign (LED)
   letterNonIlluminated: 5500, // Non-illuminated dimensional letter sign
+  letterCutOut: 5500,       // Cut out letter
   letterInox: 45000,        // Stainless Steel (Inox) - Premium Price
   aluPanel: 2000,           // Alu Background Panel (Sign Board)
   lightbox: 10000,          // Lightbox (all styles)
@@ -17,6 +18,7 @@ const DEFAULT_PRICES = {
 const LETTER_TYPES = [
   { id: 'illuminated', name: 'Illuminated dimensional letter sign', priceKey: 'letterIlluminated' },
   { id: 'nonIlluminated', name: 'Non-illuminated dimensional letter sign', priceKey: 'letterNonIlluminated' },
+  { id: 'cutOut', name: 'Cut out letter', priceKey: 'letterCutOut' },
   { id: 'inox', name: 'Stainless Steel (Inox) - Anchor Price', priceKey: 'letterInox' }
 ];
 

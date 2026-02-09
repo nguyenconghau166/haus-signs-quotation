@@ -57,6 +57,7 @@ function resetPrices() {
 function initSettingsForm(prices) {
     document.getElementById('priceLetterIlluminated').value = prices.letterIlluminated;
     document.getElementById('priceLetterNonIlluminated').value = prices.letterNonIlluminated;
+    document.getElementById('priceLetterCutOut').value = prices.letterCutOut;
     document.getElementById('priceLetterInox').value = prices.letterInox;
     document.getElementById('priceAluPanel').value = prices.aluPanel;
     document.getElementById('priceLightbox').value = prices.lightbox;
@@ -71,6 +72,7 @@ function getPricesFromForm() {
     return {
         letterIlluminated: parseFloat(document.getElementById('priceLetterIlluminated').value) || DEFAULT_PRICES.letterIlluminated,
         letterNonIlluminated: parseFloat(document.getElementById('priceLetterNonIlluminated').value) || DEFAULT_PRICES.letterNonIlluminated,
+        letterCutOut: parseFloat(document.getElementById('priceLetterCutOut').value) || DEFAULT_PRICES.letterCutOut,
         letterInox: parseFloat(document.getElementById('priceLetterInox').value) || DEFAULT_PRICES.letterInox,
         aluPanel: parseFloat(document.getElementById('priceAluPanel').value) || DEFAULT_PRICES.aluPanel,
         lightbox: parseFloat(document.getElementById('priceLightbox').value) || DEFAULT_PRICES.lightbox,
