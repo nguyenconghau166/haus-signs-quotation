@@ -1510,8 +1510,11 @@ function updateAnchorPricing() {
             const recommendedResult = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
             recommendedTotal += recommendedResult.price;
 
-            // Premium = 1.9x Best Value (Recommended) price - User request
-            premiumTotal += recommendedResult.price * 1.9;
+            // Calculate Acrylic price for reference (Illuminated)
+            const acrylicResult = calculateLetterPrice(letter.height, letter.charCount, 'illuminated', state.prices);
+
+            // Premium (Inox) = 2.2x Acrylic price - User request
+            premiumTotal += acrylicResult.price * (state.prices.anchorMultiplier || 2.2);
 
             // Budget = 75% of Best Value
             budgetTotal += recommendedResult.price * 0.75;
