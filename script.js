@@ -1553,16 +1553,17 @@ function updateAnchorPricing() {
 
     // Calculate panel
     if (hasPanel) {
-        const panelBasePrice = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
+        const panelResult = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
+        const panelPrice = panelResult.price;
 
         // Premium = Same as Recommended (User request: only letters get multiplier)
-        premiumTotal += panelBasePrice;
+        premiumTotal += panelPrice;
 
         // Recommended = Actual panel price
-        recommendedTotal += panelBasePrice;
+        recommendedTotal += panelPrice;
 
         // Budget = 75% of Best Value
-        budgetTotal += panelBasePrice * 0.75;
+        budgetTotal += panelPrice * 0.75;
 
         const area = ((state.panel.length * state.panel.width) / 10000).toFixed(2);
         productInfoHTML += `
