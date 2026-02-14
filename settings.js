@@ -14,8 +14,17 @@ function loadPrices() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             const parsed = JSON.parse(stored);
-            // Merge with defaults to ensure all keys exist
-            return { ...DEFAULT_PRICES, ...parsed };
+            const prices = { ...DEFAULT_PRICES };
+
+            // Safe merge: only accept valid numbers
+            Object.keys(DEFAULT_PRICES).forEach(key => {
+                const val = parsed[key];
+                if (typeof val === 'number' && !isNaN(val)) {
+                    prices[key] = val;
+                }
+            });
+
+            return prices;
         }
     } catch (e) {
         console.error('Error loading prices:', e);
