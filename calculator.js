@@ -83,6 +83,32 @@ function calculateLogoPrice(lengthCm, widthCm, logoType, prices) {
 }
 
 /**
+ * Calculate acrylic logo area (circular illuminated logo)
+ * Formula: (L × W + (2L + 2W) × 8) / 10000
+ * @param {number} lengthCm - Length in cm
+ * @param {number} widthCm - Width in cm
+ * @returns {number} Area in m²
+ */
+function calculateAcrylicLogoArea(lengthCm, widthCm) {
+    if (!lengthCm || !widthCm) return 0;
+    return (lengthCm * widthCm + (2 * lengthCm + 2 * widthCm) * 8) / 10000;
+}
+
+/**
+ * Calculate acrylic logo price
+ * @param {number} lengthCm - Length in cm
+ * @param {number} widthCm - Width in cm
+ * @param {object} prices - Current prices
+ * @returns {object} { area, price }
+ */
+function calculateAcrylicLogoPrice(lengthCm, widthCm, prices) {
+    const area = calculateAcrylicLogoArea(lengthCm, widthCm);
+    const pricePerSqm = prices.acrylicLogo || DEFAULT_PRICES.acrylicLogo;
+    const price = area * pricePerSqm;
+    return { area, price };
+}
+
+/**
  * Calculate panel price (Alu background)
  * @param {number} lengthCm - Panel length in cm
  * @param {number} widthCm - Panel width in cm

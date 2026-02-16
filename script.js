@@ -8,6 +8,7 @@ const state = {
     prices: {},
     letters: [],
     logo: { name: '', type: 'illuminated', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
+    acrylicLogo: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
     panel: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
     lightbox: { style: null, size: null, quantity: 1, customDimensions: null },
     anchor: {
@@ -175,6 +176,44 @@ function setupSignageListeners() {
         state.logo.widthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
         document.getElementById('logoWidthInches').value = state.logo.widthInches || '';
         updateLogoCalculation();
+    });
+
+    // Acrylic Logo name
+    document.getElementById('acrylicLogoName').addEventListener('input', (e) => {
+        state.acrylicLogo.name = e.target.value;
+        updateSignageSummary();
+    });
+
+    // Acrylic Logo inches inputs (auto-convert to cm)
+    document.getElementById('acrylicLogoLengthInches').addEventListener('input', (e) => {
+        const inches = parseFloat(e.target.value) || 0;
+        state.acrylicLogo.lengthInches = inches;
+        state.acrylicLogo.length = Math.round(inches * INCH_TO_CM * 10) / 10;
+        document.getElementById('acrylicLogoLength').value = state.acrylicLogo.length || '';
+        updateAcrylicLogoCalculation();
+    });
+    document.getElementById('acrylicLogoWidthInches').addEventListener('input', (e) => {
+        const inches = parseFloat(e.target.value) || 0;
+        state.acrylicLogo.widthInches = inches;
+        state.acrylicLogo.width = Math.round(inches * INCH_TO_CM * 10) / 10;
+        document.getElementById('acrylicLogoWidth').value = state.acrylicLogo.width || '';
+        updateAcrylicLogoCalculation();
+    });
+
+    // Acrylic Logo cm inputs (auto-convert to inches)
+    document.getElementById('acrylicLogoLength').addEventListener('input', (e) => {
+        const cm = parseFloat(e.target.value) || 0;
+        state.acrylicLogo.length = cm;
+        state.acrylicLogo.lengthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
+        document.getElementById('acrylicLogoLengthInches').value = state.acrylicLogo.lengthInches || '';
+        updateAcrylicLogoCalculation();
+    });
+    document.getElementById('acrylicLogoWidth').addEventListener('input', (e) => {
+        const cm = parseFloat(e.target.value) || 0;
+        state.acrylicLogo.width = cm;
+        state.acrylicLogo.widthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
+        document.getElementById('acrylicLogoWidthInches').value = state.acrylicLogo.widthInches || '';
+        updateAcrylicLogoCalculation();
     });
 
     // Panel name
@@ -429,6 +468,14 @@ function updateLogoCalculation() {
     updateSignageSummary();
 }
 
+function updateAcrylicLogoCalculation() {
+    const result = calculateAcrylicLogoPrice(state.acrylicLogo.length, state.acrylicLogo.width, state.prices);
+
+    document.getElementById('acrylicLogoResult').textContent = `${formatNumber(result.price)} ₱`;
+
+    updateSignageSummary();
+}
+
 function updatePanelCalculation() {
     const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
 
@@ -464,6 +511,17 @@ function updateSignageSummary() {
         const displayName = state.logo.name || 'Logo';
         rows.push({
             label: `${displayName}: ${typeInfo?.name || ''} (${state.logo.length}×${state.logo.width}cm)`,
+            value: result.price
+        });
+        totalPrice += result.price;
+    }
+
+    // Acrylic Logo
+    if (state.acrylicLogo.length > 0 && state.acrylicLogo.width > 0) {
+        const result = calculateAcrylicLogoPrice(state.acrylicLogo.length, state.acrylicLogo.width, state.prices);
+        const displayName = state.acrylicLogo.name || 'Illuminated Acrylic Logo (Round)';
+        rows.push({
+            label: `${displayName} (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
             value: result.price
         });
         totalPrice += result.price;
@@ -537,6 +595,19 @@ function addSignageToQuotation() {
         }
     }
 
+    // Add acrylic logo
+    if (state.acrylicLogo.length > 0 && state.acrylicLogo.width > 0) {
+        const result = calculateAcrylicLogoPrice(state.acrylicLogo.length, state.acrylicLogo.width, state.prices);
+        const displayName = state.acrylicLogo.name || 'Illuminated Acrylic Logo';
+        state.quotationItems.push({
+            description: `${displayName} - Illuminated Acrylic Logo (Round) (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
+            price: result.price
+        });
+
+        // Acrylic logo is always illuminated
+        hasIlluminatedProduct = true;
+    }
+
     // Add panel
     if (state.panel.length > 0 && state.panel.width > 0) {
         const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
@@ -576,6 +647,14 @@ function clearSignage() {
     document.getElementById('logoWidthInches').value = '';
     document.getElementById('logoWidth').value = '';
     document.getElementById('logoResult').textContent = '0 ₱';
+
+    state.acrylicLogo = { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
+    document.getElementById('acrylicLogoName').value = '';
+    document.getElementById('acrylicLogoLengthInches').value = '';
+    document.getElementById('acrylicLogoLength').value = '';
+    document.getElementById('acrylicLogoWidthInches').value = '';
+    document.getElementById('acrylicLogoWidth').value = '';
+    document.getElementById('acrylicLogoResult').textContent = '0 ₱';
 
     state.panel = { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
     document.getElementById('panelName').value = '';

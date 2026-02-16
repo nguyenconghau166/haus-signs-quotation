@@ -11,6 +11,7 @@ const DEFAULT_PRICES = {
   letterInox: 45000,        // Stainless Steel (Inox) - Premium Price
   aluPanel: 2000,           // Alu Background Panel (Sign Board)
   lightbox: 10000,          // Lightbox (all styles)
+  acrylicLogo: 11000,       // Illuminated Acrylic Logo (Round)
   anchorMultiplier: 2.2     // Anchor price multiplier for Inox
 };
 

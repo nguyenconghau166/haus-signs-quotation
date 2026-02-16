@@ -70,6 +70,7 @@ function initSettingsForm(prices) {
     document.getElementById('priceLetterInox').value = prices.letterInox;
     document.getElementById('priceAluPanel').value = prices.aluPanel;
     document.getElementById('priceLightbox').value = prices.lightbox;
+    document.getElementById('priceAcrylicLogo').value = prices.acrylicLogo;
     document.getElementById('anchorMultiplier').value = prices.anchorMultiplier;
 }
 
@@ -85,6 +86,7 @@ function getPricesFromForm() {
         letterInox: parseFloat(document.getElementById('priceLetterInox').value) || DEFAULT_PRICES.letterInox,
         aluPanel: parseFloat(document.getElementById('priceAluPanel').value) || DEFAULT_PRICES.aluPanel,
         lightbox: parseFloat(document.getElementById('priceLightbox').value) || DEFAULT_PRICES.lightbox,
+        acrylicLogo: parseFloat(document.getElementById('priceAcrylicLogo').value) || DEFAULT_PRICES.acrylicLogo,
         anchorMultiplier: parseFloat(document.getElementById('anchorMultiplier').value) || DEFAULT_PRICES.anchorMultiplier
     };
 }

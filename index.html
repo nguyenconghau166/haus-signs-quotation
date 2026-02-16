@@ -121,6 +121,38 @@
           </div>
         </div>
 
+        <!-- Illuminated Acrylic Logo (Round) Section -->
+        <div class="card">
+          <h2 class="card-title">🔴 Illuminated Acrylic Logo (Round)</h2>
+
+          <div class="form-grid logo-panel-grid">
+            <div class="form-group full-width">
+              <label for="acrylicLogoName">Logo Content</label>
+              <input type="text" id="acrylicLogoName" placeholder="E.g: Company Logo">
+            </div>
+            <div class="form-group">
+              <label for="acrylicLogoLengthInches">Length (inches)</label>
+              <input type="number" id="acrylicLogoLengthInches" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="acrylicLogoLength">Length (cm)</label>
+              <input type="number" id="acrylicLogoLength" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="acrylicLogoWidthInches">Width (inches)</label>
+              <input type="number" id="acrylicLogoWidthInches" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="acrylicLogoWidth">Width (cm)</label>
+              <input type="number" id="acrylicLogoWidth" placeholder="0" min="0" step="0.1">
+            </div>
+            <div class="form-group result-display">
+              <label>Price</label>
+              <div class="result-value" id="acrylicLogoResult">0 ₱</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Alu Panel Section -->
         <div class="card">
           <h2 class="card-title">📐 Alu Background Panel</h2>
@@ -722,6 +754,13 @@
                   <span class="unit">₱/m²</span>
                 </div>
               </div>
+              <div class="form-group">
+                <label for="priceAcrylicLogo">Illuminated Acrylic Logo (Round)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceAcrylicLogo" value="11000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -769,6 +808,10 @@
             <div class="formula-item">
               <span class="formula-label">Logo/Panel:</span>
               <span class="formula-value">Area (m²) = Length (cm) × Width (cm) / 10000</span>
+            </div>
+            <div class="formula-item">
+              <span class="formula-label">Acrylic Logo (Round):</span>
+              <span class="formula-value">Area (m²) = (L × W + (2L + 2W) × 8) / 10000</span>
             </div>
           </div>
         </div>
@@ -944,10 +987,10 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="data.js"></script>
-  <script src="calculator.js"></script>
-  <script src="settings.js"></script>
-  <script src="script.js"></script>
+  <script src="data.js?v=1"></script>
+  <script src="calculator.js?v=1"></script>
+  <script src="settings.js?v=1"></script>
+  <script src="script.js?v=1"></script>
 </body>
 
 </html>
