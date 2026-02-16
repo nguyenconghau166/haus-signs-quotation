@@ -487,6 +487,7 @@ function updatePanelCalculation() {
 function updateSignageSummary() {
     const summary = document.getElementById('signageSummary');
     let totalPrice = 0;
+    let totalLetterPrice = 0; // Track total price of letters for surcharge calculation
     let rows = [];
 
     // Letters (skip invalid ones)
@@ -501,6 +502,7 @@ function updateSignageSummary() {
                 value: result.price
             });
             totalPrice += result.price;
+            totalLetterPrice += result.price;
         }
     });
 
@@ -514,6 +516,40 @@ function updateSignageSummary() {
             value: result.price
         });
         totalPrice += result.price;
+        // Logo is treated as a letter type for surcharge purposes if it uses letter materials
+        // But the requirement specifically said "total value of the types of raised letters (excluding other products)"
+        // Assuming Logo (which uses LETTER_TYPES) counts towards this total if it's considered "chữ nổi"
+        // Based on "logo uses same price as letter type" comment in calculator.js, it seems related.
+        // However, the prompt says "total value of the types of raised letters". 
+        // Let's stick to state.letters for now as "raised letters". 
+        // If the user meant "all things made of letters including logos", I might need to clarify, 
+        // but "chữ nổi" usually refers to the text parts. 
+        // Let's assume ONLY state.letters for the surcharge base for now to be safe, 
+        // or check if Logo is considered a "letter" product. 
+        // Given the code structure, Logo uses `LETTER_TYPES` but is stored in `state.logo`.
+        // I will strictly follow "total value of the types of raised letters (excluding other products)".
+        // So I will NOT add logo price to `totalLetterPrice`.
+    }
+
+    // Apply surcharge based on totalLetterPrice
+    // < 4000: +1000
+    // < 5000: +500
+    // >= 5000: +0
+    let surcharge = 0;
+    if (totalLetterPrice > 0) {
+        if (totalLetterPrice < 4000) {
+            surcharge = 1000;
+        } else if (totalLetterPrice < 5000) {
+            surcharge = 500;
+        }
+    }
+
+    if (surcharge > 0) {
+        rows.push({
+            label: 'Small Order Surcharge (Letter Total < 5000₱)',
+            value: surcharge
+        });
+        totalPrice += surcharge;
     }
 
     // Acrylic Logo
@@ -615,6 +651,33 @@ function addSignageToQuotation() {
         state.quotationItems.push({
             description: `${displayName} (${state.panel.length}×${state.panel.width}cm)`,
             price: result.price
+        });
+    }
+
+    // Apply surcharge based on totalLetterPrice
+    // Calculate total letter price again for quotation
+    let totalLetterPrice = 0;
+    state.letters.forEach((letter) => {
+        const minHeight = getMinHeightForType(letter.type);
+        if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
+            const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
+            totalLetterPrice += result.price;
+        }
+    });
+
+    let surcharge = 0;
+    if (totalLetterPrice > 0) {
+        if (totalLetterPrice < 4000) {
+            surcharge = 1000;
+        } else if (totalLetterPrice < 5000) {
+            surcharge = 500;
+        }
+    }
+
+    if (surcharge > 0) {
+        state.quotationItems.push({
+            description: 'Small Order Surcharge (Letter Total < 5000₱)',
+            price: surcharge
         });
     }
 

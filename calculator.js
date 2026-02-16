@@ -35,18 +35,10 @@ function calculateLetterPrice(heightCm, charCount, letterType, prices) {
     const pricePerSqm = prices[letterTypeInfo.priceKey] || DEFAULT_PRICES[letterTypeInfo.priceKey];
     const basePrice = area * pricePerSqm;
 
-    // Small order markup rules:
-    // - Orders under 3000 PHP: +30%
-    // - Orders under 5000 PHP: +20%
-    let markupPercent = 0;
-    if (basePrice > 0 && basePrice < 3000) {
-        markupPercent = 30;
-    } else if (basePrice >= 3000 && basePrice < 5000) {
-        markupPercent = 20;
-    }
-
-    const markup = basePrice * (markupPercent / 100);
-    const price = basePrice + markup;
+    // Small order markup removed as per new policy (total order surcharge instead)
+    const markup = 0;
+    const markupPercent = 0;
+    const price = basePrice;
 
     return { area, basePrice, markup, markupPercent, price };
 }
