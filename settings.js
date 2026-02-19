@@ -72,6 +72,12 @@ function initSettingsForm(prices) {
     document.getElementById('priceLightbox').value = prices.lightbox;
     document.getElementById('priceAcrylicLogo').value = prices.acrylicLogo;
     document.getElementById('anchorMultiplier').value = prices.anchorMultiplier;
+
+    // Surcharge settings (with fallbacks to defaults if not present in saved settings)
+    document.getElementById('surchargeThreshold1').value = prices.surchargeThreshold1 || DEFAULT_PRICES.surchargeThreshold1;
+    document.getElementById('surchargeAmount1').value = prices.surchargeAmount1 || DEFAULT_PRICES.surchargeAmount1;
+    document.getElementById('surchargeThreshold2').value = prices.surchargeThreshold2 || DEFAULT_PRICES.surchargeThreshold2;
+    document.getElementById('surchargeAmount2').value = prices.surchargeAmount2 || DEFAULT_PRICES.surchargeAmount2;
 }
 
 /**
@@ -87,7 +93,13 @@ function getPricesFromForm() {
         aluPanel: parseFloat(document.getElementById('priceAluPanel').value) || DEFAULT_PRICES.aluPanel,
         lightbox: parseFloat(document.getElementById('priceLightbox').value) || DEFAULT_PRICES.lightbox,
         acrylicLogo: parseFloat(document.getElementById('priceAcrylicLogo').value) || DEFAULT_PRICES.acrylicLogo,
-        anchorMultiplier: parseFloat(document.getElementById('anchorMultiplier').value) || DEFAULT_PRICES.anchorMultiplier
+        anchorMultiplier: parseFloat(document.getElementById('anchorMultiplier').value) || DEFAULT_PRICES.anchorMultiplier,
+
+        // Surcharge settings
+        surchargeThreshold1: parseFloat(document.getElementById('surchargeThreshold1').value) || DEFAULT_PRICES.surchargeThreshold1,
+        surchargeAmount1: parseFloat(document.getElementById('surchargeAmount1').value) || DEFAULT_PRICES.surchargeAmount1,
+        surchargeThreshold2: parseFloat(document.getElementById('surchargeThreshold2').value) || DEFAULT_PRICES.surchargeThreshold2,
+        surchargeAmount2: parseFloat(document.getElementById('surchargeAmount2').value) || DEFAULT_PRICES.surchargeAmount2
     };
 }
 

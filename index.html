@@ -286,20 +286,20 @@
             </h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
               <div class="input-group">
-                <label for="customerName">Customer Name *</label>
-                <input type="text" id="customerName" placeholder="e.g., John Doe">
+                <label for="anchorCustomerName">Customer Name *</label>
+                <input type="text" id="anchorCustomerName" placeholder="e.g., John Doe">
               </div>
               <div class="input-group">
-                <label for="customerCompany">Company Name</label>
-                <input type="text" id="customerCompany" placeholder="e.g., ABC Corporation">
+                <label for="anchorCustomerCompany">Company Name</label>
+                <input type="text" id="anchorCustomerCompany" placeholder="e.g., ABC Corporation">
               </div>
               <div class="input-group">
-                <label for="customerPhone">Phone Number</label>
-                <input type="tel" id="customerPhone" placeholder="e.g., +63 912 345 6789">
+                <label for="anchorCustomerPhone">Phone Number</label>
+                <input type="tel" id="anchorCustomerPhone" placeholder="e.g., +63 912 345 6789">
               </div>
               <div class="input-group">
-                <label for="customerEmail">Email</label>
-                <input type="email" id="customerEmail" placeholder="e.g., customer@email.com">
+                <label for="anchorCustomerEmail">Email</label>
+                <input type="email" id="anchorCustomerEmail" placeholder="e.g., customer@email.com">
               </div>
             </div>
           </div>
@@ -759,6 +759,43 @@
                 <div class="input-with-unit">
                   <input type="number" id="priceAcrylicLogo" value="11000" min="0">
                   <span class="unit">₱/m²</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <h3 class="settings-group-title">Small Order Surcharge</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Surcharges are automatically added to the first letter item price for small orders.
+              </p>
+
+              <div class="form-group">
+                <label for="surchargeThreshold1">Threshold 1 (Below this amount)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="surchargeThreshold1" value="4000" min="0">
+                  <span class="unit">₱</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="surchargeAmount1">Surcharge Amount 1</label>
+                <div class="input-with-unit">
+                  <input type="number" id="surchargeAmount1" value="1000" min="0">
+                  <span class="unit">₱</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="surchargeThreshold2">Threshold 2 (Below this amount)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="surchargeThreshold2" value="5000" min="0">
+                  <span class="unit">₱</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="surchargeAmount2">Surcharge Amount 2</label>
+                <div class="input-with-unit">
+                  <input type="number" id="surchargeAmount2" value="500" min="0">
+                  <span class="unit">₱</span>
                 </div>
               </div>
             </div>

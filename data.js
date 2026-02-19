@@ -12,7 +12,11 @@ const DEFAULT_PRICES = {
   aluPanel: 2000,           // Alu Background Panel (Sign Board)
   lightbox: 10000,          // Lightbox (all styles)
   acrylicLogo: 11000,       // Illuminated Acrylic Logo (Round)
-  anchorMultiplier: 2.2     // Anchor price multiplier for Inox
+  anchorMultiplier: 2.2,    // Anchor price multiplier for Inox
+  surchargeThreshold1: 4000, // Threshold 1: Orders below this amount get surcharge 1
+  surchargeAmount1: 1000,    // Surcharge 1 amount
+  surchargeThreshold2: 5000, // Threshold 2: Orders below this amount (but >= threshold 1) get surcharge 2
+  surchargeAmount2: 500      // Surcharge 2 amount
 };
 
 // Letter type options

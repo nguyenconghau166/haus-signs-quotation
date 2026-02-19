@@ -490,20 +490,56 @@ function updateSignageSummary() {
     let totalLetterPrice = 0; // Track total price of letters for surcharge calculation
     let rows = [];
 
-    // Letters (skip invalid ones)
+    // First pass: Calculate total letter price to determine surcharge
+    let lettersWithPrice = [];
     state.letters.forEach((letter, index) => {
         const minHeight = getMinHeightForType(letter.type);
         if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
             const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
-            const typeInfo = LETTER_TYPES.find(t => t.id === letter.type);
-            const displayName = letter.name || `Raised Letters ${index + 1}`;
-            rows.push({
-                label: `${displayName}: ${typeInfo?.name || ''} (${letter.height}cm × ${letter.charCount} letters)`,
-                value: result.price
-            });
-            totalPrice += result.price;
+            lettersWithPrice.push({ ...letter, price: result.price, index: index });
             totalLetterPrice += result.price;
         }
+    });
+
+    // Calculate surcharge based on dynamic settings
+    const threshold1 = state.prices.surchargeThreshold1 || DEFAULT_PRICES.surchargeThreshold1;
+    const amount1 = state.prices.surchargeAmount1 || DEFAULT_PRICES.surchargeAmount1;
+    const threshold2 = state.prices.surchargeThreshold2 || DEFAULT_PRICES.surchargeThreshold2;
+    const amount2 = state.prices.surchargeAmount2 || DEFAULT_PRICES.surchargeAmount2;
+
+    let surcharge = 0;
+    if (totalLetterPrice > 0) {
+        if (totalLetterPrice < threshold1) {
+            surcharge = amount1;
+        } else if (totalLetterPrice < threshold2) {
+            surcharge = amount2;
+        }
+    }
+
+    // Second pass: Generate rows and apply surcharge to the first valid letter item
+    let surchargeApplied = false;
+
+    lettersWithPrice.forEach((item) => {
+        const typeInfo = LETTER_TYPES.find(t => t.id === item.type);
+        const displayName = item.name || `Raised Letters ${item.index + 1}`;
+
+        // Add surcharge to the first item if applicable
+        let displayPrice = item.price;
+        let label = `${displayName}: ${typeInfo?.name || ''} (${item.height}cm × ${item.charCount} letters)`;
+
+        if (surcharge > 0 && !surchargeApplied) {
+            displayPrice += surcharge;
+            surchargeApplied = true;
+            // Optionally append note about surcharge, but user asked to "hide" it sort of
+            // "cộng thẳng giá vào báo giá chứ đừng tạo thành 1 sản phẩm mới"
+            // We can just show the total price.
+        }
+
+        rows.push({
+            label: label,
+            value: displayPrice
+        });
+        totalPrice += displayPrice;
     });
 
     // Logo
@@ -516,41 +552,9 @@ function updateSignageSummary() {
             value: result.price
         });
         totalPrice += result.price;
-        // Logo is treated as a letter type for surcharge purposes if it uses letter materials
-        // But the requirement specifically said "total value of the types of raised letters (excluding other products)"
-        // Assuming Logo (which uses LETTER_TYPES) counts towards this total if it's considered "chữ nổi"
-        // Based on "logo uses same price as letter type" comment in calculator.js, it seems related.
-        // However, the prompt says "total value of the types of raised letters". 
-        // Let's stick to state.letters for now as "raised letters". 
-        // If the user meant "all things made of letters including logos", I might need to clarify, 
-        // but "chữ nổi" usually refers to the text parts. 
-        // Let's assume ONLY state.letters for the surcharge base for now to be safe, 
-        // or check if Logo is considered a "letter" product. 
-        // Given the code structure, Logo uses `LETTER_TYPES` but is stored in `state.logo`.
-        // I will strictly follow "total value of the types of raised letters (excluding other products)".
-        // So I will NOT add logo price to `totalLetterPrice`.
     }
 
-    // Apply surcharge based on totalLetterPrice
-    // < 4000: +1000
-    // < 5000: +500
-    // >= 5000: +0
-    let surcharge = 0;
-    if (totalLetterPrice > 0) {
-        if (totalLetterPrice < 4000) {
-            surcharge = 1000;
-        } else if (totalLetterPrice < 5000) {
-            surcharge = 500;
-        }
-    }
-
-    if (surcharge > 0) {
-        rows.push({
-            label: 'Small Order Surcharge (Letter Total < 5000₱)',
-            value: surcharge
-        });
-        totalPrice += surcharge;
-    }
+    // Removed separate surcharge display block as it's now integrated
 
     // Acrylic Logo
     if (state.acrylicLogo.length > 0 && state.acrylicLogo.width > 0) {
@@ -596,22 +600,58 @@ function addSignageToQuotation() {
     // Track if any illuminated products are added
     let hasIlluminatedProduct = false;
 
-    // Add letters (skip invalid ones)
+    // Calculate total letter price for surcharge
+    let totalLetterPrice = 0;
+    let lettersWithPrice = [];
+
+    // First pass: Calculate prices and total
     state.letters.forEach((letter, index) => {
         const minHeight = getMinHeightForType(letter.type);
         if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
             const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
-            const typeInfo = LETTER_TYPES.find(t => t.id === letter.type);
-            const displayName = letter.name || `Raised Letters`;
-            state.quotationItems.push({
-                description: `${displayName} - ${typeInfo?.name || ''} (${letter.height}cm x ${letter.charCount} letters)`,
-                price: result.price
-            });
+            lettersWithPrice.push({ ...letter, price: result.price, index: index });
+            totalLetterPrice += result.price;
+        }
+    });
 
-            // Check if illuminated
-            if (letter.type === 'illuminated') {
-                hasIlluminatedProduct = true;
-            }
+    // Calculate surcharge based on dynamic settings
+    const threshold1 = state.prices.surchargeThreshold1 || DEFAULT_PRICES.surchargeThreshold1;
+    const amount1 = state.prices.surchargeAmount1 || DEFAULT_PRICES.surchargeAmount1;
+    const threshold2 = state.prices.surchargeThreshold2 || DEFAULT_PRICES.surchargeThreshold2;
+    const amount2 = state.prices.surchargeAmount2 || DEFAULT_PRICES.surchargeAmount2;
+
+    let surcharge = 0;
+    if (totalLetterPrice > 0) {
+        if (totalLetterPrice < threshold1) {
+            surcharge = amount1;
+        } else if (totalLetterPrice < threshold2) {
+            surcharge = amount2;
+        }
+    }
+
+    // Second pass: Add to quotation items
+    let surchargeApplied = false;
+
+    lettersWithPrice.forEach((item) => {
+        const typeInfo = LETTER_TYPES.find(t => t.id === item.type);
+        const displayName = item.name || `Raised Letters`;
+
+        let displayPrice = item.price;
+
+        // Add surcharge to first item
+        if (surcharge > 0 && !surchargeApplied) {
+            displayPrice += surcharge;
+            surchargeApplied = true;
+        }
+
+        state.quotationItems.push({
+            description: `${displayName} - ${typeInfo?.name || ''} (${item.height}cm x ${item.charCount} letters)`,
+            price: displayPrice
+        });
+
+        // Check if illuminated
+        if (item.type === 'illuminated') {
+            hasIlluminatedProduct = true;
         }
     });
 
@@ -651,33 +691,6 @@ function addSignageToQuotation() {
         state.quotationItems.push({
             description: `${displayName} (${state.panel.length}×${state.panel.width}cm)`,
             price: result.price
-        });
-    }
-
-    // Apply surcharge based on totalLetterPrice
-    // Calculate total letter price again for quotation
-    let totalLetterPrice = 0;
-    state.letters.forEach((letter) => {
-        const minHeight = getMinHeightForType(letter.type);
-        if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
-            const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
-            totalLetterPrice += result.price;
-        }
-    });
-
-    let surcharge = 0;
-    if (totalLetterPrice > 0) {
-        if (totalLetterPrice < 4000) {
-            surcharge = 1000;
-        } else if (totalLetterPrice < 5000) {
-            surcharge = 500;
-        }
-    }
-
-    if (surcharge > 0) {
-        state.quotationItems.push({
-            description: 'Small Order Surcharge (Letter Total < 5000₱)',
-            price: surcharge
         });
     }
 
@@ -991,6 +1004,34 @@ function setupQuotationListeners() {
     });
 
     document.getElementById('installationPrice').addEventListener('input', updateQuotationTotals);
+
+    // Customer Name listener (Quotation Tab)
+    const customerNameInput = document.getElementById('customerName');
+    if (customerNameInput) {
+        customerNameInput.addEventListener('input', (e) => {
+            state.customer.name = e.target.value;
+            localStorage.setItem('customerName', e.target.value);
+            // Sync with Anchor tab input
+            const anchorInput = document.getElementById('anchorCustomerName');
+            if (anchorInput) anchorInput.value = e.target.value;
+        });
+        // Initialize from state
+        customerNameInput.value = state.customer.name;
+    }
+
+    // Phone listener (Quotation Tab)
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', (e) => {
+            state.customer.phone = e.target.value;
+            localStorage.setItem('customerPhone', e.target.value);
+            // Sync with Anchor tab input
+            const anchorInput = document.getElementById('anchorCustomerPhone');
+            if (anchorInput) anchorInput.value = e.target.value;
+        });
+        // Initialize from state
+        phoneInput.value = state.customer.phone;
+    }
 }
 
 function addManualItem() {
@@ -1537,44 +1578,50 @@ function setupAnchorPricingListeners() {
         });
     }
 
-    // Customer information listeners
-    const customerNameInput = document.getElementById('customerName');
-    if (customerNameInput) {
-        customerNameInput.addEventListener('input', (e) => {
+    // Customer information listeners (Anchor Tab)
+    const anchorCustomerName = document.getElementById('anchorCustomerName');
+    if (anchorCustomerName) {
+        anchorCustomerName.addEventListener('input', (e) => {
             state.customer.name = e.target.value;
             localStorage.setItem('customerName', e.target.value);
+            // Sync with Quotation tab input
+            const quoteInput = document.getElementById('customerName');
+            if (quoteInput) quoteInput.value = e.target.value;
         });
     }
 
-    const customerCompanyInput = document.getElementById('customerCompany');
-    if (customerCompanyInput) {
-        customerCompanyInput.addEventListener('input', (e) => {
+    const anchorCustomerCompany = document.getElementById('anchorCustomerCompany');
+    if (anchorCustomerCompany) {
+        anchorCustomerCompany.addEventListener('input', (e) => {
             state.customer.company = e.target.value;
             localStorage.setItem('customerCompany', e.target.value);
         });
     }
 
-    const customerPhoneInput = document.getElementById('customerPhone');
-    if (customerPhoneInput) {
-        customerPhoneInput.addEventListener('input', (e) => {
+    const anchorCustomerPhone = document.getElementById('anchorCustomerPhone');
+    if (anchorCustomerPhone) {
+        anchorCustomerPhone.addEventListener('input', (e) => {
             state.customer.phone = e.target.value;
             localStorage.setItem('customerPhone', e.target.value);
+            // Sync with Quotation tab input
+            const quoteInput = document.getElementById('phone');
+            if (quoteInput) quoteInput.value = e.target.value;
         });
     }
 
-    const customerEmailInput = document.getElementById('customerEmail');
-    if (customerEmailInput) {
-        customerEmailInput.addEventListener('input', (e) => {
+    const anchorCustomerEmail = document.getElementById('anchorCustomerEmail');
+    if (anchorCustomerEmail) {
+        anchorCustomerEmail.addEventListener('input', (e) => {
             state.customer.email = e.target.value;
             localStorage.setItem('customerEmail', e.target.value);
         });
     }
 
-    // Initialize customer input values from state
-    if (customerNameInput) customerNameInput.value = state.customer.name;
-    if (customerCompanyInput) customerCompanyInput.value = state.customer.company;
-    if (customerPhoneInput) customerPhoneInput.value = state.customer.phone;
-    if (customerEmailInput) customerEmailInput.value = state.customer.email;
+    // Initialize anchor input values from state
+    if (anchorCustomerName) anchorCustomerName.value = state.customer.name;
+    if (anchorCustomerCompany) anchorCustomerCompany.value = state.customer.company;
+    if (anchorCustomerPhone) anchorCustomerPhone.value = state.customer.phone;
+    if (anchorCustomerEmail) anchorCustomerEmail.value = state.customer.email;
 }
 
 function updateAnchorPricing() {
