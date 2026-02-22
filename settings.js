@@ -71,6 +71,7 @@ function initSettingsForm(prices) {
     document.getElementById('priceAluPanel').value = prices.aluPanel;
     document.getElementById('priceLightbox').value = prices.lightbox;
     document.getElementById('priceAcrylicLogo').value = prices.acrylicLogo;
+    document.getElementById('priceLogoRaised').value = prices.logoRaised;
     document.getElementById('anchorMultiplier').value = prices.anchorMultiplier;
 
     // Surcharge settings (with fallbacks to defaults if not present in saved settings)
@@ -93,6 +94,7 @@ function getPricesFromForm() {
         aluPanel: parseFloat(document.getElementById('priceAluPanel').value) || DEFAULT_PRICES.aluPanel,
         lightbox: parseFloat(document.getElementById('priceLightbox').value) || DEFAULT_PRICES.lightbox,
         acrylicLogo: parseFloat(document.getElementById('priceAcrylicLogo').value) || DEFAULT_PRICES.acrylicLogo,
+        logoRaised: parseFloat(document.getElementById('priceLogoRaised').value) || DEFAULT_PRICES.logoRaised,
         anchorMultiplier: parseFloat(document.getElementById('anchorMultiplier').value) || DEFAULT_PRICES.anchorMultiplier,
 
         // Surcharge settings

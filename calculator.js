@@ -64,11 +64,8 @@ function calculateRectangleArea(lengthCm, widthCm) {
  */
 function calculateLogoPrice(lengthCm, widthCm, logoType, prices) {
     const area = calculateRectangleArea(lengthCm, widthCm);
-    // Logo uses same price as letter type
-    const letterTypeInfo = LETTER_TYPES.find(t => t.id === logoType);
-    if (!letterTypeInfo) return { area: 0, price: 0 };
-
-    const pricePerSqm = prices[letterTypeInfo.priceKey] || DEFAULT_PRICES[letterTypeInfo.priceKey];
+    // Logo now uses a specific logoRaised price, regardless of the material selected
+    const pricePerSqm = prices.logoRaised || DEFAULT_PRICES.logoRaised;
     const price = area * pricePerSqm;
 
     return { area, price };

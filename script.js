@@ -1233,10 +1233,12 @@ function setupExportListeners() {
 }
 
 function updatePDFTemplate() {
+    const template = document.getElementById('pdfTemplate');
+
     // Customer info
-    document.getElementById('pdfCustomerName').textContent = document.getElementById('customerName').value || '';
-    document.getElementById('pdfAddress').textContent = document.getElementById('address').value || '';
-    document.getElementById('pdfPhone').textContent = document.getElementById('phone').value || '';
+    template.querySelector('#pdfCustomerName').textContent = document.getElementById('customerName').value || '';
+    template.querySelector('#pdfAddress').textContent = document.getElementById('address').value || '';
+    template.querySelector('#pdfPhone').textContent = document.getElementById('phone').value || '';
 
     // Date
     const date = document.getElementById('quoteDate').value;
@@ -1245,10 +1247,10 @@ function updatePDFTemplate() {
         day: '2-digit',
         year: 'numeric'
     }) : '';
-    document.getElementById('pdfDate').textContent = formattedDate;
+    template.querySelector('#pdfDate').textContent = formattedDate;
 
     // Items
-    const itemsBody = document.getElementById('pdfItemsBody');
+    const itemsBody = template.querySelector('#pdfItemsBody');
     itemsBody.innerHTML = '';
 
     let subtotal = 0;
@@ -1287,12 +1289,12 @@ function updatePDFTemplate() {
     const dp = parseFloat(document.getElementById('dpAmount').value) || 0;
     const total = subtotal - dp;
 
-    document.getElementById('pdfDP').textContent = formatNumber(dp);
-    document.getElementById('pdfSubtotal').textContent = formatNumber(subtotal);
-    document.getElementById('pdfTotal').textContent = formatNumber(total);
+    template.querySelector('#pdfDP').textContent = formatNumber(dp);
+    template.querySelector('#pdfSubtotal').textContent = formatNumber(subtotal);
+    template.querySelector('#pdfTotal').textContent = formatNumber(total);
 
     // Update payment terms note based on installation
-    const termsNote = document.querySelector('.pdf-template .terms-note');
+    const termsNote = template.querySelector('.terms-note');
     if (termsNote) {
         if (installationChecked && installationPrice > 0) {
             termsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. This is a NON-VAT receipt.';
@@ -1302,8 +1304,8 @@ function updatePDFTemplate() {
     }
 
     // Images
-    const layoutContainer = document.getElementById('pdfLayoutImage');
-    const imagesSection = document.getElementById('pdfImagesSection');
+    const layoutContainer = template.querySelector('#pdfLayoutImage');
+    const imagesSection = template.querySelector('#pdfImagesSection');
 
     if (layoutContainer) {
         if (state.images.length > 0) {
