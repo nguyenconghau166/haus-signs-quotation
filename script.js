@@ -1707,8 +1707,9 @@ function updateAnchorPricing() {
             // Premium (Inox) = 2.2x Acrylic price - User request
             premiumTotal += acrylicResult.price * (state.prices.anchorMultiplier || 2.2);
 
-            // Budget = 75% of Best Value
-            budgetTotal += recommendedResult.price * 0.75;
+            // Budget = Non-illuminated (calc using nonIlluminated price from settings)
+            const budgetResult = calculateLetterPrice(letter.height, letter.charCount, 'nonIlluminated', state.prices);
+            budgetTotal += budgetResult.price;
 
             const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
             productInfoHTML += `
