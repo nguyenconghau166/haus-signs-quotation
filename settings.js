@@ -5,6 +5,7 @@
 
 const STORAGE_KEY = 'haussigns_calculator_prices';
 const SETTINGS_API_ENDPOINT = '/api/settings';
+const LIGHTBOX_FORMULAS_API_ENDPOINT = '/api/settings?resource=formulas';
 
 /**
  * Normalize prices object against defaults
@@ -225,21 +226,29 @@ async function checkSettingsSyncHealth(showNotificationToast = false) {
     updateSettingsHealthUI('loading', 'Checking shared sync status...');
 
     try {
-        const response = await fetch(SETTINGS_API_ENDPOINT, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' },
-            cache: 'no-store'
-        });
+        const [priceResponse, formulaResponse] = await Promise.all([
+            fetch(SETTINGS_API_ENDPOINT, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                cache: 'no-store'
+            }),
+            fetch(LIGHTBOX_FORMULAS_API_ENDPOINT, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                cache: 'no-store'
+            })
+        ]);
 
-        if (response.ok) {
-            updateSettingsHealthUI('ok', 'Shared sync is connected');
+        if (priceResponse.ok && formulaResponse.ok) {
+            updateSettingsHealthUI('ok', 'Shared sync is connected (prices + formulas)');
             if (showNotificationToast) {
                 showNotification('Shared settings sync is connected.', 'success');
             }
             return true;
         }
 
-        updateSettingsHealthUI('error', `Shared sync unavailable (${response.status})`);
+        const statusText = `${priceResponse.status}/${formulaResponse.status}`;
+        updateSettingsHealthUI('error', `Shared sync unavailable (${statusText})`);
         if (showNotificationToast) {
             showNotification('Shared sync is unavailable. Check KV env vars.', 'error');
         }
@@ -417,6 +426,34 @@ function loadLightboxFormulas() {
 }
 
 /**
+ * Load lightbox formulas from shared backend storage
+ * @returns {Promise<object|null>} Formulas object or null
+ */
+async function loadRemoteLightboxFormulas() {
+    try {
+        const response = await fetch(LIGHTBOX_FORMULAS_API_ENDPOINT, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const payload = await response.json();
+        if (!payload || typeof payload !== 'object' || !payload.formulas || typeof payload.formulas !== 'object') {
+            return null;
+        }
+
+        return payload.formulas;
+    } catch (e) {
+        console.error('Error loading remote lightbox formulas:', e);
+        return null;
+    }
+}
+
+/**
  * Save lightbox formulas to localStorage
  * @param {object} formulas - Formulas object
  */
@@ -428,6 +465,57 @@ function saveLightboxFormulas(formulas) {
         console.error('Error saving lightbox formulas:', e);
         return false;
     }
+}
+
+/**
+ * Save lightbox formulas to shared backend storage
+ * @param {object} formulas - Formulas object
+ * @returns {Promise<boolean>} True if saved remotely
+ */
+async function saveRemoteLightboxFormulas(formulas) {
+    try {
+        const response = await fetch(LIGHTBOX_FORMULAS_API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ formulas })
+        });
+
+        return response.ok;
+    } catch (e) {
+        console.error('Error saving remote lightbox formulas:', e);
+        return false;
+    }
+}
+
+/**
+ * Reset lightbox formulas in shared backend storage
+ * @returns {Promise<boolean>} True if reset remotely
+ */
+async function resetRemoteLightboxFormulas() {
+    try {
+        const response = await fetch(LIGHTBOX_FORMULAS_API_ENDPOINT, {
+            method: 'DELETE'
+        });
+
+        return response.ok;
+    } catch (e) {
+        console.error('Error resetting remote lightbox formulas:', e);
+        return false;
+    }
+}
+
+/**
+ * Sync local formulas from remote storage (if available)
+ * @returns {Promise<boolean>} True if remote formulas were loaded
+ */
+async function syncLightboxFormulasFromRemote() {
+    const remoteFormulas = await loadRemoteLightboxFormulas();
+    if (!remoteFormulas) {
+        return false;
+    }
+
+    saveLightboxFormulas(remoteFormulas);
+    return true;
 }
 
 /**
@@ -562,7 +650,7 @@ function setupLightboxFormulaListeners() {
     const resetBtn = document.getElementById('resetLightboxFormulasBtn');
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
+        saveBtn.addEventListener('click', async () => {
             const formulas = getFormulasFromUI();
 
             // Validate all formulas
@@ -580,9 +668,17 @@ function setupLightboxFormulaListeners() {
                 return;
             }
 
-            if (saveLightboxFormulas(formulas)) {
+            const localSaved = saveLightboxFormulas(formulas);
+            const remoteSaved = await saveRemoteLightboxFormulas(formulas);
+
+            if (localSaved || remoteSaved) {
                 applyCustomLightboxFormulas();
-                showNotification('Lightbox formulas saved successfully!', 'success');
+
+                if (remoteSaved) {
+                    showNotification('Lightbox formulas saved and synced!', 'success');
+                } else {
+                    showNotification('Formulas saved only on this device. Check API storage!', 'error');
+                }
             } else {
                 showNotification('Error saving formulas!', 'error');
             }
@@ -590,9 +686,10 @@ function setupLightboxFormulaListeners() {
     }
 
     if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
+        resetBtn.addEventListener('click', async () => {
             if (confirm('Are you sure you want to reset all lightbox formulas to default?')) {
                 localStorage.removeItem(LIGHTBOX_FORMULAS_KEY);
+                const remoteReset = await resetRemoteLightboxFormulas();
 
                 // Reset LIGHTBOX_STYLES calcArea functions
                 for (const styleId in LIGHTBOX_STYLES) {
@@ -600,7 +697,12 @@ function setupLightboxFormulaListeners() {
                 }
 
                 renderLightboxFormulaList();
-                showNotification('Formulas reset to default!', 'success');
+
+                if (remoteReset) {
+                    showNotification('Formulas reset to default and synced!', 'success');
+                } else {
+                    showNotification('Formulas reset only on this device. Check API storage!', 'error');
+                }
             }
         });
     }
