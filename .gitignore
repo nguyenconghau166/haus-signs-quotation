@@ -18,6 +18,9 @@ npm-debug.log*
 # Node modules (if any)
 node_modules/
 .vercel
+.env
+.env.*
+!.env.example
 
 # Shared runtime data
 storage/*.json
