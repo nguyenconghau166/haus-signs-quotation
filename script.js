@@ -7,9 +7,26 @@
 const state = {
     prices: {},
     letters: [],
-    logo: { name: '', type: 'illuminated', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
-    acrylicLogo: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
-    panel: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
+    logo: {
+        name: '',
+        type: 'frontLit',
+        noLed: false,
+        difficult: false,
+        length: 0,
+        width: 0,
+        lengthInches: 0,
+        widthInches: 0
+    },
+    acrylicLogo: {
+        name: '',
+        shape: 'round',
+        complex: false,
+        length: 0,
+        width: 0,
+        lengthInches: 0,
+        widthInches: 0
+    },
+    panel: { name: '', hasSticker: false, length: 0, width: 0, lengthInches: 0, widthInches: 0 },
     lightbox: { style: null, size: null, quantity: 1, customDimensions: null },
     anchor: {
         productType: 'letter',
@@ -29,9 +46,10 @@ const state = {
 };
 
 // ==================== Initialize ====================
-function init() {
+async function init() {
     // Load prices from settings
-    state.prices = loadPrices();
+    state.prices = await loadPrices();
+    const settingsMeta = getSettingsMeta();
 
     // Initialize settings form
     initSettingsForm(state.prices);
@@ -76,6 +94,30 @@ function init() {
     // Initial render
     renderQuotationItems();
     updateSignageSummary();
+
+    if (settingsMeta.source === 'cache') {
+        showNotification('Shared settings server is offline. Using local cached prices.', 'error');
+    }
+
+    // Keep settings in sync when multiple employees use the same shared server
+    startSharedPriceSync();
+}
+
+function arePricesEqual(a, b) {
+    const keys = Object.keys(DEFAULT_PRICES);
+    return keys.every((key) => (a?.[key] || 0) === (b?.[key] || 0));
+}
+
+function startSharedPriceSync(intervalMs = 15000) {
+    setInterval(async () => {
+        const latestPrices = await loadPrices();
+        if (!arePricesEqual(latestPrices, state.prices)) {
+            state.prices = latestPrices;
+            initSettingsForm(latestPrices);
+            updateAllCalculations();
+            showNotification('Shared price settings updated from server.', 'success');
+        }
+    }, intervalMs);
 }
 
 // ==================== Secret Settings Access ====================
@@ -143,8 +185,16 @@ function setupSignageListeners() {
         updateSignageSummary();
     });
 
-    // Logo type
+    // Logo type and options
     document.getElementById('logoType').addEventListener('input', updateLogoCalculation);
+    document.getElementById('logoNoLed').addEventListener('change', (e) => {
+        state.logo.noLed = e.target.checked;
+        updateLogoCalculation();
+    });
+    document.getElementById('logoDifficult').addEventListener('change', (e) => {
+        state.logo.difficult = e.target.checked;
+        updateLogoCalculation();
+    });
 
     // Logo inches inputs (auto-convert to cm)
     document.getElementById('logoLengthInches').addEventListener('input', (e) => {
@@ -183,6 +233,14 @@ function setupSignageListeners() {
         state.acrylicLogo.name = e.target.value;
         updateSignageSummary();
     });
+    document.getElementById('acrylicLogoShape').addEventListener('change', (e) => {
+        state.acrylicLogo.shape = e.target.value;
+        updateAcrylicLogoCalculation();
+    });
+    document.getElementById('acrylicLogoComplex').addEventListener('change', (e) => {
+        state.acrylicLogo.complex = e.target.checked;
+        updateAcrylicLogoCalculation();
+    });
 
     // Acrylic Logo inches inputs (auto-convert to cm)
     document.getElementById('acrylicLogoLengthInches').addEventListener('input', (e) => {
@@ -220,6 +278,10 @@ function setupSignageListeners() {
     document.getElementById('panelName').addEventListener('input', (e) => {
         state.panel.name = e.target.value;
         updateSignageSummary();
+    });
+    document.getElementById('panelWithSticker').addEventListener('change', (e) => {
+        state.panel.hasSticker = e.target.checked;
+        updatePanelCalculation();
     });
 
     // Panel inches inputs (auto-convert to cm)
@@ -265,7 +327,9 @@ function addLetterRow() {
     const letterData = {
         id: Date.now(),
         name: '',
-        type: 'illuminated',
+        type: 'frontLit',
+        noLed: false,
+        difficult: false,
         height: 0,
         heightInches: 0,
         charCount: 0
@@ -318,6 +382,18 @@ function renderLetterRows() {
         <label>Height (cm)</label>
         <input type="number" class="letter-height" data-id="${letter.id}" 
                value="${letter.height || ''}" placeholder="10" min="0" step="0.1">
+      </div>
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" class="letter-no-led" data-id="${letter.id}" ${letter.noLed ? 'checked' : ''}>
+          <span>No LED</span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" class="letter-difficult" data-id="${letter.id}" ${letter.difficult ? 'checked' : ''}>
+          <span>Difficult lettering</span>
+        </label>
       </div>
       <div class="form-group" style="display: none;">
         <label>Letter Count</label>
@@ -411,6 +487,28 @@ function renderLetterRows() {
         });
     });
 
+    container.querySelectorAll('.letter-no-led').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const id = parseInt(e.target.dataset.id);
+            const letter = state.letters.find(l => l.id === id);
+            if (letter) {
+                letter.noLed = e.target.checked;
+                updateLetterCalculation(id);
+            }
+        });
+    });
+
+    container.querySelectorAll('.letter-difficult').forEach(input => {
+        input.addEventListener('change', (e) => {
+            const id = parseInt(e.target.dataset.id);
+            const letter = state.letters.find(l => l.id === id);
+            if (letter) {
+                letter.difficult = e.target.checked;
+                updateLetterCalculation(id);
+            }
+        });
+    });
+
     container.querySelectorAll('.remove-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const id = parseInt(e.target.dataset.id);
@@ -428,8 +526,16 @@ function renderLetterRows() {
 const MIN_LETTER_HEIGHT = 15;         // For Illuminated letters
 const MIN_LETTER_HEIGHT_NON_ILLUMINATED = 8; // For Non-illuminated letters
 
+function isNonLedLetterType(letterType) {
+    return ['cutOut', 'stainless'].includes(letterType);
+}
+
+function isLedCapableType(letterType) {
+    return !isNonLedLetterType(letterType);
+}
+
 function getMinHeightForType(letterType) {
-    if (letterType === 'nonIlluminated') return MIN_LETTER_HEIGHT_NON_ILLUMINATED;
+    if (isNonLedLetterType(letterType)) return MIN_LETTER_HEIGHT_NON_ILLUMINATED;
     return MIN_LETTER_HEIGHT;
 }
 
@@ -453,15 +559,23 @@ function updateLetterCalculation(id) {
     letter.isValid = true;
     priceEl.style.color = '';
 
-    const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
+    const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices, {
+        noLed: letter.noLed,
+        difficult: letter.difficult
+    });
     priceEl.textContent = `${formatNumber(result.price)} ₱`;
     updateSignageSummary();
 }
 
 function updateLogoCalculation() {
     state.logo.type = document.getElementById('logoType').value;
+    state.logo.noLed = document.getElementById('logoNoLed').checked;
+    state.logo.difficult = document.getElementById('logoDifficult').checked;
 
-    const result = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
+    const result = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices, {
+        noLed: state.logo.noLed,
+        difficult: state.logo.difficult
+    });
 
     document.getElementById('logoResult').textContent = `${formatNumber(result.price)} ₱`;
 
@@ -469,7 +583,16 @@ function updateLogoCalculation() {
 }
 
 function updateAcrylicLogoCalculation() {
-    const result = calculateAcrylicLogoPrice(state.acrylicLogo.length, state.acrylicLogo.width, state.prices);
+    state.acrylicLogo.shape = document.getElementById('acrylicLogoShape').value;
+    state.acrylicLogo.complex = document.getElementById('acrylicLogoComplex').checked;
+
+    const result = calculateAcrylicLogoPrice(
+        state.acrylicLogo.length,
+        state.acrylicLogo.width,
+        state.prices,
+        state.acrylicLogo.shape,
+        state.acrylicLogo.complex
+    );
 
     document.getElementById('acrylicLogoResult').textContent = `${formatNumber(result.price)} ₱`;
 
@@ -477,7 +600,9 @@ function updateAcrylicLogoCalculation() {
 }
 
 function updatePanelCalculation() {
-    const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
+    state.panel.hasSticker = document.getElementById('panelWithSticker').checked;
+
+    const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices, state.panel.hasSticker);
 
     document.getElementById('panelResult').textContent = `${formatNumber(result.price)} ₱`;
 
@@ -495,7 +620,10 @@ function updateSignageSummary() {
     state.letters.forEach((letter, index) => {
         const minHeight = getMinHeightForType(letter.type);
         if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
-            const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
+            const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices, {
+                noLed: letter.noLed,
+                difficult: letter.difficult
+            });
             lettersWithPrice.push({ ...letter, price: result.price, index: index });
             totalLetterPrice += result.price;
         }
@@ -525,13 +653,15 @@ function updateSignageSummary() {
 
         // Add surcharge to the first item if applicable
         let displayPrice = item.price;
-        let label = `${displayName}: ${typeInfo?.name || ''} (${item.height}cm × ${item.charCount} letters)`;
+        const optionText = [item.noLed ? 'No LED' : '', item.difficult ? 'Difficult lettering' : '']
+            .filter(Boolean)
+            .join(', ');
+        let label = `${displayName}: ${typeInfo?.name || ''} (${item.height}cm × ${item.charCount} letters${optionText ? `, ${optionText}` : ''})`;
 
         if (surcharge > 0 && !surchargeApplied) {
             displayPrice += surcharge;
             surchargeApplied = true;
-            // Optionally append note about surcharge, but user asked to "hide" it sort of
-            // "cộng thẳng giá vào báo giá chứ đừng tạo thành 1 sản phẩm mới"
+            // Surcharge is merged directly into item price.
             // We can just show the total price.
         }
 
@@ -544,11 +674,17 @@ function updateSignageSummary() {
 
     // Logo
     if (state.logo.length > 0 && state.logo.width > 0) {
-        const result = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
+        const result = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices, {
+            noLed: state.logo.noLed,
+            difficult: state.logo.difficult
+        });
         const typeInfo = LETTER_TYPES.find(t => t.id === state.logo.type);
         const displayName = state.logo.name || 'Logo';
+        const logoOptionText = [state.logo.noLed ? 'No LED' : '', state.logo.difficult ? 'Difficult lettering' : '']
+            .filter(Boolean)
+            .join(', ');
         rows.push({
-            label: `${displayName}: ${typeInfo?.name || ''} (${state.logo.length}×${state.logo.width}cm)`,
+            label: `${displayName}: ${typeInfo?.name || ''} (${state.logo.length}×${state.logo.width}cm${logoOptionText ? `, ${logoOptionText}` : ''})`,
             value: result.price
         });
         totalPrice += result.price;
@@ -558,10 +694,17 @@ function updateSignageSummary() {
 
     // Acrylic Logo
     if (state.acrylicLogo.length > 0 && state.acrylicLogo.width > 0) {
-        const result = calculateAcrylicLogoPrice(state.acrylicLogo.length, state.acrylicLogo.width, state.prices);
-        const displayName = state.acrylicLogo.name || 'Illuminated Acrylic Logo (Round)';
+        const result = calculateAcrylicLogoPrice(
+            state.acrylicLogo.length,
+            state.acrylicLogo.width,
+            state.prices,
+            state.acrylicLogo.shape,
+            state.acrylicLogo.complex
+        );
+        const displayName = state.acrylicLogo.name || 'Illuminated Acrylic Logo';
+        const shapeText = state.acrylicLogo.shape === 'square' ? 'square' : 'round';
         rows.push({
-            label: `${displayName} (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
+            label: `${displayName} (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm, ${shapeText}${state.acrylicLogo.complex ? ', complex shape' : ''})`,
             value: result.price
         });
         totalPrice += result.price;
@@ -569,10 +712,10 @@ function updateSignageSummary() {
 
     // Panel
     if (state.panel.length > 0 && state.panel.width > 0) {
-        const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
-        const displayName = state.panel.name || 'Alu Panel';
+        const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices, state.panel.hasSticker);
+        const displayName = state.panel.name || 'Aluminum Panel';
         rows.push({
-            label: `${displayName} (${state.panel.length}×${state.panel.width}cm)`,
+            label: `${displayName} (${state.panel.length}×${state.panel.width}cm${state.panel.hasSticker ? ', sticker print included' : ''})`,
             value: result.price
         });
         totalPrice += result.price;
@@ -608,7 +751,10 @@ function addSignageToQuotation() {
     state.letters.forEach((letter, index) => {
         const minHeight = getMinHeightForType(letter.type);
         if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
-            const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
+            const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices, {
+                noLed: letter.noLed,
+                difficult: letter.difficult
+            });
             lettersWithPrice.push({ ...letter, price: result.price, index: index });
             totalLetterPrice += result.price;
         }
@@ -645,38 +791,48 @@ function addSignageToQuotation() {
         }
 
         state.quotationItems.push({
-            description: `${displayName} - ${typeInfo?.name || ''} (${item.height}cm x ${item.charCount} letters)`,
+            description: `${displayName} - ${typeInfo?.name || ''} (${item.height}cm x ${item.charCount} letters${item.noLed ? ', No LED' : ''}${item.difficult ? ', Difficult lettering' : ''})`,
             price: displayPrice
         });
 
-        // Check if illuminated
-        if (item.type === 'illuminated') {
+        // Check if illuminated product exists
+        if (isLedCapableType(item.type) && !item.noLed) {
             hasIlluminatedProduct = true;
         }
     });
 
     // Add logo
     if (state.logo.length > 0 && state.logo.width > 0) {
-        const result = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
+        const result = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices, {
+            noLed: state.logo.noLed,
+            difficult: state.logo.difficult
+        });
         const typeInfo = LETTER_TYPES.find(t => t.id === state.logo.type);
         const displayName = state.logo.name || 'Logo';
         state.quotationItems.push({
-            description: `${displayName} - ${typeInfo?.name || ''} (${state.logo.length}×${state.logo.width}cm)`,
+            description: `${displayName} - ${typeInfo?.name || ''} (${state.logo.length}×${state.logo.width}cm${state.logo.noLed ? ', No LED' : ''}${state.logo.difficult ? ', Difficult lettering' : ''})`,
             price: result.price
         });
 
         // Check if illuminated
-        if (state.logo.type === 'illuminated') {
+        if (isLedCapableType(state.logo.type) && !state.logo.noLed) {
             hasIlluminatedProduct = true;
         }
     }
 
     // Add acrylic logo
     if (state.acrylicLogo.length > 0 && state.acrylicLogo.width > 0) {
-        const result = calculateAcrylicLogoPrice(state.acrylicLogo.length, state.acrylicLogo.width, state.prices);
+        const result = calculateAcrylicLogoPrice(
+            state.acrylicLogo.length,
+            state.acrylicLogo.width,
+            state.prices,
+            state.acrylicLogo.shape,
+            state.acrylicLogo.complex
+        );
         const displayName = state.acrylicLogo.name || 'Illuminated Acrylic Logo';
+        const shapeText = state.acrylicLogo.shape === 'square' ? 'square' : 'round';
         state.quotationItems.push({
-            description: `${displayName} - Illuminated Acrylic Logo (Round) (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
+            description: `${displayName} - Illuminated Acrylic Logo (${shapeText}${state.acrylicLogo.complex ? ', complex shape' : ''}) (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
             price: result.price
         });
 
@@ -686,10 +842,10 @@ function addSignageToQuotation() {
 
     // Add panel
     if (state.panel.length > 0 && state.panel.width > 0) {
-        const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
-        const displayName = state.panel.name || 'Alu Panel';
+        const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices, state.panel.hasSticker);
+        const displayName = state.panel.name || 'Aluminum Panel';
         state.quotationItems.push({
-            description: `${displayName} (${state.panel.length}×${state.panel.width}cm)`,
+            description: `${displayName} (${state.panel.length}×${state.panel.width}cm${state.panel.hasSticker ? ', sticker print included' : ''})`,
             price: result.price
         });
     }
@@ -697,7 +853,7 @@ function addSignageToQuotation() {
     // Add FREE Sign Board bonus for illuminated orders
     if (hasIlluminatedProduct) {
         state.quotationItems.push({
-            description: '🎁 FREE BONUS: Sign Board/Frame (Alu Panel Background) - Gift for Illuminated Letter Orders',
+            description: '🎁 FREE BONUS: Sign Board/Frame (Aluminum Background Panel) - Gift for Illuminated Letter Orders',
             price: 0
         });
     }
@@ -715,25 +871,39 @@ function clearSignage() {
     state.letters = [];
     addLetterRow();
 
-    state.logo = { name: '', type: 'illuminated', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
+    state.logo = {
+        name: '',
+        type: 'frontLit',
+        noLed: false,
+        difficult: false,
+        length: 0,
+        width: 0,
+        lengthInches: 0,
+        widthInches: 0
+    };
     document.getElementById('logoName').value = '';
-    document.getElementById('logoType').value = 'illuminated';
+    document.getElementById('logoType').value = 'frontLit';
+    document.getElementById('logoNoLed').checked = false;
+    document.getElementById('logoDifficult').checked = false;
     document.getElementById('logoLengthInches').value = '';
     document.getElementById('logoLength').value = '';
     document.getElementById('logoWidthInches').value = '';
     document.getElementById('logoWidth').value = '';
     document.getElementById('logoResult').textContent = '0 ₱';
 
-    state.acrylicLogo = { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
+    state.acrylicLogo = { name: '', shape: 'round', complex: false, length: 0, width: 0, lengthInches: 0, widthInches: 0 };
     document.getElementById('acrylicLogoName').value = '';
+    document.getElementById('acrylicLogoShape').value = 'round';
+    document.getElementById('acrylicLogoComplex').checked = false;
     document.getElementById('acrylicLogoLengthInches').value = '';
     document.getElementById('acrylicLogoLength').value = '';
     document.getElementById('acrylicLogoWidthInches').value = '';
     document.getElementById('acrylicLogoWidth').value = '';
     document.getElementById('acrylicLogoResult').textContent = '0 ₱';
 
-    state.panel = { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
+    state.panel = { name: '', hasSticker: false, length: 0, width: 0, lengthInches: 0, widthInches: 0 };
     document.getElementById('panelName').value = '';
+    document.getElementById('panelWithSticker').checked = false;
     document.getElementById('panelLengthInches').value = '';
     document.getElementById('panelLength').value = '';
     document.getElementById('panelWidthInches').value = '';
@@ -1529,6 +1699,7 @@ function updateAllCalculations() {
 
     // Update logo and panel
     updateLogoCalculation();
+    updateAcrylicLogoCalculation();
     updatePanelCalculation();
 
     // Update lightbox
@@ -1657,6 +1828,7 @@ function updateAnchorPricing() {
                     <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
                         <div><strong>Type:</strong> ${typeName}</div>
                         <div><strong>Height:</strong> ${letter.height} cm</div>
+                        <div><strong>Option:</strong> ${letter.noLed ? 'No LED' : 'LED'}${letter.difficult ? ' | Difficult lettering' : ''}</div>
                     </div>
                 </div>
             `;
@@ -1671,6 +1843,7 @@ function updateAnchorPricing() {
                 <div style="font-weight: 600; margin-bottom: 0.5rem;">🎨 ${state.logo.name || 'Logo'}</div>
                 <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
                     <div><strong>Type:</strong> ${typeName}</div>
+                    <div><strong>Option:</strong> ${state.logo.noLed ? 'No LED' : 'LED'}${state.logo.difficult ? ' | Difficult lettering' : ''}</div>
                 </div>
             </div>
         `;
@@ -1681,6 +1854,7 @@ function updateAnchorPricing() {
         productListHTML += `
             <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
                 <div style="font-weight: 600; margin-bottom: 0.5rem;">📋 ${state.panel.name || 'Background Panel'}</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;"><strong>Option:</strong> ${state.panel.hasSticker ? 'Sticker print included' : 'No sticker print'}</div>
             </div>
         `;
     }
@@ -1698,24 +1872,27 @@ function updateAnchorPricing() {
     if (hasLetters) {
         state.letters.forEach((letter, index) => {
             // Recommended = Actual selected type
-            const recommendedResult = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
+            const recommendedResult = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices, {
+                noLed: letter.noLed,
+                difficult: letter.difficult
+            });
             recommendedTotal += recommendedResult.price;
 
-            // Calculate Acrylic price for reference (Illuminated)
-            const acrylicResult = calculateLetterPrice(letter.height, letter.charCount, 'illuminated', state.prices);
+            // Calculate acrylic-based LED price for premium reference
+            const acrylicResult = calculateLetterPrice(letter.height, letter.charCount, 'fullAcrylic', state.prices);
 
             // Premium (Inox) = 2.2x Acrylic price - User request
             premiumTotal += acrylicResult.price * (state.prices.anchorMultiplier || 2.2);
 
-            // Budget = Non-illuminated (calc using nonIlluminated price from settings)
-            const budgetResult = calculateLetterPrice(letter.height, letter.charCount, 'nonIlluminated', state.prices);
+            // Budget = Cut-out letters
+            const budgetResult = calculateLetterPrice(letter.height, letter.charCount, 'cutOut', state.prices);
             budgetTotal += budgetResult.price;
 
             const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
             productInfoHTML += `
                 <div style="margin-bottom: 0.5rem;">
                     <strong>${letter.name || `Letters #${index + 1}`}:</strong><br>
-                    ${typeName} - ${letter.height}cm × ${letter.charCount} letters
+                    ${typeName} - ${letter.height}cm × ${letter.charCount} letters${letter.noLed ? ' - No LED' : ''}${letter.difficult ? ' - Difficult lettering' : ''}
                 </div>
             `;
         });
@@ -1724,7 +1901,10 @@ function updateAnchorPricing() {
     // Calculate logo
     if (hasLogo) {
         // Recommended = Actual selected type
-        const recommendedResult = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
+        const recommendedResult = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices, {
+            noLed: state.logo.noLed,
+            difficult: state.logo.difficult
+        });
         recommendedTotal += recommendedResult.price;
 
         // Premium = Same as Recommended (User request: only letters get 1.9x multiplier)
@@ -1738,14 +1918,14 @@ function updateAnchorPricing() {
         productInfoHTML += `
             <div style="margin-bottom: 0.5rem;">
                 <strong>${state.logo.name || 'Logo'}:</strong><br>
-                ${typeName} - ${state.logo.length}cm × ${state.logo.width}cm (${area}m²)
+                ${typeName} - ${state.logo.length}cm × ${state.logo.width}cm (${area}m²)${state.logo.noLed ? ' - No LED' : ''}${state.logo.difficult ? ' - Difficult lettering' : ''}
             </div>
         `;
     }
 
     // Calculate panel
     if (hasPanel) {
-        const panelResult = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
+        const panelResult = calculatePanelPrice(state.panel.length, state.panel.width, state.prices, state.panel.hasSticker);
         const panelPrice = panelResult.price;
 
         // Premium = Same as Recommended (User request: only letters get multiplier)
@@ -1761,7 +1941,7 @@ function updateAnchorPricing() {
         productInfoHTML += `
             <div style="margin-bottom: 0.5rem;">
                 <strong>${state.panel.name || 'Background Panel'}:</strong><br>
-                Alu Panel - ${state.panel.length}cm × ${state.panel.width}cm (${area}m²)
+                Aluminum Panel - ${state.panel.length}cm × ${state.panel.width}cm (${area}m²)${state.panel.hasSticker ? ' - Sticker print included' : ''}
             </div>
         `;
     }
@@ -1885,7 +2065,7 @@ function generateAnchorQuotationDocument() {
         state.letters.forEach((letter, index) => {
             const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
             productSpec += `
-                <div><strong>${index + 1}. ${letter.name || `Letters #${index + 1}`}:</strong> ${typeName} - ${letter.height}cm height</div>
+                <div><strong>${index + 1}. ${letter.name || `Letters #${index + 1}`}:</strong> ${typeName} - ${letter.height}cm height${letter.noLed ? ' - No LED' : ''}${letter.difficult ? ' - Difficult lettering' : ''}</div>
             `;
         });
     }
@@ -1894,14 +2074,14 @@ function generateAnchorQuotationDocument() {
         const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
         const area = ((state.logo.length * state.logo.width) / 10000).toFixed(2);
         productSpec += `
-            <div><strong>Logo:</strong> ${state.logo.name || 'Logo'} - ${typeName} - ${state.logo.length}cm × ${state.logo.width}cm (${area}m²)</div>
+            <div><strong>Logo:</strong> ${state.logo.name || 'Logo'} - ${typeName} - ${state.logo.length}cm × ${state.logo.width}cm (${area}m²)${state.logo.noLed ? ' - No LED' : ''}${state.logo.difficult ? ' - Difficult lettering' : ''}</div>
         `;
     }
 
     if (state.panel && state.panel.length > 0 && state.panel.width > 0) {
         const area = ((state.panel.length * state.panel.width) / 10000).toFixed(2);
         productSpec += `
-            <div><strong>Panel:</strong> ${state.panel.name || 'Background Panel'} - ${state.panel.length}cm × ${state.panel.width}cm (${area}m²)</div>
+            <div><strong>Panel:</strong> ${state.panel.name || 'Background Panel'} - ${state.panel.length}cm × ${state.panel.width}cm (${area}m²)${state.panel.hasSticker ? ' - Sticker print included' : ''}</div>
         `;
     }
 
@@ -1921,15 +2101,15 @@ function generateAnchorQuotationDocument() {
     if (state.letters && state.letters.length > 0) {
         state.letters.forEach((letter, index) => {
             const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productDetailsHTML += `<div><strong>${letter.name || `#${index + 1}`}:</strong><br>${typeName} - ${letter.height}cm</div>`;
+            productDetailsHTML += `<div><strong>${letter.name || `#${index + 1}`}:</strong><br>${typeName} - ${letter.height}cm${letter.noLed ? ' - No LED' : ''}${letter.difficult ? ' - Difficult lettering' : ''}</div>`;
         });
     }
     if (state.logo && state.logo.length > 0 && state.logo.width > 0) {
         const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        productDetailsHTML += `<div><strong>Logo:</strong><br>${typeName} - ${state.logo.length}cm × ${state.logo.width}cm</div>`;
+        productDetailsHTML += `<div><strong>Logo:</strong><br>${typeName} - ${state.logo.length}cm × ${state.logo.width}cm${state.logo.noLed ? ' - No LED' : ''}${state.logo.difficult ? ' - Difficult lettering' : ''}</div>`;
     }
     if (state.panel && state.panel.length > 0 && state.panel.width > 0) {
-        productDetailsHTML += `<div><strong>Panel:</strong><br>${state.panel.length}cm × ${state.panel.width}cm</div>`;
+        productDetailsHTML += `<div><strong>Panel:</strong><br>${state.panel.length}cm × ${state.panel.width}cm${state.panel.hasSticker ? ' - Sticker print included' : ''}</div>`;
     }
     document.getElementById('anchorDocProductDetails').innerHTML = productDetailsHTML;
 
@@ -2017,5 +2197,9 @@ function copyAnchorQuotationToClipboard() {
 
 
 // ==================== Start ====================
-document.addEventListener('DOMContentLoaded', init);
-
+document.addEventListener('DOMContentLoaded', () => {
+    init().catch((error) => {
+        console.error('Initialization error:', error);
+        showNotification('App initialization failed. Please refresh.', 'error');
+    });
+});

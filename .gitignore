@@ -18,3 +18,7 @@ npm-debug.log*
 # Node modules (if any)
 node_modules/
 .vercel
+
+# Shared runtime data
+storage/*.json
+!storage/.gitkeep

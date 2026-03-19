@@ -5,15 +5,22 @@
 
 // Default prices (PHP per m²)
 const DEFAULT_PRICES = {
-  letterIlluminated: 20000, // Illuminated dimensional letter sign (LED)
-  letterNonIlluminated: 5500, // Non-illuminated dimensional letter sign
-  letterCutOut: 5500,       // Cut out letter
-  letterInox: 45000,        // Stainless Steel (Inox) - Premium Price
-  aluPanel: 2000,           // Alu Background Panel (Sign Board)
+  letterFrontLit: 20000,    // Front-lit letters
+  letterBackLit: 21000,     // Back-lit letters
+  letterFullAcrylic: 19000, // Full acrylic letters
+  letterCutOut: 5500,       // Cut-out letters
+  letterAluAcrylic: 16500,  // Aluminum + acrylic letters
+  letterStainless: 45000,   // Stainless steel letters
+  aluPanel: 2000,           // Aluminum Background Panel (Sign Board)
   lightbox: 10000,          // Lightbox (all styles)
-  acrylicLogo: 11000,       // Illuminated Acrylic Logo (Round)
+  acrylicLogoRound: 11000,  // Illuminated Acrylic Logo (Round)
+  acrylicLogoSquare: 10000, // Illuminated Acrylic Logo (Square)
   anchorMultiplier: 2.2,    // Anchor price multiplier for Inox
-  logoRaised: 25000,          // Raised Logo (per m²)
+  logoRaised: 25000,        // Raised Logo (per m²)
+  noLedMultiplier: 0.8,     // No LED option multiplier
+  difficultMultiplier: 1.2, // Difficult lettering multiplier
+  acrylicComplexMultiplier: 1.2, // Complex acrylic logo multiplier
+  aluStickerMultiplier: 1.2, // Sticker print multiplier on alu panel
   surchargeThreshold1: 4000, // Threshold 1: Orders below this amount get surcharge 1
   surchargeAmount1: 1000,    // Surcharge 1 amount
   surchargeThreshold2: 5000, // Threshold 2: Orders below this amount (but >= threshold 1) get surcharge 2
@@ -22,10 +29,12 @@ const DEFAULT_PRICES = {
 
 // Letter type options
 const LETTER_TYPES = [
-  { id: 'illuminated', name: 'Illuminated dimensional letter sign', priceKey: 'letterIlluminated' },
-  { id: 'nonIlluminated', name: 'Non-illuminated dimensional letter sign', priceKey: 'letterNonIlluminated' },
-  { id: 'cutOut', name: 'Cut out letter', priceKey: 'letterCutOut' },
-  { id: 'inox', name: 'Stainless Steel (Inox) - Anchor Price', priceKey: 'letterInox' }
+  { id: 'frontLit', name: 'Front-lit letters', priceKey: 'letterFrontLit' },
+  { id: 'backLit', name: 'Back-lit letters', priceKey: 'letterBackLit' },
+  { id: 'fullAcrylic', name: 'Full acrylic letters', priceKey: 'letterFullAcrylic' },
+  { id: 'cutOut', name: 'Cut-out letters', priceKey: 'letterCutOut' },
+  { id: 'aluAcrylic', name: 'Aluminum + acrylic letters', priceKey: 'letterAluAcrylic' },
+  { id: 'stainless', name: 'Stainless steel letters', priceKey: 'letterStainless' }
 ];
 
 // Lightbox styles with preset sizes
@@ -127,4 +136,3 @@ const LIGHTBOX_STYLES = {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { DEFAULT_PRICES, LETTER_TYPES, LIGHTBOX_STYLES };
 }
-

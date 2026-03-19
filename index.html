@@ -94,9 +94,25 @@
             <div class="form-group">
               <label for="logoType">Logo Type</label>
               <select id="logoType">
-                <option value="illuminated">Illuminated (LED)</option>
-                <option value="nonIlluminated">Non-illuminated</option>
+                <option value="frontLit">Front-lit letters</option>
+                <option value="backLit">Back-lit letters</option>
+                <option value="fullAcrylic">Full acrylic letters</option>
+                <option value="cutOut">Cut-out letters</option>
+                <option value="aluAcrylic">Aluminum + acrylic letters</option>
+                <option value="stainless">Stainless steel letters</option>
               </select>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="logoNoLed">
+                <span>No LED</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="logoDifficult">
+                <span>Difficult lettering</span>
+              </label>
             </div>
             <div class="form-group">
               <label for="logoLengthInches">Length (inches)</label>
@@ -123,12 +139,25 @@
 
         <!-- Illuminated Acrylic Logo (Round) Section -->
         <div class="card">
-          <h2 class="card-title">🔴 Illuminated Acrylic Logo (Round)</h2>
+          <h2 class="card-title">🔴 Illuminated Acrylic Logo</h2>
 
           <div class="form-grid logo-panel-grid">
             <div class="form-group full-width">
               <label for="acrylicLogoName">Logo Content</label>
               <input type="text" id="acrylicLogoName" placeholder="E.g: Company Logo">
+            </div>
+            <div class="form-group">
+              <label for="acrylicLogoShape">Shape</label>
+              <select id="acrylicLogoShape">
+                <option value="round">Round</option>
+                <option value="square">Square</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="acrylicLogoComplex">
+                <span>Complex shape</span>
+              </label>
             </div>
             <div class="form-group">
               <label for="acrylicLogoLengthInches">Length (inches)</label>
@@ -153,15 +182,21 @@
           </div>
         </div>
 
-        <!-- Alu Panel Section -->
+        <!-- Aluminum Panel Section -->
         <div class="card">
-          <h2 class="card-title">📐 Alu Background Panel</h2>
+          <h2 class="card-title">📐 Aluminum Background Panel</h2>
           <p class="card-subtitle">Enter panel dimensions (length × width)</p>
 
           <div class="form-grid logo-panel-grid">
             <div class="form-group full-width">
               <label for="panelName">Note</label>
               <input type="text" id="panelName" placeholder="E.g: Main signage panel">
+            </div>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="panelWithSticker">
+                <span>Include sticker print</span>
+              </label>
             </div>
             <div class="form-group">
               <label for="panelLengthInches">Length (inches)</label>
@@ -700,32 +735,64 @@
             <div class="settings-group">
               <h3 class="settings-group-title">Raised Letters</h3>
               <div class="form-group">
-                <label for="priceLetterIlluminated">Illuminated dimensional letter sign (LED)</label>
+                <label for="priceLetterFrontLit">Front-lit letters</label>
                 <div class="input-with-unit">
-                  <input type="number" id="priceLetterIlluminated" value="20000" min="0">
+                  <input type="number" id="priceLetterFrontLit" value="20000" min="0">
                   <span class="unit">₱/m²</span>
                 </div>
               </div>
               <div class="form-group">
-                <label for="priceLetterNonIlluminated">Non-illuminated dimensional letter sign</label>
+                <label for="priceLetterBackLit">Back-lit letters</label>
                 <div class="input-with-unit">
-                  <input type="number" id="priceLetterNonIlluminated" value="5500" min="0">
+                  <input type="number" id="priceLetterBackLit" value="21000" min="0">
                   <span class="unit">₱/m²</span>
                 </div>
               </div>
               <div class="form-group">
-                <label for="priceLetterCutOut">Cut out letter</label>
+                <label for="priceLetterFullAcrylic">Full acrylic letters</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceLetterFullAcrylic" value="19000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="priceLetterCutOut">Cut-out letters</label>
                 <div class="input-with-unit">
                   <input type="number" id="priceLetterCutOut" value="5500" min="0">
                   <span class="unit">₱/m²</span>
                 </div>
               </div>
               <div class="form-group">
-                <label for="priceLetterInox">Stainless Steel (Inox) - Premium</label>
+                <label for="priceLetterAluAcrylic">Aluminum + acrylic letters</label>
                 <div class="input-with-unit">
-                  <input type="number" id="priceLetterInox" value="45000" min="0">
+                  <input type="number" id="priceLetterAluAcrylic" value="16500" min="0">
                   <span class="unit">₱/m²</span>
                 </div>
+              </div>
+              <div class="form-group">
+                <label for="priceLetterStainless">Stainless steel letters</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceLetterStainless" value="45000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="noLedMultiplier">No LED multiplier</label>
+                <div class="input-with-unit">
+                  <input type="number" id="noLedMultiplier" value="0.8" min="0" step="0.01">
+                  <span class="unit">×</span>
+                </div>
+                <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Applied when
+                  "No LED" is checked (default 0.8 = 20% discount)</small>
+              </div>
+              <div class="form-group">
+                <label for="difficultMultiplier">Difficult lettering multiplier</label>
+                <div class="input-with-unit">
+                  <input type="number" id="difficultMultiplier" value="1.2" min="0" step="0.01">
+                  <span class="unit">×</span>
+                </div>
+                <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Applied when
+                  "Difficult lettering" is checked (default 1.2 = 20% increase)</small>
               </div>
               <div class="form-group">
                 <label for="anchorMultiplier">Premium Price Multiplier</label>
@@ -739,9 +806,9 @@
             </div>
 
             <div class="settings-group">
-              <h3 class="settings-group-title">Alu Panel & Lightbox</h3>
+              <h3 class="settings-group-title">Aluminum Panel & Lightbox</h3>
               <div class="form-group">
-                <label for="priceAluPanel">Alu Panel</label>
+                <label for="priceAluPanel">Aluminum panel</label>
                 <div class="input-with-unit">
                   <input type="number" id="priceAluPanel" value="2000" min="0">
                   <span class="unit">₱/m²</span>
@@ -755,10 +822,24 @@
                 </div>
               </div>
               <div class="form-group">
-                <label for="priceAcrylicLogo">Acrylic Logo Round (per m²)</label>
+                <label for="priceAcrylicLogoRound">Acrylic logo (round)</label>
                 <div class="input-with-unit">
-                  <input type="number" id="priceAcrylicLogo" value="11000" min="0">
+                  <input type="number" id="priceAcrylicLogoRound" value="11000" min="0">
                   <span class="unit">₱</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="priceAcrylicLogoSquare">Acrylic logo (square)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceAcrylicLogoSquare" value="10000" min="0">
+                  <span class="unit">₱</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="acrylicComplexMultiplier">Complex shape multiplier</label>
+                <div class="input-with-unit">
+                  <input type="number" id="acrylicComplexMultiplier" value="1.2" min="0" step="0.01">
+                  <span class="unit">×</span>
                 </div>
               </div>
               <div class="form-group">
@@ -767,6 +848,15 @@
                   <input type="number" id="priceLogoRaised" value="25000" min="0">
                   <span class="unit">₱</span>
                 </div>
+              </div>
+              <div class="form-group">
+                <label for="aluStickerMultiplier">Aluminum background with sticker print</label>
+                <div class="input-with-unit">
+                  <input type="number" id="aluStickerMultiplier" value="1.2" min="0" step="0.01">
+                  <span class="unit">×</span>
+                </div>
+                <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Default 1.2 = 20%
+                  increase when "Include sticker print" is checked</small>
               </div>
             </div>
 
@@ -815,6 +905,13 @@
             <button id="resetSettingsBtn" class="btn btn-secondary">
               <span class="icon">🔄</span> Reset to Default
             </button>
+            <button id="exportSettingsBtn" class="btn btn-secondary">
+              <span class="icon">📤</span> Export Internal Price File
+            </button>
+            <label for="importSettingsInput" class="btn btn-secondary" style="cursor: pointer;">
+              <span class="icon">📥</span> Import Internal Price File
+            </label>
+            <input type="file" id="importSettingsInput" accept="application/json" hidden>
           </div>
         </div>
 
@@ -854,8 +951,8 @@
               <span class="formula-value">Area (m²) = Length (cm) × Width (cm) / 10000</span>
             </div>
             <div class="formula-item">
-              <span class="formula-label">Acrylic Logo (Round):</span>
-              <span class="formula-value">Area (m²) = (L × W + (2L + 2W) × 8) / 10000</span>
+              <span class="formula-label">Acrylic Logo:</span>
+              <span class="formula-value">Round: (L × W + (2L + 2W) × 8) / 10000 | Square: L × W / 10000</span>
             </div>
           </div>
         </div>

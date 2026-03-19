@@ -25,9 +25,10 @@ function calculateLetterArea(heightCm, charCount) {
  * @param {number} charCount - Number of characters
  * @param {string} letterType - Letter type ID
  * @param {object} prices - Current prices object
- * @returns {object} { area, basePrice, markup, price }
+ * @param {object} modifiers - { noLed, difficult }
+ * @returns {object} { area, basePrice, multiplier, markup, price }
  */
-function calculateLetterPrice(heightCm, charCount, letterType, prices) {
+function calculateLetterPrice(heightCm, charCount, letterType, prices, modifiers = {}) {
     const area = calculateLetterArea(heightCm, charCount);
     const letterTypeInfo = LETTER_TYPES.find(t => t.id === letterType);
     if (!letterTypeInfo) return { area: 0, basePrice: 0, markup: 0, price: 0 };
@@ -35,12 +36,21 @@ function calculateLetterPrice(heightCm, charCount, letterType, prices) {
     const pricePerSqm = prices[letterTypeInfo.priceKey] || DEFAULT_PRICES[letterTypeInfo.priceKey];
     const basePrice = area * pricePerSqm;
 
+    const noLedMultiplier = prices.noLedMultiplier || DEFAULT_PRICES.noLedMultiplier;
+    const difficultMultiplier = prices.difficultMultiplier || DEFAULT_PRICES.difficultMultiplier;
+
+    let multiplier = 1;
+    if (modifiers.noLed) multiplier *= noLedMultiplier;
+    if (modifiers.difficult) multiplier *= difficultMultiplier;
+
+    const adjustedPrice = basePrice * multiplier;
+
     // Small order markup removed as per new policy (total order surcharge instead)
     const markup = 0;
     const markupPercent = 0;
-    const price = basePrice;
+    const price = adjustedPrice;
 
-    return { area, basePrice, markup, markupPercent, price };
+    return { area, basePrice, multiplier, markup, markupPercent, price };
 }
 
 /**
@@ -60,15 +70,25 @@ function calculateRectangleArea(lengthCm, widthCm) {
  * @param {number} widthCm - Logo width in cm
  * @param {string} logoType - Logo type (with LED or without)
  * @param {object} prices - Current prices
- * @returns {object} { area, price }
+ * @param {object} modifiers - { noLed, difficult }
+ * @returns {object} { area, basePrice, multiplier, price }
  */
-function calculateLogoPrice(lengthCm, widthCm, logoType, prices) {
+function calculateLogoPrice(lengthCm, widthCm, logoType, prices, modifiers = {}) {
     const area = calculateRectangleArea(lengthCm, widthCm);
     // Logo now uses a specific logoRaised price, regardless of the material selected
     const pricePerSqm = prices.logoRaised || DEFAULT_PRICES.logoRaised;
-    const price = area * pricePerSqm;
+    const basePrice = area * pricePerSqm;
 
-    return { area, price };
+    const noLedMultiplier = prices.noLedMultiplier || DEFAULT_PRICES.noLedMultiplier;
+    const difficultMultiplier = prices.difficultMultiplier || DEFAULT_PRICES.difficultMultiplier;
+
+    let multiplier = 1;
+    if (modifiers.noLed) multiplier *= noLedMultiplier;
+    if (modifiers.difficult) multiplier *= difficultMultiplier;
+
+    const price = basePrice * multiplier;
+
+    return { area, basePrice, multiplier, price };
 }
 
 /**
@@ -76,10 +96,14 @@ function calculateLogoPrice(lengthCm, widthCm, logoType, prices) {
  * Formula: (L × W + (2L + 2W) × 8) / 10000
  * @param {number} lengthCm - Length in cm
  * @param {number} widthCm - Width in cm
+ * @param {string} shape - round or square
  * @returns {number} Area in m²
  */
-function calculateAcrylicLogoArea(lengthCm, widthCm) {
+function calculateAcrylicLogoArea(lengthCm, widthCm, shape = 'round') {
     if (!lengthCm || !widthCm) return 0;
+    if (shape === 'square') {
+        return (lengthCm * widthCm) / 10000;
+    }
     return (lengthCm * widthCm + (2 * lengthCm + 2 * widthCm) * 8) / 10000;
 }
 
@@ -88,13 +112,19 @@ function calculateAcrylicLogoArea(lengthCm, widthCm) {
  * @param {number} lengthCm - Length in cm
  * @param {number} widthCm - Width in cm
  * @param {object} prices - Current prices
- * @returns {object} { area, price }
+ * @param {string} shape - round or square
+ * @param {boolean} isComplex - complex shape option
+ * @returns {object} { area, basePrice, multiplier, price }
  */
-function calculateAcrylicLogoPrice(lengthCm, widthCm, prices) {
-    const area = calculateAcrylicLogoArea(lengthCm, widthCm);
-    const pricePerSqm = prices.acrylicLogo || DEFAULT_PRICES.acrylicLogo;
-    const price = area * pricePerSqm;
-    return { area, price };
+function calculateAcrylicLogoPrice(lengthCm, widthCm, prices, shape = 'round', isComplex = false) {
+    const area = calculateAcrylicLogoArea(lengthCm, widthCm, shape);
+    const priceKey = shape === 'square' ? 'acrylicLogoSquare' : 'acrylicLogoRound';
+    const pricePerSqm = prices[priceKey] || DEFAULT_PRICES[priceKey];
+    const basePrice = area * pricePerSqm;
+    const complexMultiplier = prices.acrylicComplexMultiplier || DEFAULT_PRICES.acrylicComplexMultiplier;
+    const multiplier = isComplex ? complexMultiplier : 1;
+    const price = basePrice * multiplier;
+    return { area, basePrice, multiplier, price };
 }
 
 /**
@@ -102,14 +132,18 @@ function calculateAcrylicLogoPrice(lengthCm, widthCm, prices) {
  * @param {number} lengthCm - Panel length in cm
  * @param {number} widthCm - Panel width in cm
  * @param {object} prices - Current prices
- * @returns {object} { area, price }
+ * @param {boolean} hasSticker - sticker print option
+ * @returns {object} { area, basePrice, multiplier, price }
  */
-function calculatePanelPrice(lengthCm, widthCm, prices) {
+function calculatePanelPrice(lengthCm, widthCm, prices, hasSticker = false) {
     const area = calculateRectangleArea(lengthCm, widthCm);
     const pricePerSqm = prices.aluPanel || DEFAULT_PRICES.aluPanel;
-    const price = area * pricePerSqm;
+    const basePrice = area * pricePerSqm;
+    const stickerMultiplier = prices.aluStickerMultiplier || DEFAULT_PRICES.aluStickerMultiplier;
+    const multiplier = hasSticker ? stickerMultiplier : 1;
+    const price = basePrice * multiplier;
 
-    return { area, price };
+    return { area, basePrice, multiplier, price };
 }
 
 /**

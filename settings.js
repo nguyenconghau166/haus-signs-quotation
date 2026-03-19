@@ -4,59 +4,150 @@
  */
 
 const STORAGE_KEY = 'haussigns_calculator_prices';
+const SETTINGS_META_KEY = 'haussigns_calculator_settings_meta';
+const SETTINGS_API_URL = '/api/settings';
 
-/**
- * Load prices from localStorage or return defaults
- * @returns {object} Prices object
- */
-function loadPrices() {
+function sanitizePrices(source) {
+    const prices = { ...DEFAULT_PRICES };
+    if (!source || typeof source !== 'object') return prices;
+
+    Object.keys(DEFAULT_PRICES).forEach((key) => {
+        const val = source[key];
+        if (typeof val === 'number' && !isNaN(val)) {
+            prices[key] = val;
+        }
+    });
+
+    return prices;
+}
+
+function getCachedPrices() {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            const prices = { ...DEFAULT_PRICES };
-
-            // Safe merge: only accept valid numbers
-            Object.keys(DEFAULT_PRICES).forEach(key => {
-                const val = parsed[key];
-                if (typeof val === 'number' && !isNaN(val)) {
-                    prices[key] = val;
-                }
-            });
-
-            return prices;
-        }
+        if (!stored) return null;
+        return sanitizePrices(JSON.parse(stored));
     } catch (e) {
-        console.error('Error loading prices:', e);
+        console.error('Error reading cached prices:', e);
+        return null;
     }
-    return { ...DEFAULT_PRICES };
+}
+
+function cachePrices(prices) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizePrices(prices)));
+    } catch (e) {
+        console.error('Error caching prices:', e);
+    }
+}
+
+function setSettingsMeta(meta) {
+    try {
+        localStorage.setItem(SETTINGS_META_KEY, JSON.stringify(meta || {}));
+    } catch (e) {
+        console.error('Error saving settings metadata:', e);
+    }
+}
+
+function getSettingsMeta() {
+    try {
+        const raw = localStorage.getItem(SETTINGS_META_KEY);
+        return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+        console.error('Error reading settings metadata:', e);
+        return {};
+    }
+}
+
+async function fetchSettingsFromServer() {
+    const response = await fetch(SETTINGS_API_URL, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: {
+            'Accept': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to load shared settings (${response.status})`);
+    }
+
+    return response.json();
 }
 
 /**
- * Save prices to localStorage
+ * Load prices from shared server (with local fallback)
+ * @returns {object} Prices object
+ */
+async function loadPrices() {
+    try {
+        const payload = await fetchSettingsFromServer();
+        const prices = sanitizePrices(payload.prices);
+        cachePrices(prices);
+        setSettingsMeta({
+            updatedAt: payload.updatedAt || null,
+            source: 'server'
+        });
+        return prices;
+    } catch (e) {
+        console.warn('Shared settings unavailable, using cached/default prices:', e.message || e);
+
+        const cached = getCachedPrices();
+        if (cached) {
+            setSettingsMeta({
+                ...getSettingsMeta(),
+                source: 'cache'
+            });
+            return cached;
+        }
+
+        return { ...DEFAULT_PRICES };
+    }
+}
+
+/**
+ * Save prices to shared server
  * @param {object} prices - Prices to save
  */
-function savePrices(prices) {
+async function savePrices(prices) {
+    const sanitizedPrices = sanitizePrices(prices);
+
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(prices));
+        const response = await fetch(SETTINGS_API_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ prices: sanitizedPrices })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to save shared settings (${response.status})`);
+        }
+
+        const payload = await response.json();
+        const confirmedPrices = sanitizePrices(payload.prices || sanitizedPrices);
+        cachePrices(confirmedPrices);
+        setSettingsMeta({
+            updatedAt: payload.updatedAt || null,
+            source: 'server'
+        });
         return true;
     } catch (e) {
-        console.error('Error saving prices:', e);
+        cachePrices(sanitizedPrices);
+        setSettingsMeta({
+            ...getSettingsMeta(),
+            source: 'cache'
+        });
+        console.error('Error saving shared prices:', e);
         return false;
     }
 }
 
 /**
- * Reset prices to defaults
+ * Reset shared prices to defaults
  */
-function resetPrices() {
-    try {
-        localStorage.removeItem(STORAGE_KEY);
-        return true;
-    } catch (e) {
-        console.error('Error resetting prices:', e);
-        return false;
-    }
+async function resetPrices() {
+    return savePrices({ ...DEFAULT_PRICES });
 }
 
 /**
@@ -64,13 +155,20 @@ function resetPrices() {
  * @param {object} prices - Current prices
  */
 function initSettingsForm(prices) {
-    document.getElementById('priceLetterIlluminated').value = prices.letterIlluminated;
-    document.getElementById('priceLetterNonIlluminated').value = prices.letterNonIlluminated;
+    document.getElementById('priceLetterFrontLit').value = prices.letterFrontLit;
+    document.getElementById('priceLetterBackLit').value = prices.letterBackLit;
+    document.getElementById('priceLetterFullAcrylic').value = prices.letterFullAcrylic;
     document.getElementById('priceLetterCutOut').value = prices.letterCutOut;
-    document.getElementById('priceLetterInox').value = prices.letterInox;
+    document.getElementById('priceLetterAluAcrylic').value = prices.letterAluAcrylic;
+    document.getElementById('priceLetterStainless').value = prices.letterStainless;
+    document.getElementById('noLedMultiplier').value = prices.noLedMultiplier;
+    document.getElementById('difficultMultiplier').value = prices.difficultMultiplier;
     document.getElementById('priceAluPanel').value = prices.aluPanel;
+    document.getElementById('aluStickerMultiplier').value = prices.aluStickerMultiplier;
     document.getElementById('priceLightbox').value = prices.lightbox;
-    document.getElementById('priceAcrylicLogo').value = prices.acrylicLogo;
+    document.getElementById('priceAcrylicLogoRound').value = prices.acrylicLogoRound;
+    document.getElementById('priceAcrylicLogoSquare').value = prices.acrylicLogoSquare;
+    document.getElementById('acrylicComplexMultiplier').value = prices.acrylicComplexMultiplier;
     document.getElementById('priceLogoRaised').value = prices.logoRaised;
     document.getElementById('anchorMultiplier').value = prices.anchorMultiplier;
 
@@ -87,13 +185,20 @@ function initSettingsForm(prices) {
  */
 function getPricesFromForm() {
     return {
-        letterIlluminated: parseFloat(document.getElementById('priceLetterIlluminated').value) || DEFAULT_PRICES.letterIlluminated,
-        letterNonIlluminated: parseFloat(document.getElementById('priceLetterNonIlluminated').value) || DEFAULT_PRICES.letterNonIlluminated,
+        letterFrontLit: parseFloat(document.getElementById('priceLetterFrontLit').value) || DEFAULT_PRICES.letterFrontLit,
+        letterBackLit: parseFloat(document.getElementById('priceLetterBackLit').value) || DEFAULT_PRICES.letterBackLit,
+        letterFullAcrylic: parseFloat(document.getElementById('priceLetterFullAcrylic').value) || DEFAULT_PRICES.letterFullAcrylic,
         letterCutOut: parseFloat(document.getElementById('priceLetterCutOut').value) || DEFAULT_PRICES.letterCutOut,
-        letterInox: parseFloat(document.getElementById('priceLetterInox').value) || DEFAULT_PRICES.letterInox,
+        letterAluAcrylic: parseFloat(document.getElementById('priceLetterAluAcrylic').value) || DEFAULT_PRICES.letterAluAcrylic,
+        letterStainless: parseFloat(document.getElementById('priceLetterStainless').value) || DEFAULT_PRICES.letterStainless,
+        noLedMultiplier: parseFloat(document.getElementById('noLedMultiplier').value) || DEFAULT_PRICES.noLedMultiplier,
+        difficultMultiplier: parseFloat(document.getElementById('difficultMultiplier').value) || DEFAULT_PRICES.difficultMultiplier,
         aluPanel: parseFloat(document.getElementById('priceAluPanel').value) || DEFAULT_PRICES.aluPanel,
+        aluStickerMultiplier: parseFloat(document.getElementById('aluStickerMultiplier').value) || DEFAULT_PRICES.aluStickerMultiplier,
         lightbox: parseFloat(document.getElementById('priceLightbox').value) || DEFAULT_PRICES.lightbox,
-        acrylicLogo: parseFloat(document.getElementById('priceAcrylicLogo').value) || DEFAULT_PRICES.acrylicLogo,
+        acrylicLogoRound: parseFloat(document.getElementById('priceAcrylicLogoRound').value) || DEFAULT_PRICES.acrylicLogoRound,
+        acrylicLogoSquare: parseFloat(document.getElementById('priceAcrylicLogoSquare').value) || DEFAULT_PRICES.acrylicLogoSquare,
+        acrylicComplexMultiplier: parseFloat(document.getElementById('acrylicComplexMultiplier').value) || DEFAULT_PRICES.acrylicComplexMultiplier,
         logoRaised: parseFloat(document.getElementById('priceLogoRaised').value) || DEFAULT_PRICES.logoRaised,
         anchorMultiplier: parseFloat(document.getElementById('anchorMultiplier').value) || DEFAULT_PRICES.anchorMultiplier,
 
@@ -113,26 +218,103 @@ function getPricesFromForm() {
 function setupSettingsListeners(onSave, onReset) {
     const saveBtn = document.getElementById('saveSettingsBtn');
     const resetBtn = document.getElementById('resetSettingsBtn');
+    const exportBtn = document.getElementById('exportSettingsBtn');
+    const importInput = document.getElementById('importSettingsInput');
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
+        saveBtn.addEventListener('click', async () => {
             const prices = getPricesFromForm();
-            if (savePrices(prices)) {
-                showNotification('Price settings saved successfully!', 'success');
-                if (onSave) onSave(prices);
+            if (await savePrices(prices)) {
+                const latest = await loadPrices();
+                showNotification('Shared price settings saved successfully!', 'success');
+                if (onSave) onSave(latest);
             } else {
-                showNotification('Error saving settings!', 'error');
+                showNotification('Cannot update shared server. Saved only on this browser cache.', 'error');
             }
         });
     }
 
     if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
+        resetBtn.addEventListener('click', async () => {
             if (confirm('Are you sure you want to reset to default prices?')) {
-                resetPrices();
-                initSettingsForm(DEFAULT_PRICES);
-                showNotification('Prices reset to default!', 'success');
-                if (onReset) onReset(DEFAULT_PRICES);
+                if (await resetPrices()) {
+                    const latest = await loadPrices();
+                    initSettingsForm(latest);
+                    showNotification('Shared prices reset to default!', 'success');
+                    if (onReset) onReset(latest);
+                } else {
+                    showNotification('Cannot reset shared prices. Please check server.', 'error');
+                }
+            }
+        });
+    }
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            try {
+                const payload = {
+                    exportedAt: new Date().toISOString(),
+                    prices: await loadPrices(),
+                    lightboxFormulas: loadLightboxFormulas()
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const date = new Date().toISOString().split('T')[0];
+                link.href = url;
+                link.download = `haussigns-internal-prices-${date}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                showNotification('Internal price file exported!', 'success');
+            } catch (e) {
+                console.error('Error exporting settings:', e);
+                showNotification('Error exporting settings file!', 'error');
+            }
+        });
+    }
+
+    if (importInput) {
+        importInput.addEventListener('change', async (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                const parsed = JSON.parse(text);
+                const importedPrices = parsed.prices || parsed;
+
+                const mergedPrices = { ...DEFAULT_PRICES };
+                Object.keys(DEFAULT_PRICES).forEach(key => {
+                    const value = importedPrices[key];
+                    if (typeof value === 'number' && !isNaN(value)) {
+                        mergedPrices[key] = value;
+                    }
+                });
+
+                const saved = await savePrices(mergedPrices);
+                if (!saved) {
+                    showNotification('Cannot import to shared server. Please check server.', 'error');
+                    return;
+                }
+
+                const latest = await loadPrices();
+                initSettingsForm(latest);
+
+                if (parsed.lightboxFormulas && typeof parsed.lightboxFormulas === 'object') {
+                    saveLightboxFormulas(parsed.lightboxFormulas);
+                    applyCustomLightboxFormulas();
+                    renderLightboxFormulaList();
+                }
+
+                if (onSave) onSave(latest);
+                showNotification('Internal price file imported to shared server!', 'success');
+            } catch (error) {
+                console.error('Error importing settings:', error);
+                showNotification('Invalid settings file!', 'error');
+            } finally {
+                e.target.value = '';
             }
         });
     }
