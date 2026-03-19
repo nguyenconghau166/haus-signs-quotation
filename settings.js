@@ -5,43 +5,7 @@
 
 const STORAGE_KEY = 'haussigns_calculator_prices';
 const SETTINGS_API_ENDPOINT = '/api/settings';
-const SETTINGS_API_ENDPOINT_FALLBACK = '/api/settings.js';
-
-/**
- * Request settings API with fallback path support
- * @param {string} query - Optional query string without leading '?'
- * @param {object} options - Fetch options
- * @returns {Promise<Response>} Fetch response
- */
-async function requestSettingsApi(query = '', options = {}) {
-    const paths = [SETTINGS_API_ENDPOINT, SETTINGS_API_ENDPOINT_FALLBACK];
-    const queryPart = query ? `?${query}` : '';
-
-    let last404Response = null;
-    let lastError = null;
-
-    for (const basePath of paths) {
-        const url = `${basePath}${queryPart}`;
-
-        try {
-            const response = await fetch(url, options);
-
-            if (response.status !== 404) {
-                return response;
-            }
-
-            last404Response = response;
-        } catch (e) {
-            lastError = e;
-        }
-    }
-
-    if (last404Response) {
-        return last404Response;
-    }
-
-    throw lastError || new Error('Settings API request failed');
-}
+const LIGHTBOX_FORMULAS_API_ENDPOINT = '/api/settings?resource=formulas';
 
 /**
  * Normalize prices object against defaults
@@ -117,7 +81,7 @@ function resetLocalPrices() {
  */
 async function loadRemotePrices() {
     try {
-        const response = await requestSettingsApi('', {
+        const response = await fetch(SETTINGS_API_ENDPOINT, {
             method: 'GET',
             headers: { 'Accept': 'application/json' },
             cache: 'no-store'
@@ -146,7 +110,7 @@ async function loadRemotePrices() {
  */
 async function saveRemotePrices(prices) {
     try {
-        const response = await requestSettingsApi('', {
+        const response = await fetch(SETTINGS_API_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prices })
@@ -165,7 +129,7 @@ async function saveRemotePrices(prices) {
  */
 async function resetRemotePrices() {
     try {
-        const response = await requestSettingsApi('', {
+        const response = await fetch(SETTINGS_API_ENDPOINT, {
             method: 'DELETE'
         });
 
@@ -263,12 +227,12 @@ async function checkSettingsSyncHealth(showNotificationToast = false) {
 
     try {
         const [priceResponse, formulaResponse] = await Promise.all([
-            requestSettingsApi('', {
+            fetch(SETTINGS_API_ENDPOINT, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' },
                 cache: 'no-store'
             }),
-            requestSettingsApi('resource=formulas', {
+            fetch(LIGHTBOX_FORMULAS_API_ENDPOINT, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' },
                 cache: 'no-store'
@@ -467,7 +431,7 @@ function loadLightboxFormulas() {
  */
 async function loadRemoteLightboxFormulas() {
     try {
-        const response = await requestSettingsApi('resource=formulas', {
+        const response = await fetch(LIGHTBOX_FORMULAS_API_ENDPOINT, {
             method: 'GET',
             headers: { 'Accept': 'application/json' },
             cache: 'no-store'
@@ -510,7 +474,7 @@ function saveLightboxFormulas(formulas) {
  */
 async function saveRemoteLightboxFormulas(formulas) {
     try {
-        const response = await requestSettingsApi('resource=formulas', {
+        const response = await fetch(LIGHTBOX_FORMULAS_API_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ formulas })
@@ -529,7 +493,7 @@ async function saveRemoteLightboxFormulas(formulas) {
  */
 async function resetRemoteLightboxFormulas() {
     try {
-        const response = await requestSettingsApi('resource=formulas', {
+        const response = await fetch(LIGHTBOX_FORMULAS_API_ENDPOINT, {
             method: 'DELETE'
         });
 

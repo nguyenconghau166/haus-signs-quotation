@@ -2,24 +2,13 @@
   "version": 2,
   "functions": {
     "api/**/*.js": {
-      "maxDuration": 10
+      "runtime": "@vercel/node"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/settings",
-      "dest": "/api/settings.js"
-    },
-    {
-      "src": "/api/settings.js",
-      "dest": "/api/settings.js"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     }
   ]
 }
