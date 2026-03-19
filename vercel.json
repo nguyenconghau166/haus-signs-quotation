@@ -4,5 +4,22 @@
     "api/**/*.js": {
       "maxDuration": 10
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/api/settings",
+      "dest": "/api/settings.js"
+    },
+    {
+      "src": "/api/settings.js",
+      "dest": "/api/settings.js"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
