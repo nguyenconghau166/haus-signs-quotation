@@ -63,7 +63,6 @@ async function init() {
   setupSettingsHealthCheck();
 
   // Apply custom lightbox formulas and render formula list
-  await syncLightboxFormulasFromRemote();
   applyCustomLightboxFormulas();
   renderLightboxFormulaList();
   setupLightboxFormulaListeners();

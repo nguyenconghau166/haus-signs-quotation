@@ -1,5 +1,4 @@
-const SETTINGS_PRICES_KEY = 'haussigns_calculator_prices';
-const SETTINGS_FORMULAS_KEY = 'haussigns_lightbox_formulas';
+const SETTINGS_KEY = 'haussigns_calculator_prices';
 
 function sendJson(res, statusCode, payload) {
   res.status(statusCode).json(payload);
@@ -57,68 +56,19 @@ function normalizePrices(raw) {
   return Object.keys(normalized).length > 0 ? normalized : null;
 }
 
-function normalizeFormulas(raw) {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-    return null;
-  }
-
-  const normalized = {};
-  for (const [key, value] of Object.entries(raw)) {
-    if (typeof value === 'string') {
-      const formula = value.trim();
-      if (formula) {
-        normalized[key] = formula;
-      }
-    }
-  }
-
-  return normalized;
-}
-
-function parseKvResult(result) {
-  if (!result || !result.result) {
-    return null;
-  }
-
-  return typeof result.result === 'string'
-    ? JSON.parse(result.result)
-    : result.result;
-}
-
 module.exports = async function handler(req, res) {
-  const resource = req.query && req.query.resource
-    ? String(req.query.resource)
-    : 'prices';
-
   if (req.method === 'GET') {
     try {
-      if (resource === 'all') {
-        const [pricesResult, formulasResult] = await Promise.all([
-          kvRequest(`get/${SETTINGS_PRICES_KEY}`),
-          kvRequest(`get/${SETTINGS_FORMULAS_KEY}`),
-        ]);
-
-        return sendJson(res, 200, {
-          prices: parseKvResult(pricesResult),
-          formulas: parseKvResult(formulasResult),
-          source: 'kv',
-        });
+      const result = await kvRequest(`get/${SETTINGS_KEY}`);
+      if (!result || !result.result) {
+        return sendJson(res, 200, { prices: null, source: 'empty' });
       }
 
-      if (resource === 'formulas') {
-        const formulasResult = await kvRequest(`get/${SETTINGS_FORMULAS_KEY}`);
-        return sendJson(res, 200, {
-          formulas: parseKvResult(formulasResult),
-          source: 'kv',
-        });
-      }
+      const parsed = typeof result.result === 'string'
+        ? JSON.parse(result.result)
+        : result.result;
 
-      const pricesResult = await kvRequest(`get/${SETTINGS_PRICES_KEY}`);
-
-      return sendJson(res, 200, {
-        prices: parseKvResult(pricesResult),
-        source: 'kv',
-      });
+      return sendJson(res, 200, { prices: parsed, source: 'kv' });
     } catch (error) {
       return sendJson(res, 503, {
         error: 'Cannot load shared settings',
@@ -130,25 +80,13 @@ module.exports = async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const body = parseRequestBody(req);
-      if (resource === 'formulas') {
-        const formulas = normalizeFormulas(body.formulas);
-
-        if (!formulas) {
-          return sendJson(res, 400, { error: 'Invalid formulas payload' });
-        }
-
-        await kvRequest(`set/${SETTINGS_FORMULAS_KEY}/${encodeURIComponent(JSON.stringify(formulas))}`);
-
-        return sendJson(res, 200, { ok: true });
-      }
-
       const prices = normalizePrices(body.prices);
 
       if (!prices) {
         return sendJson(res, 400, { error: 'Invalid prices payload' });
       }
 
-      await kvRequest(`set/${SETTINGS_PRICES_KEY}/${encodeURIComponent(JSON.stringify(prices))}`);
+      await kvRequest(`set/${SETTINGS_KEY}/${encodeURIComponent(JSON.stringify(prices))}`);
 
       return sendJson(res, 200, { ok: true });
     } catch (error) {
@@ -161,17 +99,7 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'DELETE') {
     try {
-      if (resource === 'formulas') {
-        await kvRequest(`del/${SETTINGS_FORMULAS_KEY}`);
-      } else if (resource === 'all') {
-        await Promise.all([
-          kvRequest(`del/${SETTINGS_PRICES_KEY}`),
-          kvRequest(`del/${SETTINGS_FORMULAS_KEY}`),
-        ]);
-      } else {
-        await kvRequest(`del/${SETTINGS_PRICES_KEY}`);
-      }
-
+      await kvRequest(`del/${SETTINGS_KEY}`);
       return sendJson(res, 200, { ok: true });
     } catch (error) {
       return sendJson(res, 503, {
