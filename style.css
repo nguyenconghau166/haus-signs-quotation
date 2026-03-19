@@ -650,6 +650,18 @@ body {
   cursor: pointer;
 }
 
+.checkbox-group-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 44px;
+}
+
+.logo-options-group {
+  margin-top: -0.25rem;
+}
+
 .installation-price {
   margin-top: 1rem;
   display: flex;
