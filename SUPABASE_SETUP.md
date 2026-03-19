@@ -53,3 +53,27 @@ When configured correctly, response contains:
 
 - Use `service_role` key only on server, never in browser code.
 - If Supabase env vars are missing, server falls back to local file storage.
+
+## Vercel Deployment (luxsign.net)
+
+If you deploy on Vercel, set these in **Project Settings -> Environment Variables**:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_SETTINGS_TABLE` = `shared_settings`
+- `SETTINGS_ROW_ID` = `1`
+
+Then redeploy the latest commit.
+
+Verify from production:
+
+```bash
+curl https://luxsign.net/api/health
+curl https://luxsign.net/api/settings
+```
+
+Expected health:
+
+```json
+{ "ok": true, "storage": "supabase" }
+```
