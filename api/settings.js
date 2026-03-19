@@ -2,6 +2,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const SUPABASE_TABLE = process.env.SUPABASE_SETTINGS_TABLE || 'shared_settings';
 const SETTINGS_ROW_ID = Number.parseInt(process.env.SETTINGS_ROW_ID || '1', 10);
+const LIGHTBOX_FORMULAS_EMBEDDED_KEY = '__lightboxFormulas';
 
 function sendJson(res, status, data) {
   res.status(status).setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -23,11 +24,27 @@ function supabaseHeaders(extra = {}) {
 }
 
 function normalizeSettings(row) {
+  const rawPrices = (row && typeof row.prices === 'object' && row.prices) || {};
+  const lightboxFormulas =
+    (rawPrices && typeof rawPrices[LIGHTBOX_FORMULAS_EMBEDDED_KEY] === 'object' && rawPrices[LIGHTBOX_FORMULAS_EMBEDDED_KEY]) || {};
+
+  const prices = { ...rawPrices };
+  delete prices[LIGHTBOX_FORMULAS_EMBEDDED_KEY];
+
   return {
-    prices: (row && typeof row.prices === 'object' && row.prices) || {},
+    prices,
+    lightboxFormulas,
     updatedAt: row?.updated_at || row?.updatedAt || null,
     updatedBy: row?.updated_by || row?.updatedBy || 'unknown'
   };
+}
+
+function toRowPrices(prices, lightboxFormulas) {
+  const merged = { ...(prices || {}) };
+  if (lightboxFormulas && typeof lightboxFormulas === 'object' && Object.keys(lightboxFormulas).length > 0) {
+    merged[LIGHTBOX_FORMULAS_EMBEDDED_KEY] = lightboxFormulas;
+  }
+  return merged;
 }
 
 async function readSettings() {
@@ -93,12 +110,26 @@ module.exports = async (req, res) => {
 
     if (req.method === 'PUT') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-      if (!body || typeof body !== 'object' || typeof body.prices !== 'object') {
-        return sendJson(res, 400, { error: 'Body must include `prices` object.' });
+      if (!body || typeof body !== 'object') {
+        return sendJson(res, 400, { error: 'Invalid request body.' });
       }
 
+      if (body.prices !== undefined && typeof body.prices !== 'object') {
+        return sendJson(res, 400, { error: '`prices` must be an object.' });
+      }
+
+      if (body.lightboxFormulas !== undefined && typeof body.lightboxFormulas !== 'object') {
+        return sendJson(res, 400, { error: '`lightboxFormulas` must be an object.' });
+      }
+
+      const existing = await readSettings();
+      const nextPrices = body.prices !== undefined
+        ? { ...(existing.prices || {}), ...(body.prices || {}) }
+        : existing.prices;
+      const nextLightboxFormulas = body.lightboxFormulas !== undefined ? body.lightboxFormulas : existing.lightboxFormulas;
+
       const updatedBy = req.headers['x-user-name'] || 'employee';
-      const saved = await writeSettings(body.prices, String(updatedBy));
+      const saved = await writeSettings(toRowPrices(nextPrices, nextLightboxFormulas), String(updatedBy));
       return sendJson(res, 200, saved);
     }
 

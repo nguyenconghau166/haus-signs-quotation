@@ -4,8 +4,25 @@
  */
 
 const STORAGE_KEY = 'haussigns_calculator_prices';
+const LIGHTBOX_FORMULAS_KEY = 'haussigns_lightbox_formulas';
 const SETTINGS_META_KEY = 'haussigns_calculator_settings_meta';
 const SETTINGS_API_URL = '/api/settings';
+
+function sanitizeLightboxFormulas(source) {
+    const formulas = {};
+    if (!source || typeof source !== 'object') return formulas;
+
+    Object.entries(source).forEach(([styleId, formula]) => {
+        if (typeof formula === 'string') {
+            const trimmed = formula.trim();
+            if (trimmed && trimmed !== DEFAULT_LIGHTBOX_FORMULA) {
+                formulas[String(styleId)] = trimmed;
+            }
+        }
+    });
+
+    return formulas;
+}
 
 function sanitizePrices(source) {
     const prices = { ...DEFAULT_PRICES };
@@ -37,6 +54,25 @@ function cachePrices(prices) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizePrices(prices)));
     } catch (e) {
         console.error('Error caching prices:', e);
+    }
+}
+
+function getCachedLightboxFormulas() {
+    try {
+        const stored = localStorage.getItem(LIGHTBOX_FORMULAS_KEY);
+        if (!stored) return {};
+        return sanitizeLightboxFormulas(JSON.parse(stored));
+    } catch (e) {
+        console.error('Error reading cached lightbox formulas:', e);
+        return {};
+    }
+}
+
+function cacheLightboxFormulas(formulas) {
+    try {
+        localStorage.setItem(LIGHTBOX_FORMULAS_KEY, JSON.stringify(sanitizeLightboxFormulas(formulas)));
+    } catch (e) {
+        console.error('Error caching lightbox formulas:', e);
     }
 }
 
@@ -82,7 +118,9 @@ async function loadPrices() {
     try {
         const payload = await fetchSettingsFromServer();
         const prices = sanitizePrices(payload.prices);
+        const formulas = sanitizeLightboxFormulas(payload.lightboxFormulas);
         cachePrices(prices);
+        cacheLightboxFormulas(formulas);
         setSettingsMeta({
             updatedAt: payload.updatedAt || null,
             source: 'server'
@@ -126,7 +164,9 @@ async function savePrices(prices) {
 
         const payload = await response.json();
         const confirmedPrices = sanitizePrices(payload.prices || sanitizedPrices);
+        const confirmedFormulas = sanitizeLightboxFormulas(payload.lightboxFormulas || getCachedLightboxFormulas());
         cachePrices(confirmedPrices);
+        cacheLightboxFormulas(confirmedFormulas);
         setSettingsMeta({
             updatedAt: payload.updatedAt || null,
             source: 'server'
@@ -303,7 +343,7 @@ function setupSettingsListeners(onSave, onReset) {
                 initSettingsForm(latest);
 
                 if (parsed.lightboxFormulas && typeof parsed.lightboxFormulas === 'object') {
-                    saveLightboxFormulas(parsed.lightboxFormulas);
+                    await saveLightboxFormulas(parsed.lightboxFormulas);
                     applyCustomLightboxFormulas();
                     renderLightboxFormulaList();
                 }
@@ -347,7 +387,6 @@ function showNotification(message, type = 'success') {
 }
 
 // ==================== Lightbox Formula Management ====================
-const LIGHTBOX_FORMULAS_KEY = 'haussigns_lightbox_formulas';
 
 // Default formula for all lightbox styles (5 faces)
 const DEFAULT_LIGHTBOX_FORMULA = '(w * h + 2 * d * h + 2 * w * d) / 10000';
@@ -357,26 +396,43 @@ const DEFAULT_LIGHTBOX_FORMULA = '(w * h + 2 * d * h + 2 * w * d) / 10000';
  * @returns {object} Formulas object keyed by style ID
  */
 function loadLightboxFormulas() {
-    try {
-        const stored = localStorage.getItem(LIGHTBOX_FORMULAS_KEY);
-        if (stored) {
-            return JSON.parse(stored);
-        }
-    } catch (e) {
-        console.error('Error loading lightbox formulas:', e);
-    }
-    return {};
+    return getCachedLightboxFormulas();
 }
 
 /**
  * Save lightbox formulas to localStorage
  * @param {object} formulas - Formulas object
  */
-function saveLightboxFormulas(formulas) {
+async function saveLightboxFormulas(formulas) {
+    const sanitizedFormulas = sanitizeLightboxFormulas(formulas);
+
     try {
-        localStorage.setItem(LIGHTBOX_FORMULAS_KEY, JSON.stringify(formulas));
+        const response = await fetch(SETTINGS_API_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ lightboxFormulas: sanitizedFormulas })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to save shared formulas (${response.status})`);
+        }
+
+        const payload = await response.json();
+        cachePrices(sanitizePrices(payload.prices || getCachedPrices() || DEFAULT_PRICES));
+        cacheLightboxFormulas(sanitizeLightboxFormulas(payload.lightboxFormulas || sanitizedFormulas));
+        setSettingsMeta({
+            updatedAt: payload.updatedAt || null,
+            source: 'server'
+        });
         return true;
     } catch (e) {
+        cacheLightboxFormulas(sanitizedFormulas);
+        setSettingsMeta({
+            ...getSettingsMeta(),
+            source: 'cache'
+        });
         console.error('Error saving lightbox formulas:', e);
         return false;
     }
@@ -410,6 +466,10 @@ function createCalcAreaFunction(formula) {
  * Apply custom formulas to LIGHTBOX_STYLES
  */
 function applyCustomLightboxFormulas() {
+    for (const styleId in LIGHTBOX_STYLES) {
+        LIGHTBOX_STYLES[styleId].calcArea = createCalcAreaFunction(DEFAULT_LIGHTBOX_FORMULA);
+    }
+
     const formulas = loadLightboxFormulas();
     for (const [styleId, formula] of Object.entries(formulas)) {
         if (LIGHTBOX_STYLES[styleId]) {
@@ -514,7 +574,7 @@ function setupLightboxFormulaListeners() {
     const resetBtn = document.getElementById('resetLightboxFormulasBtn');
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
+        saveBtn.addEventListener('click', async () => {
             const formulas = getFormulasFromUI();
 
             // Validate all formulas
@@ -532,8 +592,9 @@ function setupLightboxFormulaListeners() {
                 return;
             }
 
-            if (saveLightboxFormulas(formulas)) {
+            if (await saveLightboxFormulas(formulas)) {
                 applyCustomLightboxFormulas();
+                renderLightboxFormulaList();
                 showNotification('Lightbox formulas saved successfully!', 'success');
             } else {
                 showNotification('Error saving formulas!', 'error');
@@ -542,17 +603,18 @@ function setupLightboxFormulaListeners() {
     }
 
     if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
+        resetBtn.addEventListener('click', async () => {
             if (confirm('Are you sure you want to reset all lightbox formulas to default?')) {
-                localStorage.removeItem(LIGHTBOX_FORMULAS_KEY);
+                if (await saveLightboxFormulas({})) {
+                    for (const styleId in LIGHTBOX_STYLES) {
+                        LIGHTBOX_STYLES[styleId].calcArea = createCalcAreaFunction(DEFAULT_LIGHTBOX_FORMULA);
+                    }
 
-                // Reset LIGHTBOX_STYLES calcArea functions
-                for (const styleId in LIGHTBOX_STYLES) {
-                    LIGHTBOX_STYLES[styleId].calcArea = createCalcAreaFunction(DEFAULT_LIGHTBOX_FORMULA);
+                    renderLightboxFormulaList();
+                    showNotification('Formulas reset to default!', 'success');
+                } else {
+                    showNotification('Error resetting formulas!', 'error');
                 }
-
-                renderLightboxFormulaList();
-                showNotification('Formulas reset to default!', 'success');
             }
         });
     }

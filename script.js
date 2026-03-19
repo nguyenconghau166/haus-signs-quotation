@@ -109,13 +109,30 @@ function arePricesEqual(a, b) {
 }
 
 function startSharedPriceSync(intervalMs = 15000) {
+    let formulaSignature = JSON.stringify(loadLightboxFormulas());
+
     setInterval(async () => {
         const latestPrices = await loadPrices();
+        const latestFormulaSignature = JSON.stringify(loadLightboxFormulas());
+        let hasChanges = false;
+
         if (!arePricesEqual(latestPrices, state.prices)) {
             state.prices = latestPrices;
             initSettingsForm(latestPrices);
             updateAllCalculations();
-            showNotification('Shared price settings updated from server.', 'success');
+            hasChanges = true;
+        }
+
+        if (latestFormulaSignature !== formulaSignature) {
+            formulaSignature = latestFormulaSignature;
+            applyCustomLightboxFormulas();
+            renderLightboxFormulaList();
+            updateLightboxCalculation();
+            hasChanges = true;
+        }
+
+        if (hasChanges) {
+            showNotification('Shared settings updated from server.', 'success');
         }
     }, intervalMs);
 }
