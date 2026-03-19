@@ -4,59 +4,273 @@
  */
 
 const STORAGE_KEY = 'haussigns_calculator_prices';
+const SETTINGS_API_ENDPOINT = '/api/settings';
 
 /**
- * Load prices from localStorage or return defaults
- * @returns {object} Prices object
+ * Normalize prices object against defaults
+ * @param {object} raw - Raw prices object
+ * @returns {object} Sanitized prices object
  */
-function loadPrices() {
+function normalizePrices(raw) {
+    const prices = { ...DEFAULT_PRICES };
+
+    if (!raw || typeof raw !== 'object') {
+        return prices;
+    }
+
+    Object.keys(DEFAULT_PRICES).forEach(key => {
+        const value = Number(raw[key]);
+        if (Number.isFinite(value)) {
+            prices[key] = value;
+        }
+    });
+
+    return prices;
+}
+
+/**
+ * Load prices from localStorage
+ * @returns {object|null} Prices object or null
+ */
+function loadPricesFromLocalStorage() {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
-            const parsed = JSON.parse(stored);
-            const prices = { ...DEFAULT_PRICES };
-
-            // Safe merge: only accept valid numbers
-            Object.keys(DEFAULT_PRICES).forEach(key => {
-                const val = parsed[key];
-                if (typeof val === 'number' && !isNaN(val)) {
-                    prices[key] = val;
-                }
-            });
-
-            return prices;
+            return normalizePrices(JSON.parse(stored));
         }
     } catch (e) {
-        console.error('Error loading prices:', e);
+        console.error('Error loading local prices:', e);
     }
-    return { ...DEFAULT_PRICES };
+
+    return null;
 }
 
 /**
  * Save prices to localStorage
  * @param {object} prices - Prices to save
+ * @returns {boolean} True if saved
  */
-function savePrices(prices) {
+function savePricesToLocalStorage(prices) {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prices));
         return true;
     } catch (e) {
-        console.error('Error saving prices:', e);
+        console.error('Error saving local prices:', e);
         return false;
     }
 }
 
 /**
- * Reset prices to defaults
+ * Reset local prices
+ * @returns {boolean} True if reset
  */
-function resetPrices() {
+function resetLocalPrices() {
     try {
         localStorage.removeItem(STORAGE_KEY);
         return true;
     } catch (e) {
-        console.error('Error resetting prices:', e);
+        console.error('Error resetting local prices:', e);
         return false;
     }
+}
+
+/**
+ * Load prices from shared backend storage
+ * @returns {Promise<object|null>} Prices object or null
+ */
+async function loadRemotePrices() {
+    try {
+        const response = await fetch(SETTINGS_API_ENDPOINT, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const payload = await response.json();
+        if (!payload || typeof payload !== 'object' || !payload.prices) {
+            return null;
+        }
+
+        return normalizePrices(payload.prices);
+    } catch (e) {
+        console.error('Error loading remote prices:', e);
+        return null;
+    }
+}
+
+/**
+ * Save prices to shared backend storage
+ * @param {object} prices - Prices to save
+ * @returns {Promise<boolean>} True if saved remotely
+ */
+async function saveRemotePrices(prices) {
+    try {
+        const response = await fetch(SETTINGS_API_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prices })
+        });
+
+        return response.ok;
+    } catch (e) {
+        console.error('Error saving remote prices:', e);
+        return false;
+    }
+}
+
+/**
+ * Reset shared backend prices
+ * @returns {Promise<boolean>} True if reset remotely
+ */
+async function resetRemotePrices() {
+    try {
+        const response = await fetch(SETTINGS_API_ENDPOINT, {
+            method: 'DELETE'
+        });
+
+        return response.ok;
+    } catch (e) {
+        console.error('Error resetting remote prices:', e);
+        return false;
+    }
+}
+
+/**
+ * Load prices from backend first, then localStorage, then defaults
+ * @returns {Promise<object>} Prices object
+ */
+async function loadPrices() {
+    const remotePrices = await loadRemotePrices();
+    if (remotePrices) {
+        savePricesToLocalStorage(remotePrices);
+        return remotePrices;
+    }
+
+    return loadPricesFromLocalStorage() || { ...DEFAULT_PRICES };
+}
+
+/**
+ * Save prices to local and remote storage
+ * @param {object} prices - Prices to save
+ * @returns {Promise<object>} Save result
+ */
+async function savePrices(prices) {
+    const normalized = normalizePrices(prices);
+    const localSaved = savePricesToLocalStorage(normalized);
+    const remoteSaved = await saveRemotePrices(normalized);
+
+    return {
+        ok: localSaved || remoteSaved,
+        localSaved,
+        remoteSaved,
+        prices: normalized
+    };
+}
+
+/**
+ * Reset prices to defaults in local and remote storage
+ * @returns {Promise<object>} Reset result
+ */
+async function resetPrices() {
+    const localReset = resetLocalPrices();
+    const remoteReset = await resetRemotePrices();
+
+    return {
+        ok: localReset || remoteReset,
+        localReset,
+        remoteReset
+    };
+}
+
+/**
+ * Update settings sync health UI
+ * @param {string} status - loading | ok | error
+ * @param {string} text - Message text
+ */
+function updateSettingsHealthUI(status, text) {
+    const dot = document.getElementById('settingsHealthDot');
+    const label = document.getElementById('settingsHealthText');
+
+    if (!dot || !label) return;
+
+    dot.classList.remove('is-loading', 'is-ok', 'is-error');
+
+    if (status === 'loading') {
+        dot.classList.add('is-loading');
+    } else if (status === 'ok') {
+        dot.classList.add('is-ok');
+    } else {
+        dot.classList.add('is-error');
+    }
+
+    label.textContent = text;
+}
+
+/**
+ * Check shared settings sync health
+ * @param {boolean} showNotificationToast - Show toast after check
+ * @returns {Promise<boolean>} True if API is healthy
+ */
+async function checkSettingsSyncHealth(showNotificationToast = false) {
+    const refreshBtn = document.getElementById('refreshSettingsHealthBtn');
+
+    if (refreshBtn) {
+        refreshBtn.disabled = true;
+    }
+
+    updateSettingsHealthUI('loading', 'Checking shared sync status...');
+
+    try {
+        const response = await fetch(SETTINGS_API_ENDPOINT, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+        });
+
+        if (response.ok) {
+            updateSettingsHealthUI('ok', 'Shared sync is connected');
+            if (showNotificationToast) {
+                showNotification('Shared settings sync is connected.', 'success');
+            }
+            return true;
+        }
+
+        updateSettingsHealthUI('error', `Shared sync unavailable (${response.status})`);
+        if (showNotificationToast) {
+            showNotification('Shared sync is unavailable. Check KV env vars.', 'error');
+        }
+        return false;
+    } catch (e) {
+        console.error('Error checking settings sync health:', e);
+        updateSettingsHealthUI('error', 'Shared sync unavailable (network error)');
+        if (showNotificationToast) {
+            showNotification('Cannot reach shared sync API.', 'error');
+        }
+        return false;
+    } finally {
+        if (refreshBtn) {
+            refreshBtn.disabled = false;
+        }
+    }
+}
+
+/**
+ * Setup settings sync health check listeners
+ */
+function setupSettingsHealthCheck() {
+    const refreshBtn = document.getElementById('refreshSettingsHealthBtn');
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            checkSettingsSyncHealth(true);
+        });
+    }
+
+    checkSettingsSyncHealth(false);
 }
 
 /**
@@ -115,11 +329,17 @@ function setupSettingsListeners(onSave, onReset) {
     const resetBtn = document.getElementById('resetSettingsBtn');
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
+        saveBtn.addEventListener('click', async () => {
             const prices = getPricesFromForm();
-            if (savePrices(prices)) {
-                showNotification('Price settings saved successfully!', 'success');
-                if (onSave) onSave(prices);
+            const result = await savePrices(prices);
+
+            if (result.ok) {
+                if (result.remoteSaved) {
+                    showNotification('Price settings saved and synced!', 'success');
+                } else {
+                    showNotification('Saved only on this device. Check API storage!', 'error');
+                }
+                if (onSave) onSave(result.prices);
             } else {
                 showNotification('Error saving settings!', 'error');
             }
@@ -127,11 +347,21 @@ function setupSettingsListeners(onSave, onReset) {
     }
 
     if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
+        resetBtn.addEventListener('click', async () => {
             if (confirm('Are you sure you want to reset to default prices?')) {
-                resetPrices();
+                const result = await resetPrices();
                 initSettingsForm(DEFAULT_PRICES);
-                showNotification('Prices reset to default!', 'success');
+
+                if (result.ok) {
+                    if (result.remoteReset) {
+                        showNotification('Prices reset to default and synced!', 'success');
+                    } else {
+                        showNotification('Reset only on this device. Check API storage!', 'error');
+                    }
+                } else {
+                    showNotification('Error resetting settings!', 'error');
+                }
+
                 if (onReset) onReset(DEFAULT_PRICES);
             }
         });

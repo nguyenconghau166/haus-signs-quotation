@@ -5,77 +5,91 @@
 
 // ==================== State ====================
 const state = {
-    prices: {},
-    letters: [],
-    logo: { name: '', type: 'illuminated', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
-    acrylicLogo: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
-    panel: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
-    lightbox: { style: null, size: null, quantity: 1, customDimensions: null },
-    anchor: {
-        productType: 'letter',
-        letter: { name: '', height: 0, heightInches: 0, charCount: 0 },
-        logo: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 },
-        panel: { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 }
-    },
-    quotationItems: [],
-    images: [],
-    dp: 0,
-    customer: {
-        name: localStorage.getItem('customerName') || '',
-        company: localStorage.getItem('customerCompany') || '',
-        phone: localStorage.getItem('customerPhone') || '',
-        email: localStorage.getItem('customerEmail') || ''
-    }
+  prices: {},
+  letters: [],
+  logo: {
+    name: "",
+    type: "illuminated",
+    length: 0,
+    width: 0,
+    lengthInches: 0,
+    widthInches: 0,
+  },
+  acrylicLogo: {
+    name: "",
+    length: 0,
+    width: 0,
+    lengthInches: 0,
+    widthInches: 0,
+  },
+  panel: { name: "", length: 0, width: 0, lengthInches: 0, widthInches: 0 },
+  lightbox: { style: null, size: null, quantity: 1, customDimensions: null },
+  anchor: {
+    productType: "letter",
+    letter: { name: "", height: 0, heightInches: 0, charCount: 0 },
+    logo: { name: "", length: 0, width: 0, lengthInches: 0, widthInches: 0 },
+    panel: { name: "", length: 0, width: 0, lengthInches: 0, widthInches: 0 },
+  },
+  quotationItems: [],
+  images: [],
+  dp: 0,
+  customer: {
+    name: localStorage.getItem("customerName") || "",
+    company: localStorage.getItem("customerCompany") || "",
+    phone: localStorage.getItem("customerPhone") || "",
+    email: localStorage.getItem("customerEmail") || "",
+  },
 };
 
 // ==================== Initialize ====================
-function init() {
-    // Load prices from settings
-    state.prices = loadPrices();
+async function init() {
+  // Load prices from settings
+  state.prices = await loadPrices();
 
-    // Initialize settings form
-    initSettingsForm(state.prices);
+  // Initialize settings form
+  initSettingsForm(state.prices);
 
-    // Setup settings listeners
-    setupSettingsListeners(
-        (newPrices) => {
-            state.prices = newPrices;
-            updateAllCalculations();
-        },
-        (defaultPrices) => {
-            state.prices = defaultPrices;
-            updateAllCalculations();
-        }
-    );
+  // Setup settings listeners
+  setupSettingsListeners(
+    (newPrices) => {
+      state.prices = newPrices;
+      updateAllCalculations();
+    },
+    (defaultPrices) => {
+      state.prices = defaultPrices;
+      updateAllCalculations();
+    },
+  );
+  setupSettingsHealthCheck();
 
-    // Apply custom lightbox formulas and render formula list
-    applyCustomLightboxFormulas();
-    renderLightboxFormulaList();
-    setupLightboxFormulaListeners();
+  // Apply custom lightbox formulas and render formula list
+  applyCustomLightboxFormulas();
+  renderLightboxFormulaList();
+  setupLightboxFormulaListeners();
 
-    // Set default date
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('quoteDate').value = today;
+  // Set default date
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("quoteDate").value = today;
 
-    // Add initial letter row
-    addLetterRow();
+  // Add initial letter row
+  addLetterRow();
 
-    // Render lightbox styles
-    renderLightboxStyles();
+  // Render lightbox styles
+  renderLightboxStyles();
 
-    // Setup event listeners
-    setupTabListeners();
-    setupSignageListeners();
-    setupLightboxListeners();
-    setupQuotationListeners();
-    setupImageListeners();
-    setupExportListeners();
-    setupAnchorPricingListeners(); // Anchor pricing comparison
-    setupSecretSettingsAccess(); // Hidden settings access
+  // Setup event listeners
+  setupTabListeners();
+  setupSignageListeners();
+  setupLightboxListeners();
+  setupQuotationListeners();
+  setupImageListeners();
+  setupExportListeners();
+  setupAnchorPricingListeners(); // Anchor pricing comparison
+  setupSecretSettingsAccess(); // Hidden settings access
 
-    // Initial render
-    renderQuotationItems();
-    updateSignageSummary();
+  // Initial render
+  renderQuotationItems();
+  updateSignageSummary();
 }
 
 // ==================== Secret Settings Access ====================
@@ -83,202 +97,226 @@ let logoClickCount = 0;
 let logoClickTimer = null;
 
 function setupSecretSettingsAccess() {
-    const logoIcon = document.querySelector('.logo-icon');
-    if (logoIcon) {
-        logoIcon.style.cursor = 'pointer';
-        logoIcon.addEventListener('click', handleSecretClick);
-    }
+  const logoIcon = document.querySelector(".logo-icon");
+  if (logoIcon) {
+    logoIcon.style.cursor = "pointer";
+    logoIcon.addEventListener("click", handleSecretClick);
+  }
 }
 
 function handleSecretClick() {
-    logoClickCount++;
+  logoClickCount++;
 
-    // Reset counter after 3 seconds of no clicks
-    if (logoClickTimer) clearTimeout(logoClickTimer);
-    logoClickTimer = setTimeout(() => {
-        logoClickCount = 0;
-    }, 3000);
+  // Reset counter after 3 seconds of no clicks
+  if (logoClickTimer) clearTimeout(logoClickTimer);
+  logoClickTimer = setTimeout(() => {
+    logoClickCount = 0;
+  }, 3000);
 
-    // After 5 clicks, show settings tab
-    if (logoClickCount >= 5) {
-        const settingsBtn = document.getElementById('settingsTabBtn');
-        if (settingsBtn) {
-            settingsBtn.style.display = 'flex';
-            settingsBtn.click();
-            showNotification('Admin Settings unlocked!', 'success');
-        }
-        logoClickCount = 0;
+  // After 5 clicks, show settings tab
+  if (logoClickCount >= 5) {
+    const settingsBtn = document.getElementById("settingsTabBtn");
+    if (settingsBtn) {
+      settingsBtn.style.display = "flex";
+      settingsBtn.click();
+      showNotification("Admin Settings unlocked!", "success");
     }
+    logoClickCount = 0;
+  }
 }
 
 // ==================== Tab Navigation ====================
 function setupTabListeners() {
-    const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabBtns = document.querySelectorAll(".tab-btn");
 
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.dataset.tab;
+  tabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tabId = btn.dataset.tab;
 
-            // Update active tab button
-            tabBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+      // Update active tab button
+      tabBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
 
-            // Show corresponding content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(`${tabId}-tab`).classList.add('active');
-        });
+      // Show corresponding content
+      document.querySelectorAll(".tab-content").forEach((content) => {
+        content.classList.remove("active");
+      });
+      document.getElementById(`${tabId}-tab`).classList.add("active");
     });
+  });
 }
 
 // ==================== Signage Tab ====================
 function setupSignageListeners() {
-    // Add letter button
-    document.getElementById('addLetterBtn').addEventListener('click', addLetterRow);
+  // Add letter button
+  document
+    .getElementById("addLetterBtn")
+    .addEventListener("click", addLetterRow);
 
-    // Logo name
-    document.getElementById('logoName').addEventListener('input', (e) => {
-        state.logo.name = e.target.value;
-        updateSignageSummary();
-    });
+  // Logo name
+  document.getElementById("logoName").addEventListener("input", (e) => {
+    state.logo.name = e.target.value;
+    updateSignageSummary();
+  });
 
-    // Logo type
-    document.getElementById('logoType').addEventListener('input', updateLogoCalculation);
+  // Logo type
+  document
+    .getElementById("logoType")
+    .addEventListener("input", updateLogoCalculation);
 
-    // Logo inches inputs (auto-convert to cm)
-    document.getElementById('logoLengthInches').addEventListener('input', (e) => {
-        const inches = parseFloat(e.target.value) || 0;
-        state.logo.lengthInches = inches;
-        state.logo.length = Math.round(inches * INCH_TO_CM * 10) / 10;
-        document.getElementById('logoLength').value = state.logo.length || '';
-        updateLogoCalculation();
-    });
-    document.getElementById('logoWidthInches').addEventListener('input', (e) => {
-        const inches = parseFloat(e.target.value) || 0;
-        state.logo.widthInches = inches;
-        state.logo.width = Math.round(inches * INCH_TO_CM * 10) / 10;
-        document.getElementById('logoWidth').value = state.logo.width || '';
-        updateLogoCalculation();
-    });
+  // Logo inches inputs (auto-convert to cm)
+  document.getElementById("logoLengthInches").addEventListener("input", (e) => {
+    const inches = parseFloat(e.target.value) || 0;
+    state.logo.lengthInches = inches;
+    state.logo.length = Math.round(inches * INCH_TO_CM * 10) / 10;
+    document.getElementById("logoLength").value = state.logo.length || "";
+    updateLogoCalculation();
+  });
+  document.getElementById("logoWidthInches").addEventListener("input", (e) => {
+    const inches = parseFloat(e.target.value) || 0;
+    state.logo.widthInches = inches;
+    state.logo.width = Math.round(inches * INCH_TO_CM * 10) / 10;
+    document.getElementById("logoWidth").value = state.logo.width || "";
+    updateLogoCalculation();
+  });
 
-    // Logo cm inputs (auto-convert to inches)
-    document.getElementById('logoLength').addEventListener('input', (e) => {
-        const cm = parseFloat(e.target.value) || 0;
-        state.logo.length = cm;
-        state.logo.lengthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
-        document.getElementById('logoLengthInches').value = state.logo.lengthInches || '';
-        updateLogoCalculation();
-    });
-    document.getElementById('logoWidth').addEventListener('input', (e) => {
-        const cm = parseFloat(e.target.value) || 0;
-        state.logo.width = cm;
-        state.logo.widthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
-        document.getElementById('logoWidthInches').value = state.logo.widthInches || '';
-        updateLogoCalculation();
-    });
+  // Logo cm inputs (auto-convert to inches)
+  document.getElementById("logoLength").addEventListener("input", (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.logo.length = cm;
+    state.logo.lengthInches = Math.round((cm / INCH_TO_CM) * 10) / 10;
+    document.getElementById("logoLengthInches").value =
+      state.logo.lengthInches || "";
+    updateLogoCalculation();
+  });
+  document.getElementById("logoWidth").addEventListener("input", (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.logo.width = cm;
+    state.logo.widthInches = Math.round((cm / INCH_TO_CM) * 10) / 10;
+    document.getElementById("logoWidthInches").value =
+      state.logo.widthInches || "";
+    updateLogoCalculation();
+  });
 
-    // Acrylic Logo name
-    document.getElementById('acrylicLogoName').addEventListener('input', (e) => {
-        state.acrylicLogo.name = e.target.value;
-        updateSignageSummary();
-    });
+  // Acrylic Logo name
+  document.getElementById("acrylicLogoName").addEventListener("input", (e) => {
+    state.acrylicLogo.name = e.target.value;
+    updateSignageSummary();
+  });
 
-    // Acrylic Logo inches inputs (auto-convert to cm)
-    document.getElementById('acrylicLogoLengthInches').addEventListener('input', (e) => {
-        const inches = parseFloat(e.target.value) || 0;
-        state.acrylicLogo.lengthInches = inches;
-        state.acrylicLogo.length = Math.round(inches * INCH_TO_CM * 10) / 10;
-        document.getElementById('acrylicLogoLength').value = state.acrylicLogo.length || '';
-        updateAcrylicLogoCalculation();
+  // Acrylic Logo inches inputs (auto-convert to cm)
+  document
+    .getElementById("acrylicLogoLengthInches")
+    .addEventListener("input", (e) => {
+      const inches = parseFloat(e.target.value) || 0;
+      state.acrylicLogo.lengthInches = inches;
+      state.acrylicLogo.length = Math.round(inches * INCH_TO_CM * 10) / 10;
+      document.getElementById("acrylicLogoLength").value =
+        state.acrylicLogo.length || "";
+      updateAcrylicLogoCalculation();
     });
-    document.getElementById('acrylicLogoWidthInches').addEventListener('input', (e) => {
-        const inches = parseFloat(e.target.value) || 0;
-        state.acrylicLogo.widthInches = inches;
-        state.acrylicLogo.width = Math.round(inches * INCH_TO_CM * 10) / 10;
-        document.getElementById('acrylicLogoWidth').value = state.acrylicLogo.width || '';
-        updateAcrylicLogoCalculation();
-    });
-
-    // Acrylic Logo cm inputs (auto-convert to inches)
-    document.getElementById('acrylicLogoLength').addEventListener('input', (e) => {
-        const cm = parseFloat(e.target.value) || 0;
-        state.acrylicLogo.length = cm;
-        state.acrylicLogo.lengthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
-        document.getElementById('acrylicLogoLengthInches').value = state.acrylicLogo.lengthInches || '';
-        updateAcrylicLogoCalculation();
-    });
-    document.getElementById('acrylicLogoWidth').addEventListener('input', (e) => {
-        const cm = parseFloat(e.target.value) || 0;
-        state.acrylicLogo.width = cm;
-        state.acrylicLogo.widthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
-        document.getElementById('acrylicLogoWidthInches').value = state.acrylicLogo.widthInches || '';
-        updateAcrylicLogoCalculation();
+  document
+    .getElementById("acrylicLogoWidthInches")
+    .addEventListener("input", (e) => {
+      const inches = parseFloat(e.target.value) || 0;
+      state.acrylicLogo.widthInches = inches;
+      state.acrylicLogo.width = Math.round(inches * INCH_TO_CM * 10) / 10;
+      document.getElementById("acrylicLogoWidth").value =
+        state.acrylicLogo.width || "";
+      updateAcrylicLogoCalculation();
     });
 
-    // Panel name
-    document.getElementById('panelName').addEventListener('input', (e) => {
-        state.panel.name = e.target.value;
-        updateSignageSummary();
+  // Acrylic Logo cm inputs (auto-convert to inches)
+  document
+    .getElementById("acrylicLogoLength")
+    .addEventListener("input", (e) => {
+      const cm = parseFloat(e.target.value) || 0;
+      state.acrylicLogo.length = cm;
+      state.acrylicLogo.lengthInches = Math.round((cm / INCH_TO_CM) * 10) / 10;
+      document.getElementById("acrylicLogoLengthInches").value =
+        state.acrylicLogo.lengthInches || "";
+      updateAcrylicLogoCalculation();
     });
+  document.getElementById("acrylicLogoWidth").addEventListener("input", (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.acrylicLogo.width = cm;
+    state.acrylicLogo.widthInches = Math.round((cm / INCH_TO_CM) * 10) / 10;
+    document.getElementById("acrylicLogoWidthInches").value =
+      state.acrylicLogo.widthInches || "";
+    updateAcrylicLogoCalculation();
+  });
 
-    // Panel inches inputs (auto-convert to cm)
-    document.getElementById('panelLengthInches').addEventListener('input', (e) => {
-        const inches = parseFloat(e.target.value) || 0;
-        state.panel.lengthInches = inches;
-        state.panel.length = Math.round(inches * INCH_TO_CM * 10) / 10;
-        document.getElementById('panelLength').value = state.panel.length || '';
-        updatePanelCalculation();
-    });
-    document.getElementById('panelWidthInches').addEventListener('input', (e) => {
-        const inches = parseFloat(e.target.value) || 0;
-        state.panel.widthInches = inches;
-        state.panel.width = Math.round(inches * INCH_TO_CM * 10) / 10;
-        document.getElementById('panelWidth').value = state.panel.width || '';
-        updatePanelCalculation();
-    });
+  // Panel name
+  document.getElementById("panelName").addEventListener("input", (e) => {
+    state.panel.name = e.target.value;
+    updateSignageSummary();
+  });
 
-    // Panel cm inputs (auto-convert to inches)
-    document.getElementById('panelLength').addEventListener('input', (e) => {
-        const cm = parseFloat(e.target.value) || 0;
-        state.panel.length = cm;
-        state.panel.lengthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
-        document.getElementById('panelLengthInches').value = state.panel.lengthInches || '';
-        updatePanelCalculation();
+  // Panel inches inputs (auto-convert to cm)
+  document
+    .getElementById("panelLengthInches")
+    .addEventListener("input", (e) => {
+      const inches = parseFloat(e.target.value) || 0;
+      state.panel.lengthInches = inches;
+      state.panel.length = Math.round(inches * INCH_TO_CM * 10) / 10;
+      document.getElementById("panelLength").value = state.panel.length || "";
+      updatePanelCalculation();
     });
-    document.getElementById('panelWidth').addEventListener('input', (e) => {
-        const cm = parseFloat(e.target.value) || 0;
-        state.panel.width = cm;
-        state.panel.widthInches = Math.round(cm / INCH_TO_CM * 10) / 10;
-        document.getElementById('panelWidthInches').value = state.panel.widthInches || '';
-        updatePanelCalculation();
-    });
+  document.getElementById("panelWidthInches").addEventListener("input", (e) => {
+    const inches = parseFloat(e.target.value) || 0;
+    state.panel.widthInches = inches;
+    state.panel.width = Math.round(inches * INCH_TO_CM * 10) / 10;
+    document.getElementById("panelWidth").value = state.panel.width || "";
+    updatePanelCalculation();
+  });
 
-    // Add to quotation button
-    document.getElementById('addToQuotationBtn').addEventListener('click', addSignageToQuotation);
+  // Panel cm inputs (auto-convert to inches)
+  document.getElementById("panelLength").addEventListener("input", (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.panel.length = cm;
+    state.panel.lengthInches = Math.round((cm / INCH_TO_CM) * 10) / 10;
+    document.getElementById("panelLengthInches").value =
+      state.panel.lengthInches || "";
+    updatePanelCalculation();
+  });
+  document.getElementById("panelWidth").addEventListener("input", (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    state.panel.width = cm;
+    state.panel.widthInches = Math.round((cm / INCH_TO_CM) * 10) / 10;
+    document.getElementById("panelWidthInches").value =
+      state.panel.widthInches || "";
+    updatePanelCalculation();
+  });
 
-    // Clear signage button
-    document.getElementById('clearSignageBtn').addEventListener('click', clearSignage);
+  // Add to quotation button
+  document
+    .getElementById("addToQuotationBtn")
+    .addEventListener("click", addSignageToQuotation);
+
+  // Clear signage button
+  document
+    .getElementById("clearSignageBtn")
+    .addEventListener("click", clearSignage);
 }
 
 function addLetterRow() {
-    const letterData = {
-        id: Date.now(),
-        name: '',
-        type: 'illuminated',
-        height: 0,
-        heightInches: 0,
-        charCount: 0
-    };
-    state.letters.push(letterData);
-    renderLetterRows();
+  const letterData = {
+    id: Date.now(),
+    name: "",
+    type: "illuminated",
+    height: 0,
+    heightInches: 0,
+    charCount: 0,
+  };
+  state.letters.push(letterData);
+  renderLetterRows();
 }
 
 function removeLetterRow(id) {
-    if (state.letters.length === 1) return;
-    state.letters = state.letters.filter(l => l.id !== id);
-    renderLetterRows();
-    updateSignageSummary();
+  if (state.letters.length === 1) return;
+  state.letters = state.letters.filter((l) => l.id !== id);
+  renderLetterRows();
+  updateSignageSummary();
 }
 
 // Conversion constant: 1 inch = 2.54 cm
@@ -286,309 +324,376 @@ const INCH_TO_CM = 2.54;
 
 // Utility function to count characters (excluding spaces, periods, commas)
 function countCharacters(text) {
-    if (!text) return 0;
-    // Exclude spaces, periods, commas from count
-    return text.replace(/[ .,]/g, '').length;
+  if (!text) return 0;
+  // Exclude spaces, periods, commas from count
+  return text.replace(/[ .,]/g, "").length;
 }
 
 function renderLetterRows() {
-    const container = document.getElementById('letterRows');
+  const container = document.getElementById("letterRows");
 
-    container.innerHTML = state.letters.map((letter, index) => `
+  container.innerHTML = state.letters
+    .map(
+      (letter, index) => `
     <div class="letter-row" data-id="${letter.id}">
       <div class="form-group letter-name-group">
         <label>Letter Content</label>
         <input type="text" class="letter-name" data-id="${letter.id}" 
-               value="${letter.name || ''}" placeholder="E.g: HAUS SIGNS">
+               value="${letter.name || ""}" placeholder="E.g: HAUS SIGNS">
       </div>
       <div class="form-group">
         <label>Letter Type</label>
         <select class="letter-type" data-id="${letter.id}">
-          ${LETTER_TYPES.map(t => `
-            <option value="${t.id}" ${letter.type === t.id ? 'selected' : ''}>${t.name}</option>
-          `).join('')}
+          ${LETTER_TYPES.map(
+            (t) => `
+            <option value="${t.id}" ${letter.type === t.id ? "selected" : ""}>${t.name}</option>
+          `,
+          ).join("")}
         </select>
       </div>
       <div class="form-group">
         <label>Height (inches)</label>
         <input type="number" class="letter-height-inches" data-id="${letter.id}" 
-               value="${letter.heightInches || ''}" placeholder="4" min="0" step="0.1">
+               value="${letter.heightInches || ""}" placeholder="4" min="0" step="0.1">
       </div>
       <div class="form-group">
         <label>Height (cm)</label>
         <input type="number" class="letter-height" data-id="${letter.id}" 
-               value="${letter.height || ''}" placeholder="10" min="0" step="0.1">
+               value="${letter.height || ""}" placeholder="10" min="0" step="0.1">
       </div>
       <div class="form-group" style="display: none;">
         <label>Letter Count</label>
         <input type="number" class="letter-count" data-id="${letter.id}" 
-               value="${letter.charCount || ''}" placeholder="0" min="0">
+               value="${letter.charCount || ""}" placeholder="0" min="0">
       </div>
       <div class="form-group result-display">
         <label>Price</label>
         <div class="result-value letter-price" data-id="${letter.id}">0 ₱</div>
       </div>
-      <button class="remove-btn" data-id="${letter.id}" ${state.letters.length === 1 ? 'disabled' : ''}>✕</button>
+      <button class="remove-btn" data-id="${letter.id}" ${state.letters.length === 1 ? "disabled" : ""}>✕</button>
     </div>
-  `).join('');
+  `,
+    )
+    .join("");
 
-    // Add event listeners for name
-    container.querySelectorAll('.letter-name').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const letter = state.letters.find(l => l.id === id);
-            if (letter) {
-                letter.name = e.target.value;
-                // Auto-count characters from content
-                letter.charCount = countCharacters(e.target.value);
-                // Update the hidden input field value
-                const countInput = container.querySelector(`.letter-count[data-id="${id}"]`);
-                if (countInput) countInput.value = letter.charCount;
-                // Recalculate price based on new character count
-                updateLetterCalculation(id);
-                updateSignageSummary();
-            }
-        });
+  // Add event listeners for name
+  container.querySelectorAll(".letter-name").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const id = parseInt(e.target.dataset.id);
+      const letter = state.letters.find((l) => l.id === id);
+      if (letter) {
+        letter.name = e.target.value;
+        // Auto-count characters from content
+        letter.charCount = countCharacters(e.target.value);
+        // Update the hidden input field value
+        const countInput = container.querySelector(
+          `.letter-count[data-id="${id}"]`,
+        );
+        if (countInput) countInput.value = letter.charCount;
+        // Recalculate price based on new character count
+        updateLetterCalculation(id);
+        updateSignageSummary();
+      }
     });
+  });
 
-    container.querySelectorAll('.letter-type').forEach(select => {
-        select.addEventListener('change', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const letter = state.letters.find(l => l.id === id);
-            if (letter) {
-                letter.type = e.target.value;
-                updateLetterCalculation(id);
-                updateSignageSummary();
-            }
-        });
+  container.querySelectorAll(".letter-type").forEach((select) => {
+    select.addEventListener("change", (e) => {
+      const id = parseInt(e.target.dataset.id);
+      const letter = state.letters.find((l) => l.id === id);
+      if (letter) {
+        letter.type = e.target.value;
+        updateLetterCalculation(id);
+        updateSignageSummary();
+      }
     });
+  });
 
-    // Inches input - auto convert to cm
-    container.querySelectorAll('.letter-height-inches').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const letter = state.letters.find(l => l.id === id);
-            if (letter) {
-                const inches = parseFloat(e.target.value) || 0;
-                letter.heightInches = inches;
-                letter.height = Math.round(inches * INCH_TO_CM * 10) / 10; // Round to 1 decimal
-                // Update cm input
-                const cmInput = container.querySelector(`.letter-height[data-id="${id}"]`);
-                if (cmInput) cmInput.value = letter.height || '';
-                updateLetterCalculation(id);
-                updateSignageSummary();
-            }
-        });
+  // Inches input - auto convert to cm
+  container.querySelectorAll(".letter-height-inches").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const id = parseInt(e.target.dataset.id);
+      const letter = state.letters.find((l) => l.id === id);
+      if (letter) {
+        const inches = parseFloat(e.target.value) || 0;
+        letter.heightInches = inches;
+        letter.height = Math.round(inches * INCH_TO_CM * 10) / 10; // Round to 1 decimal
+        // Update cm input
+        const cmInput = container.querySelector(
+          `.letter-height[data-id="${id}"]`,
+        );
+        if (cmInput) cmInput.value = letter.height || "";
+        updateLetterCalculation(id);
+        updateSignageSummary();
+      }
     });
+  });
 
-    // CM input - auto convert to inches
-    container.querySelectorAll('.letter-height').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const letter = state.letters.find(l => l.id === id);
-            if (letter) {
-                const cm = parseFloat(e.target.value) || 0;
-                letter.height = cm;
-                letter.heightInches = Math.round(cm / INCH_TO_CM * 10) / 10; // Round to 1 decimal
-                // Update inches input
-                const inchInput = container.querySelector(`.letter-height-inches[data-id="${id}"]`);
-                if (inchInput) inchInput.value = letter.heightInches || '';
-                updateLetterCalculation(id);
-                updateSignageSummary();
-            }
-        });
+  // CM input - auto convert to inches
+  container.querySelectorAll(".letter-height").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const id = parseInt(e.target.dataset.id);
+      const letter = state.letters.find((l) => l.id === id);
+      if (letter) {
+        const cm = parseFloat(e.target.value) || 0;
+        letter.height = cm;
+        letter.heightInches = Math.round((cm / INCH_TO_CM) * 10) / 10; // Round to 1 decimal
+        // Update inches input
+        const inchInput = container.querySelector(
+          `.letter-height-inches[data-id="${id}"]`,
+        );
+        if (inchInput) inchInput.value = letter.heightInches || "";
+        updateLetterCalculation(id);
+        updateSignageSummary();
+      }
     });
+  });
 
-    container.querySelectorAll('.letter-count').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const letter = state.letters.find(l => l.id === id);
-            if (letter) {
-                letter.charCount = parseInt(e.target.value) || 0;
-                updateLetterCalculation(id);
-                updateSignageSummary();
-            }
-        });
+  container.querySelectorAll(".letter-count").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const id = parseInt(e.target.dataset.id);
+      const letter = state.letters.find((l) => l.id === id);
+      if (letter) {
+        letter.charCount = parseInt(e.target.value) || 0;
+        updateLetterCalculation(id);
+        updateSignageSummary();
+      }
     });
+  });
 
-    container.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            removeLetterRow(id);
-        });
+  container.querySelectorAll(".remove-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const id = parseInt(e.target.dataset.id);
+      removeLetterRow(id);
     });
+  });
 
-    // Update calculations for all existing letters
-    state.letters.forEach(letter => {
-        updateLetterCalculation(letter.id);
-    });
+  // Update calculations for all existing letters
+  state.letters.forEach((letter) => {
+    updateLetterCalculation(letter.id);
+  });
 }
 
 // Minimum letter height in cm
-const MIN_LETTER_HEIGHT = 15;         // For Illuminated letters
+const MIN_LETTER_HEIGHT = 15; // For Illuminated letters
 const MIN_LETTER_HEIGHT_NON_ILLUMINATED = 8; // For Non-illuminated letters
 
 function getMinHeightForType(letterType) {
-    if (letterType === 'nonIlluminated') return MIN_LETTER_HEIGHT_NON_ILLUMINATED;
-    return MIN_LETTER_HEIGHT;
+  if (letterType === "nonIlluminated") return MIN_LETTER_HEIGHT_NON_ILLUMINATED;
+  return MIN_LETTER_HEIGHT;
 }
 
 function updateLetterCalculation(id) {
-    const letter = state.letters.find(l => l.id === id);
-    if (!letter) return;
+  const letter = state.letters.find((l) => l.id === id);
+  if (!letter) return;
 
-    const priceEl = document.querySelector(`.letter-price[data-id="${id}"]`);
-    if (!priceEl) return;
+  const priceEl = document.querySelector(`.letter-price[data-id="${id}"]`);
+  if (!priceEl) return;
 
-    // Validate minimum height based on letter type
-    const minHeight = getMinHeightForType(letter.type);
-    if (letter.height > 0 && letter.height < minHeight) {
-        priceEl.textContent = `⚠️ Minimum ${minHeight}cm`;
-        priceEl.style.color = 'var(--danger)';
-        letter.isValid = false;
-        updateSignageSummary();
-        return;
-    }
-
-    letter.isValid = true;
-    priceEl.style.color = '';
-
-    const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
-    priceEl.textContent = `${formatNumber(result.price)} ₱`;
+  // Validate minimum height based on letter type
+  const minHeight = getMinHeightForType(letter.type);
+  if (letter.height > 0 && letter.height < minHeight) {
+    priceEl.textContent = `⚠️ Minimum ${minHeight}cm`;
+    priceEl.style.color = "var(--danger)";
+    letter.isValid = false;
     updateSignageSummary();
+    return;
+  }
+
+  letter.isValid = true;
+  priceEl.style.color = "";
+
+  const result = calculateLetterPrice(
+    letter.height,
+    letter.charCount,
+    letter.type,
+    state.prices,
+  );
+  priceEl.textContent = `${formatNumber(result.price)} ₱`;
+  updateSignageSummary();
 }
 
 function updateLogoCalculation() {
-    state.logo.type = document.getElementById('logoType').value;
+  state.logo.type = document.getElementById("logoType").value;
 
-    const result = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
+  const result = calculateLogoPrice(
+    state.logo.length,
+    state.logo.width,
+    state.logo.type,
+    state.prices,
+  );
 
-    document.getElementById('logoResult').textContent = `${formatNumber(result.price)} ₱`;
+  document.getElementById("logoResult").textContent =
+    `${formatNumber(result.price)} ₱`;
 
-    updateSignageSummary();
+  updateSignageSummary();
 }
 
 function updateAcrylicLogoCalculation() {
-    const result = calculateAcrylicLogoPrice(state.acrylicLogo.length, state.acrylicLogo.width, state.prices);
+  const result = calculateAcrylicLogoPrice(
+    state.acrylicLogo.length,
+    state.acrylicLogo.width,
+    state.prices,
+  );
 
-    document.getElementById('acrylicLogoResult').textContent = `${formatNumber(result.price)} ₱`;
+  document.getElementById("acrylicLogoResult").textContent =
+    `${formatNumber(result.price)} ₱`;
 
-    updateSignageSummary();
+  updateSignageSummary();
 }
 
 function updatePanelCalculation() {
-    const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
+  const result = calculatePanelPrice(
+    state.panel.length,
+    state.panel.width,
+    state.prices,
+  );
 
-    document.getElementById('panelResult').textContent = `${formatNumber(result.price)} ₱`;
+  document.getElementById("panelResult").textContent =
+    `${formatNumber(result.price)} ₱`;
 
-    updateSignageSummary();
+  updateSignageSummary();
 }
 
 function updateSignageSummary() {
-    const summary = document.getElementById('signageSummary');
-    let totalPrice = 0;
-    let totalLetterPrice = 0; // Track total price of letters for surcharge calculation
-    let rows = [];
+  const summary = document.getElementById("signageSummary");
+  let totalPrice = 0;
+  let totalLetterPrice = 0; // Track total price of letters for surcharge calculation
+  let rows = [];
 
-    // First pass: Calculate total letter price to determine surcharge
-    let lettersWithPrice = [];
-    state.letters.forEach((letter, index) => {
-        const minHeight = getMinHeightForType(letter.type);
-        if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
-            const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
-            lettersWithPrice.push({ ...letter, price: result.price, index: index });
-            totalLetterPrice += result.price;
-        }
+  // First pass: Calculate total letter price to determine surcharge
+  let lettersWithPrice = [];
+  state.letters.forEach((letter, index) => {
+    const minHeight = getMinHeightForType(letter.type);
+    if (
+      letter.height >= minHeight &&
+      letter.charCount > 0 &&
+      letter.isValid !== false
+    ) {
+      const result = calculateLetterPrice(
+        letter.height,
+        letter.charCount,
+        letter.type,
+        state.prices,
+      );
+      lettersWithPrice.push({ ...letter, price: result.price, index: index });
+      totalLetterPrice += result.price;
+    }
+  });
+
+  // Calculate surcharge based on dynamic settings
+  const threshold1 =
+    state.prices.surchargeThreshold1 || DEFAULT_PRICES.surchargeThreshold1;
+  const amount1 =
+    state.prices.surchargeAmount1 || DEFAULT_PRICES.surchargeAmount1;
+  const threshold2 =
+    state.prices.surchargeThreshold2 || DEFAULT_PRICES.surchargeThreshold2;
+  const amount2 =
+    state.prices.surchargeAmount2 || DEFAULT_PRICES.surchargeAmount2;
+
+  let surcharge = 0;
+  if (totalLetterPrice > 0) {
+    if (totalLetterPrice < threshold1) {
+      surcharge = amount1;
+    } else if (totalLetterPrice < threshold2) {
+      surcharge = amount2;
+    }
+  }
+
+  // Second pass: Generate rows and apply surcharge to the first valid letter item
+  let surchargeApplied = false;
+
+  lettersWithPrice.forEach((item) => {
+    const typeInfo = LETTER_TYPES.find((t) => t.id === item.type);
+    const displayName = item.name || `Raised Letters ${item.index + 1}`;
+
+    // Add surcharge to the first item if applicable
+    let displayPrice = item.price;
+    let label = `${displayName}: ${typeInfo?.name || ""} (${item.height}cm × ${item.charCount} letters)`;
+
+    if (surcharge > 0 && !surchargeApplied) {
+      displayPrice += surcharge;
+      surchargeApplied = true;
+      // Optionally append note about surcharge, but user asked to "hide" it sort of
+      // "cộng thẳng giá vào báo giá chứ đừng tạo thành 1 sản phẩm mới"
+      // We can just show the total price.
+    }
+
+    rows.push({
+      label: label,
+      value: displayPrice,
     });
+    totalPrice += displayPrice;
+  });
 
-    // Calculate surcharge based on dynamic settings
-    const threshold1 = state.prices.surchargeThreshold1 || DEFAULT_PRICES.surchargeThreshold1;
-    const amount1 = state.prices.surchargeAmount1 || DEFAULT_PRICES.surchargeAmount1;
-    const threshold2 = state.prices.surchargeThreshold2 || DEFAULT_PRICES.surchargeThreshold2;
-    const amount2 = state.prices.surchargeAmount2 || DEFAULT_PRICES.surchargeAmount2;
-
-    let surcharge = 0;
-    if (totalLetterPrice > 0) {
-        if (totalLetterPrice < threshold1) {
-            surcharge = amount1;
-        } else if (totalLetterPrice < threshold2) {
-            surcharge = amount2;
-        }
-    }
-
-    // Second pass: Generate rows and apply surcharge to the first valid letter item
-    let surchargeApplied = false;
-
-    lettersWithPrice.forEach((item) => {
-        const typeInfo = LETTER_TYPES.find(t => t.id === item.type);
-        const displayName = item.name || `Raised Letters ${item.index + 1}`;
-
-        // Add surcharge to the first item if applicable
-        let displayPrice = item.price;
-        let label = `${displayName}: ${typeInfo?.name || ''} (${item.height}cm × ${item.charCount} letters)`;
-
-        if (surcharge > 0 && !surchargeApplied) {
-            displayPrice += surcharge;
-            surchargeApplied = true;
-            // Optionally append note about surcharge, but user asked to "hide" it sort of
-            // "cộng thẳng giá vào báo giá chứ đừng tạo thành 1 sản phẩm mới"
-            // We can just show the total price.
-        }
-
-        rows.push({
-            label: label,
-            value: displayPrice
-        });
-        totalPrice += displayPrice;
+  // Logo
+  if (state.logo.length > 0 && state.logo.width > 0) {
+    const result = calculateLogoPrice(
+      state.logo.length,
+      state.logo.width,
+      state.logo.type,
+      state.prices,
+    );
+    const typeInfo = LETTER_TYPES.find((t) => t.id === state.logo.type);
+    const displayName = state.logo.name || "Logo";
+    rows.push({
+      label: `${displayName}: ${typeInfo?.name || ""} (${state.logo.length}×${state.logo.width}cm)`,
+      value: result.price,
     });
+    totalPrice += result.price;
+  }
 
-    // Logo
-    if (state.logo.length > 0 && state.logo.width > 0) {
-        const result = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
-        const typeInfo = LETTER_TYPES.find(t => t.id === state.logo.type);
-        const displayName = state.logo.name || 'Logo';
-        rows.push({
-            label: `${displayName}: ${typeInfo?.name || ''} (${state.logo.length}×${state.logo.width}cm)`,
-            value: result.price
-        });
-        totalPrice += result.price;
-    }
+  // Removed separate surcharge display block as it's now integrated
 
-    // Removed separate surcharge display block as it's now integrated
+  // Acrylic Logo
+  if (state.acrylicLogo.length > 0 && state.acrylicLogo.width > 0) {
+    const result = calculateAcrylicLogoPrice(
+      state.acrylicLogo.length,
+      state.acrylicLogo.width,
+      state.prices,
+    );
+    const displayName =
+      state.acrylicLogo.name || "Illuminated Acrylic Logo (Round)";
+    rows.push({
+      label: `${displayName} (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
+      value: result.price,
+    });
+    totalPrice += result.price;
+  }
 
-    // Acrylic Logo
-    if (state.acrylicLogo.length > 0 && state.acrylicLogo.width > 0) {
-        const result = calculateAcrylicLogoPrice(state.acrylicLogo.length, state.acrylicLogo.width, state.prices);
-        const displayName = state.acrylicLogo.name || 'Illuminated Acrylic Logo (Round)';
-        rows.push({
-            label: `${displayName} (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
-            value: result.price
-        });
-        totalPrice += result.price;
-    }
+  // Panel
+  if (state.panel.length > 0 && state.panel.width > 0) {
+    const result = calculatePanelPrice(
+      state.panel.length,
+      state.panel.width,
+      state.prices,
+    );
+    const displayName = state.panel.name || "Alu Panel";
+    rows.push({
+      label: `${displayName} (${state.panel.length}×${state.panel.width}cm)`,
+      value: result.price,
+    });
+    totalPrice += result.price;
+  }
 
-    // Panel
-    if (state.panel.length > 0 && state.panel.width > 0) {
-        const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
-        const displayName = state.panel.name || 'Alu Panel';
-        rows.push({
-            label: `${displayName} (${state.panel.length}×${state.panel.width}cm)`,
-            value: result.price
-        });
-        totalPrice += result.price;
-    }
+  if (rows.length === 0) {
+    summary.innerHTML =
+      '<p style="color: var(--text-muted); text-align: center;">No products yet</p>';
+    return;
+  }
 
-    if (rows.length === 0) {
-        summary.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No products yet</p>';
-        return;
-    }
-
-    summary.innerHTML = rows.map(row => `
+  summary.innerHTML =
+    rows
+      .map(
+        (row) => `
     <div class="summary-row">
       <span class="label">${row.label}</span>
       <span class="value">${formatNumber(row.value)} ₱</span>
     </div>
-  `).join('') + `
+  `,
+      )
+      .join("") +
+    `
     <div class="summary-row total">
       <span class="label">Total</span>
       <span class="value">${formatNumber(totalPrice)} ₱</span>
@@ -597,472 +702,570 @@ function updateSignageSummary() {
 }
 
 function addSignageToQuotation() {
-    // Track if any illuminated products are added
-    let hasIlluminatedProduct = false;
+  // Track if any illuminated products are added
+  let hasIlluminatedProduct = false;
 
-    // Calculate total letter price for surcharge
-    let totalLetterPrice = 0;
-    let lettersWithPrice = [];
+  // Calculate total letter price for surcharge
+  let totalLetterPrice = 0;
+  let lettersWithPrice = [];
 
-    // First pass: Calculate prices and total
-    state.letters.forEach((letter, index) => {
-        const minHeight = getMinHeightForType(letter.type);
-        if (letter.height >= minHeight && letter.charCount > 0 && letter.isValid !== false) {
-            const result = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
-            lettersWithPrice.push({ ...letter, price: result.price, index: index });
-            totalLetterPrice += result.price;
-        }
+  // First pass: Calculate prices and total
+  state.letters.forEach((letter, index) => {
+    const minHeight = getMinHeightForType(letter.type);
+    if (
+      letter.height >= minHeight &&
+      letter.charCount > 0 &&
+      letter.isValid !== false
+    ) {
+      const result = calculateLetterPrice(
+        letter.height,
+        letter.charCount,
+        letter.type,
+        state.prices,
+      );
+      lettersWithPrice.push({ ...letter, price: result.price, index: index });
+      totalLetterPrice += result.price;
+    }
+  });
+
+  // Calculate surcharge based on dynamic settings
+  const threshold1 =
+    state.prices.surchargeThreshold1 || DEFAULT_PRICES.surchargeThreshold1;
+  const amount1 =
+    state.prices.surchargeAmount1 || DEFAULT_PRICES.surchargeAmount1;
+  const threshold2 =
+    state.prices.surchargeThreshold2 || DEFAULT_PRICES.surchargeThreshold2;
+  const amount2 =
+    state.prices.surchargeAmount2 || DEFAULT_PRICES.surchargeAmount2;
+
+  let surcharge = 0;
+  if (totalLetterPrice > 0) {
+    if (totalLetterPrice < threshold1) {
+      surcharge = amount1;
+    } else if (totalLetterPrice < threshold2) {
+      surcharge = amount2;
+    }
+  }
+
+  // Second pass: Add to quotation items
+  let surchargeApplied = false;
+
+  lettersWithPrice.forEach((item) => {
+    const typeInfo = LETTER_TYPES.find((t) => t.id === item.type);
+    const displayName = item.name || `Raised Letters`;
+
+    let displayPrice = item.price;
+
+    // Add surcharge to first item
+    if (surcharge > 0 && !surchargeApplied) {
+      displayPrice += surcharge;
+      surchargeApplied = true;
+    }
+
+    state.quotationItems.push({
+      description: `${displayName} - ${typeInfo?.name || ""} (${item.height}cm x ${item.charCount} letters)`,
+      price: displayPrice,
     });
 
-    // Calculate surcharge based on dynamic settings
-    const threshold1 = state.prices.surchargeThreshold1 || DEFAULT_PRICES.surchargeThreshold1;
-    const amount1 = state.prices.surchargeAmount1 || DEFAULT_PRICES.surchargeAmount1;
-    const threshold2 = state.prices.surchargeThreshold2 || DEFAULT_PRICES.surchargeThreshold2;
-    const amount2 = state.prices.surchargeAmount2 || DEFAULT_PRICES.surchargeAmount2;
-
-    let surcharge = 0;
-    if (totalLetterPrice > 0) {
-        if (totalLetterPrice < threshold1) {
-            surcharge = amount1;
-        } else if (totalLetterPrice < threshold2) {
-            surcharge = amount2;
-        }
+    // Check if illuminated
+    if (item.type === "illuminated") {
+      hasIlluminatedProduct = true;
     }
+  });
 
-    // Second pass: Add to quotation items
-    let surchargeApplied = false;
-
-    lettersWithPrice.forEach((item) => {
-        const typeInfo = LETTER_TYPES.find(t => t.id === item.type);
-        const displayName = item.name || `Raised Letters`;
-
-        let displayPrice = item.price;
-
-        // Add surcharge to first item
-        if (surcharge > 0 && !surchargeApplied) {
-            displayPrice += surcharge;
-            surchargeApplied = true;
-        }
-
-        state.quotationItems.push({
-            description: `${displayName} - ${typeInfo?.name || ''} (${item.height}cm x ${item.charCount} letters)`,
-            price: displayPrice
-        });
-
-        // Check if illuminated
-        if (item.type === 'illuminated') {
-            hasIlluminatedProduct = true;
-        }
+  // Add logo
+  if (state.logo.length > 0 && state.logo.width > 0) {
+    const result = calculateLogoPrice(
+      state.logo.length,
+      state.logo.width,
+      state.logo.type,
+      state.prices,
+    );
+    const typeInfo = LETTER_TYPES.find((t) => t.id === state.logo.type);
+    const displayName = state.logo.name || "Logo";
+    state.quotationItems.push({
+      description: `${displayName} - ${typeInfo?.name || ""} (${state.logo.length}×${state.logo.width}cm)`,
+      price: result.price,
     });
 
-    // Add logo
-    if (state.logo.length > 0 && state.logo.width > 0) {
-        const result = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
-        const typeInfo = LETTER_TYPES.find(t => t.id === state.logo.type);
-        const displayName = state.logo.name || 'Logo';
-        state.quotationItems.push({
-            description: `${displayName} - ${typeInfo?.name || ''} (${state.logo.length}×${state.logo.width}cm)`,
-            price: result.price
-        });
-
-        // Check if illuminated
-        if (state.logo.type === 'illuminated') {
-            hasIlluminatedProduct = true;
-        }
+    // Check if illuminated
+    if (state.logo.type === "illuminated") {
+      hasIlluminatedProduct = true;
     }
+  }
 
-    // Add acrylic logo
-    if (state.acrylicLogo.length > 0 && state.acrylicLogo.width > 0) {
-        const result = calculateAcrylicLogoPrice(state.acrylicLogo.length, state.acrylicLogo.width, state.prices);
-        const displayName = state.acrylicLogo.name || 'Illuminated Acrylic Logo';
-        state.quotationItems.push({
-            description: `${displayName} - Illuminated Acrylic Logo (Round) (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
-            price: result.price
-        });
+  // Add acrylic logo
+  if (state.acrylicLogo.length > 0 && state.acrylicLogo.width > 0) {
+    const result = calculateAcrylicLogoPrice(
+      state.acrylicLogo.length,
+      state.acrylicLogo.width,
+      state.prices,
+    );
+    const displayName = state.acrylicLogo.name || "Illuminated Acrylic Logo";
+    state.quotationItems.push({
+      description: `${displayName} - Illuminated Acrylic Logo (Round) (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
+      price: result.price,
+    });
 
-        // Acrylic logo is always illuminated
-        hasIlluminatedProduct = true;
-    }
+    // Acrylic logo is always illuminated
+    hasIlluminatedProduct = true;
+  }
 
-    // Add panel
-    if (state.panel.length > 0 && state.panel.width > 0) {
-        const result = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
-        const displayName = state.panel.name || 'Alu Panel';
-        state.quotationItems.push({
-            description: `${displayName} (${state.panel.length}×${state.panel.width}cm)`,
-            price: result.price
-        });
-    }
+  // Add panel
+  if (state.panel.length > 0 && state.panel.width > 0) {
+    const result = calculatePanelPrice(
+      state.panel.length,
+      state.panel.width,
+      state.prices,
+    );
+    const displayName = state.panel.name || "Alu Panel";
+    state.quotationItems.push({
+      description: `${displayName} (${state.panel.length}×${state.panel.width}cm)`,
+      price: result.price,
+    });
+  }
 
-    // Add FREE Sign Board bonus for illuminated orders
-    if (hasIlluminatedProduct) {
-        state.quotationItems.push({
-            description: '🎁 FREE BONUS: Sign Board/Frame (Alu Panel Background) - Gift for Illuminated Letter Orders',
-            price: 0
-        });
-    }
+  // Add FREE Sign Board bonus for illuminated orders
+  if (hasIlluminatedProduct) {
+    state.quotationItems.push({
+      description:
+        "🎁 FREE BONUS: Sign Board/Frame (Alu Panel Background) - Gift for Illuminated Letter Orders",
+      price: 0,
+    });
+  }
 
-    renderQuotationItems();
-    clearSignage();
+  renderQuotationItems();
+  clearSignage();
 
-    // Switch to quotation tab
-    document.querySelector('[data-tab="quotation"]').click();
+  // Switch to quotation tab
+  document.querySelector('[data-tab="quotation"]').click();
 
-    showNotification('Added to quotation!' + (hasIlluminatedProduct ? ' 🎁 FREE Sign Board/Frame included!' : ''), 'success');
+  showNotification(
+    "Added to quotation!" +
+      (hasIlluminatedProduct ? " 🎁 FREE Sign Board/Frame included!" : ""),
+    "success",
+  );
 }
 
 function clearSignage() {
-    state.letters = [];
-    addLetterRow();
+  state.letters = [];
+  addLetterRow();
 
-    state.logo = { name: '', type: 'illuminated', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
-    document.getElementById('logoName').value = '';
-    document.getElementById('logoType').value = 'illuminated';
-    document.getElementById('logoLengthInches').value = '';
-    document.getElementById('logoLength').value = '';
-    document.getElementById('logoWidthInches').value = '';
-    document.getElementById('logoWidth').value = '';
-    document.getElementById('logoResult').textContent = '0 ₱';
+  state.logo = {
+    name: "",
+    type: "illuminated",
+    length: 0,
+    width: 0,
+    lengthInches: 0,
+    widthInches: 0,
+  };
+  document.getElementById("logoName").value = "";
+  document.getElementById("logoType").value = "illuminated";
+  document.getElementById("logoLengthInches").value = "";
+  document.getElementById("logoLength").value = "";
+  document.getElementById("logoWidthInches").value = "";
+  document.getElementById("logoWidth").value = "";
+  document.getElementById("logoResult").textContent = "0 ₱";
 
-    state.acrylicLogo = { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
-    document.getElementById('acrylicLogoName').value = '';
-    document.getElementById('acrylicLogoLengthInches').value = '';
-    document.getElementById('acrylicLogoLength').value = '';
-    document.getElementById('acrylicLogoWidthInches').value = '';
-    document.getElementById('acrylicLogoWidth').value = '';
-    document.getElementById('acrylicLogoResult').textContent = '0 ₱';
+  state.acrylicLogo = {
+    name: "",
+    length: 0,
+    width: 0,
+    lengthInches: 0,
+    widthInches: 0,
+  };
+  document.getElementById("acrylicLogoName").value = "";
+  document.getElementById("acrylicLogoLengthInches").value = "";
+  document.getElementById("acrylicLogoLength").value = "";
+  document.getElementById("acrylicLogoWidthInches").value = "";
+  document.getElementById("acrylicLogoWidth").value = "";
+  document.getElementById("acrylicLogoResult").textContent = "0 ₱";
 
-    state.panel = { name: '', length: 0, width: 0, lengthInches: 0, widthInches: 0 };
-    document.getElementById('panelName').value = '';
-    document.getElementById('panelLengthInches').value = '';
-    document.getElementById('panelLength').value = '';
-    document.getElementById('panelWidthInches').value = '';
-    document.getElementById('panelWidth').value = '';
-    document.getElementById('panelResult').textContent = '0 ₱';
+  state.panel = {
+    name: "",
+    length: 0,
+    width: 0,
+    lengthInches: 0,
+    widthInches: 0,
+  };
+  document.getElementById("panelName").value = "";
+  document.getElementById("panelLengthInches").value = "";
+  document.getElementById("panelLength").value = "";
+  document.getElementById("panelWidthInches").value = "";
+  document.getElementById("panelWidth").value = "";
+  document.getElementById("panelResult").textContent = "0 ₱";
 
-    updateSignageSummary();
+  updateSignageSummary();
 }
 
 // ==================== Lightbox Tab ====================
 function setupLightboxListeners() {
-    // Quantity input
-    document.getElementById('lightboxQty').addEventListener('input', updateLightboxCalculation);
+  // Quantity input
+  document
+    .getElementById("lightboxQty")
+    .addEventListener("input", updateLightboxCalculation);
 
-    // Custom size inputs - Inches (auto-convert to cm)
-    document.getElementById('customWidthInches').addEventListener('input', (e) => {
-        const inches = parseFloat(e.target.value) || 0;
-        const cm = Math.round(inches * INCH_TO_CM * 10) / 10;
-        document.getElementById('customWidth').value = cm || '';
-        updateLightboxCalculation();
+  // Custom size inputs - Inches (auto-convert to cm)
+  document
+    .getElementById("customWidthInches")
+    .addEventListener("input", (e) => {
+      const inches = parseFloat(e.target.value) || 0;
+      const cm = Math.round(inches * INCH_TO_CM * 10) / 10;
+      document.getElementById("customWidth").value = cm || "";
+      updateLightboxCalculation();
     });
-    document.getElementById('customHeightInches').addEventListener('input', (e) => {
-        const inches = parseFloat(e.target.value) || 0;
-        const cm = Math.round(inches * INCH_TO_CM * 10) / 10;
-        document.getElementById('customHeight').value = cm || '';
-        updateLightboxCalculation();
+  document
+    .getElementById("customHeightInches")
+    .addEventListener("input", (e) => {
+      const inches = parseFloat(e.target.value) || 0;
+      const cm = Math.round(inches * INCH_TO_CM * 10) / 10;
+      document.getElementById("customHeight").value = cm || "";
+      updateLightboxCalculation();
     });
-    document.getElementById('customDepthInches').addEventListener('input', (e) => {
-        const inches = parseFloat(e.target.value) || 0;
-        const cm = Math.round(inches * INCH_TO_CM * 10) / 10;
-        document.getElementById('customDepth').value = cm || '';
-        updateLightboxCalculation();
-    });
-
-    // Custom size inputs - CM (auto-convert to inches)
-    document.getElementById('customWidth').addEventListener('input', (e) => {
-        const cm = parseFloat(e.target.value) || 0;
-        const inches = Math.round(cm / INCH_TO_CM * 10) / 10;
-        document.getElementById('customWidthInches').value = inches || '';
-        updateLightboxCalculation();
-    });
-    document.getElementById('customHeight').addEventListener('input', (e) => {
-        const cm = parseFloat(e.target.value) || 0;
-        const inches = Math.round(cm / INCH_TO_CM * 10) / 10;
-        document.getElementById('customHeightInches').value = inches || '';
-        updateLightboxCalculation();
-    });
-    document.getElementById('customDepth').addEventListener('input', (e) => {
-        const cm = parseFloat(e.target.value) || 0;
-        const inches = Math.round(cm / INCH_TO_CM * 10) / 10;
-        document.getElementById('customDepthInches').value = inches || '';
-        updateLightboxCalculation();
+  document
+    .getElementById("customDepthInches")
+    .addEventListener("input", (e) => {
+      const inches = parseFloat(e.target.value) || 0;
+      const cm = Math.round(inches * INCH_TO_CM * 10) / 10;
+      document.getElementById("customDepth").value = cm || "";
+      updateLightboxCalculation();
     });
 
-    // Add to quotation
-    document.getElementById('addLightboxToQuotationBtn').addEventListener('click', addLightboxToQuotation);
+  // Custom size inputs - CM (auto-convert to inches)
+  document.getElementById("customWidth").addEventListener("input", (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    const inches = Math.round((cm / INCH_TO_CM) * 10) / 10;
+    document.getElementById("customWidthInches").value = inches || "";
+    updateLightboxCalculation();
+  });
+  document.getElementById("customHeight").addEventListener("input", (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    const inches = Math.round((cm / INCH_TO_CM) * 10) / 10;
+    document.getElementById("customHeightInches").value = inches || "";
+    updateLightboxCalculation();
+  });
+  document.getElementById("customDepth").addEventListener("input", (e) => {
+    const cm = parseFloat(e.target.value) || 0;
+    const inches = Math.round((cm / INCH_TO_CM) * 10) / 10;
+    document.getElementById("customDepthInches").value = inches || "";
+    updateLightboxCalculation();
+  });
+
+  // Add to quotation
+  document
+    .getElementById("addLightboxToQuotationBtn")
+    .addEventListener("click", addLightboxToQuotation);
 }
 
 function renderLightboxStyles() {
-    const container = document.getElementById('lightboxStyles');
+  const container = document.getElementById("lightboxStyles");
 
-    container.innerHTML = Object.entries(LIGHTBOX_STYLES).map(([id, style]) => `
+  container.innerHTML = Object.entries(LIGHTBOX_STYLES)
+    .map(
+      ([id, style]) => `
     <div class="lightbox-style-card" data-style="${id}">
       <div class="style-number">${id}</div>
-      <div class="style-name">${style.name.replace(`Style ${id} - `, '')}</div>
+      <div class="style-name">${style.name.replace(`Style ${id} - `, "")}</div>
     </div>
-  `).join('');
+  `,
+    )
+    .join("");
 
-    // Add click listeners
-    container.querySelectorAll('.lightbox-style-card').forEach(card => {
-        card.addEventListener('click', () => selectLightboxStyle(parseInt(card.dataset.style)));
-    });
+  // Add click listeners
+  container.querySelectorAll(".lightbox-style-card").forEach((card) => {
+    card.addEventListener("click", () =>
+      selectLightboxStyle(parseInt(card.dataset.style)),
+    );
+  });
 }
 
 function selectLightboxStyle(styleId) {
-    const style = LIGHTBOX_STYLES[styleId];
-    if (!style) return;
+  const style = LIGHTBOX_STYLES[styleId];
+  if (!style) return;
 
-    state.lightbox.style = styleId;
-    state.lightbox.size = null;
-    state.lightbox.customDimensions = null;
+  state.lightbox.style = styleId;
+  state.lightbox.size = null;
+  state.lightbox.customDimensions = null;
 
-    // Update UI
-    document.querySelectorAll('.lightbox-style-card').forEach(card => {
-        card.classList.toggle('selected', parseInt(card.dataset.style) === styleId);
-    });
+  // Update UI
+  document.querySelectorAll(".lightbox-style-card").forEach((card) => {
+    card.classList.toggle("selected", parseInt(card.dataset.style) === styleId);
+  });
 
-    // Show config panel
-    document.getElementById('lightboxConfig').style.display = 'block';
-    document.getElementById('selectedStyleName').textContent = style.name;
+  // Show config panel
+  document.getElementById("lightboxConfig").style.display = "block";
+  document.getElementById("selectedStyleName").textContent = style.name;
 
-    // Render size buttons
-    renderSizeButtons(styleId);
+  // Render size buttons
+  renderSizeButtons(styleId);
 }
 
 function renderSizeButtons(styleId) {
-    const style = LIGHTBOX_STYLES[styleId];
-    const container = document.getElementById('sizeButtons');
+  const style = LIGHTBOX_STYLES[styleId];
+  const container = document.getElementById("sizeButtons");
 
-    container.innerHTML = Object.entries(style.sizes).map(([size, data]) => `
+  container.innerHTML =
+    Object.entries(style.sizes)
+      .map(
+        ([size, data]) => `
     <button class="size-btn" data-size="${size}">
       <span class="size-label">${size}</span>
-      <span class="size-dimensions">${data.label.replace(`${size}: `, '')}</span>
+      <span class="size-dimensions">${data.label.replace(`${size}: `, "")}</span>
     </button>
-  `).join('') + `
+  `,
+      )
+      .join("") +
+    `
     <button class="size-btn" data-size="custom">
       <span class="size-label">Custom</span>
       <span class="size-dimensions">Custom size</span>
     </button>
   `;
 
-    container.querySelectorAll('.size-btn').forEach(btn => {
-        btn.addEventListener('click', () => selectLightboxSize(btn.dataset.size));
-    });
+  container.querySelectorAll(".size-btn").forEach((btn) => {
+    btn.addEventListener("click", () => selectLightboxSize(btn.dataset.size));
+  });
 }
 
 function selectLightboxSize(size) {
-    state.lightbox.size = size;
+  state.lightbox.size = size;
 
-    // Update UI
-    document.querySelectorAll('.size-btn').forEach(btn => {
-        btn.classList.toggle('selected', btn.dataset.size === size);
-    });
+  // Update UI
+  document.querySelectorAll(".size-btn").forEach((btn) => {
+    btn.classList.toggle("selected", btn.dataset.size === size);
+  });
 
-    // Show/hide custom inputs
-    const customInputs = document.getElementById('customSizeInputs');
-    if (size === 'custom') {
-        customInputs.style.display = 'block';
-        state.lightbox.customDimensions = {
-            width: parseFloat(document.getElementById('customWidth').value) || 0,
-            height: parseFloat(document.getElementById('customHeight').value) || 0,
-            depth: parseFloat(document.getElementById('customDepth').value) || 0
-        };
-    } else {
-        customInputs.style.display = 'none';
-        state.lightbox.customDimensions = null;
-    }
+  // Show/hide custom inputs
+  const customInputs = document.getElementById("customSizeInputs");
+  if (size === "custom") {
+    customInputs.style.display = "block";
+    state.lightbox.customDimensions = {
+      width: parseFloat(document.getElementById("customWidth").value) || 0,
+      height: parseFloat(document.getElementById("customHeight").value) || 0,
+      depth: parseFloat(document.getElementById("customDepth").value) || 0,
+    };
+  } else {
+    customInputs.style.display = "none";
+    state.lightbox.customDimensions = null;
+  }
 
-    updateLightboxCalculation();
+  updateLightboxCalculation();
 }
 
 function updateLightboxCalculation() {
-    // Clear any previous warning
-    const warningEl = document.getElementById('lightboxSizeWarning');
-    if (warningEl) warningEl.style.display = 'none';
-    state.lightbox.isValid = true;
+  // Clear any previous warning
+  const warningEl = document.getElementById("lightboxSizeWarning");
+  if (warningEl) warningEl.style.display = "none";
+  state.lightbox.isValid = true;
 
-    if (!state.lightbox.style || !state.lightbox.size) {
-        document.getElementById('lightboxResult').textContent = '0 ₱';
-        return;
-    }
+  if (!state.lightbox.style || !state.lightbox.size) {
+    document.getElementById("lightboxResult").textContent = "0 ₱";
+    return;
+  }
 
-    const quantity = parseInt(document.getElementById('lightboxQty').value) || 1;
-    state.lightbox.quantity = quantity;
+  const quantity = parseInt(document.getElementById("lightboxQty").value) || 1;
+  state.lightbox.quantity = quantity;
 
-    if (state.lightbox.size === 'custom') {
-        state.lightbox.customDimensions = {
-            width: parseFloat(document.getElementById('customWidth').value) || 0,
-            height: parseFloat(document.getElementById('customHeight').value) || 0,
-            depth: parseFloat(document.getElementById('customDepth').value) || 0
-        };
+  if (state.lightbox.size === "custom") {
+    state.lightbox.customDimensions = {
+      width: parseFloat(document.getElementById("customWidth").value) || 0,
+      height: parseFloat(document.getElementById("customHeight").value) || 0,
+      depth: parseFloat(document.getElementById("customDepth").value) || 0,
+    };
 
-        // Validate against Size S minimum
-        const style = LIGHTBOX_STYLES[state.lightbox.style];
-        if (style && style.sizes.S) {
-            const sizeS = style.sizes.S;
-            const custom = state.lightbox.customDimensions;
+    // Validate against Size S minimum
+    const style = LIGHTBOX_STYLES[state.lightbox.style];
+    if (style && style.sizes.S) {
+      const sizeS = style.sizes.S;
+      const custom = state.lightbox.customDimensions;
 
-            if (custom.width > 0 && custom.height > 0 && custom.depth > 0) {
-                if (custom.width < sizeS.width || custom.height < sizeS.height || custom.depth < sizeS.depth) {
-                    state.lightbox.isValid = false;
-                    if (warningEl) {
-                        warningEl.textContent = `⚠️ Minimum size is Size S: ${sizeS.width}×${sizeS.height}×${sizeS.depth}cm`;
-                        warningEl.style.display = 'block';
-                    }
-                    document.getElementById('lightboxResult').textContent = '❌ Invalid size';
-                    document.getElementById('lightboxResult').style.color = 'var(--danger)';
-                    return;
-                }
-            }
+      if (custom.width > 0 && custom.height > 0 && custom.depth > 0) {
+        if (
+          custom.width < sizeS.width ||
+          custom.height < sizeS.height ||
+          custom.depth < sizeS.depth
+        ) {
+          state.lightbox.isValid = false;
+          if (warningEl) {
+            warningEl.textContent = `⚠️ Minimum size is Size S: ${sizeS.width}×${sizeS.height}×${sizeS.depth}cm`;
+            warningEl.style.display = "block";
+          }
+          document.getElementById("lightboxResult").textContent =
+            "❌ Invalid size";
+          document.getElementById("lightboxResult").style.color =
+            "var(--danger)";
+          return;
         }
+      }
     }
+  }
 
-    document.getElementById('lightboxResult').style.color = '';
+  document.getElementById("lightboxResult").style.color = "";
 
-    const result = calculateLightboxPrice(
-        state.lightbox.style,
-        state.lightbox.size,
-        quantity,
-        state.lightbox.customDimensions,
-        state.prices
-    );
+  const result = calculateLightboxPrice(
+    state.lightbox.style,
+    state.lightbox.size,
+    quantity,
+    state.lightbox.customDimensions,
+    state.prices,
+  );
 
-    document.getElementById('lightboxResult').textContent =
-        `${formatNumber(result.totalPrice)} ₱`;
+  document.getElementById("lightboxResult").textContent =
+    `${formatNumber(result.totalPrice)} ₱`;
 }
 
 function addLightboxToQuotation() {
-    if (!state.lightbox.style || !state.lightbox.size) {
-        showNotification('Please select a lightbox style and size!', 'error');
-        return;
-    }
+  if (!state.lightbox.style || !state.lightbox.size) {
+    showNotification("Please select a lightbox style and size!", "error");
+    return;
+  }
 
-    // Block if custom size is too small
-    if (state.lightbox.isValid === false) {
-        showNotification('Lightbox size is too small! Please select a size larger than Size S.', 'error');
-        return;
-    }
-
-    const style = LIGHTBOX_STYLES[state.lightbox.style];
-    const quantity = state.lightbox.quantity;
-
-    let sizeLabel = '';
-    if (state.lightbox.size === 'custom') {
-        const { width, height, depth } = state.lightbox.customDimensions;
-        sizeLabel = `Custom (${width}×${height}×${depth}cm)`;
-    } else {
-        sizeLabel = style.sizes[state.lightbox.size].label;
-    }
-
-    const result = calculateLightboxPrice(
-        state.lightbox.style,
-        state.lightbox.size,
-        quantity,
-        state.lightbox.customDimensions,
-        state.prices
+  // Block if custom size is too small
+  if (state.lightbox.isValid === false) {
+    showNotification(
+      "Lightbox size is too small! Please select a size larger than Size S.",
+      "error",
     );
+    return;
+  }
 
-    state.quotationItems.push({
-        description: `${style.name} - ${sizeLabel}`,
-        price: result.totalPrice
-    });
+  const style = LIGHTBOX_STYLES[state.lightbox.style];
+  const quantity = state.lightbox.quantity;
 
-    renderQuotationItems();
+  let sizeLabel = "";
+  if (state.lightbox.size === "custom") {
+    const { width, height, depth } = state.lightbox.customDimensions;
+    sizeLabel = `Custom (${width}×${height}×${depth}cm)`;
+  } else {
+    sizeLabel = style.sizes[state.lightbox.size].label;
+  }
 
-    // Reset lightbox selection
-    state.lightbox = { style: null, size: null, quantity: 1, customDimensions: null };
-    document.querySelectorAll('.lightbox-style-card').forEach(card => card.classList.remove('selected'));
-    document.getElementById('lightboxConfig').style.display = 'none';
-    document.getElementById('lightboxQty').value = '1';
-    document.getElementById('customWidthInches').value = '';
-    document.getElementById('customWidth').value = '';
-    document.getElementById('customHeightInches').value = '';
-    document.getElementById('customHeight').value = '';
-    document.getElementById('customDepthInches').value = '';
-    document.getElementById('customDepth').value = '';
-    document.getElementById('lightboxResult').textContent = '0 ₱';
+  const result = calculateLightboxPrice(
+    state.lightbox.style,
+    state.lightbox.size,
+    quantity,
+    state.lightbox.customDimensions,
+    state.prices,
+  );
 
-    // Switch to quotation tab
-    document.querySelector('[data-tab="quotation"]').click();
+  state.quotationItems.push({
+    description: `${style.name} - ${sizeLabel}`,
+    price: result.totalPrice,
+  });
 
-    showNotification('Lightbox added to quotation!', 'success');
+  renderQuotationItems();
+
+  // Reset lightbox selection
+  state.lightbox = {
+    style: null,
+    size: null,
+    quantity: 1,
+    customDimensions: null,
+  };
+  document
+    .querySelectorAll(".lightbox-style-card")
+    .forEach((card) => card.classList.remove("selected"));
+  document.getElementById("lightboxConfig").style.display = "none";
+  document.getElementById("lightboxQty").value = "1";
+  document.getElementById("customWidthInches").value = "";
+  document.getElementById("customWidth").value = "";
+  document.getElementById("customHeightInches").value = "";
+  document.getElementById("customHeight").value = "";
+  document.getElementById("customDepthInches").value = "";
+  document.getElementById("customDepth").value = "";
+  document.getElementById("lightboxResult").textContent = "0 ₱";
+
+  // Switch to quotation tab
+  document.querySelector('[data-tab="quotation"]').click();
+
+  showNotification("Lightbox added to quotation!", "success");
 }
 
 // ==================== Quotation Tab ====================
 function setupQuotationListeners() {
-    document.getElementById('addItemBtn').addEventListener('click', addManualItem);
-    document.getElementById('dpAmount').addEventListener('input', updateQuotationTotals);
+  document
+    .getElementById("addItemBtn")
+    .addEventListener("click", addManualItem);
+  document
+    .getElementById("dpAmount")
+    .addEventListener("input", updateQuotationTotals);
 
-    // Installation checkbox
-    document.getElementById('installationCheck').addEventListener('change', (e) => {
-        const priceSection = document.getElementById('installationPriceSection');
-        priceSection.style.display = e.target.checked ? 'flex' : 'none';
-        if (!e.target.checked) {
-            document.getElementById('installationPrice').value = '0';
-        }
-        updateQuotationTotals();
+  // Installation checkbox
+  document
+    .getElementById("installationCheck")
+    .addEventListener("change", (e) => {
+      const priceSection = document.getElementById("installationPriceSection");
+      priceSection.style.display = e.target.checked ? "flex" : "none";
+      if (!e.target.checked) {
+        document.getElementById("installationPrice").value = "0";
+      }
+      updateQuotationTotals();
     });
 
-    document.getElementById('installationPrice').addEventListener('input', updateQuotationTotals);
+  document
+    .getElementById("installationPrice")
+    .addEventListener("input", updateQuotationTotals);
 
-    // Customer Name listener (Quotation Tab)
-    const customerNameInput = document.getElementById('customerName');
-    if (customerNameInput) {
-        customerNameInput.addEventListener('input', (e) => {
-            state.customer.name = e.target.value;
-            localStorage.setItem('customerName', e.target.value);
-            // Sync with Anchor tab input
-            const anchorInput = document.getElementById('anchorCustomerName');
-            if (anchorInput) anchorInput.value = e.target.value;
-        });
-        // Initialize from state
-        customerNameInput.value = state.customer.name;
-    }
+  // Customer Name listener (Quotation Tab)
+  const customerNameInput = document.getElementById("customerName");
+  if (customerNameInput) {
+    customerNameInput.addEventListener("input", (e) => {
+      state.customer.name = e.target.value;
+      localStorage.setItem("customerName", e.target.value);
+      // Sync with Anchor tab input
+      const anchorInput = document.getElementById("anchorCustomerName");
+      if (anchorInput) anchorInput.value = e.target.value;
+    });
+    // Initialize from state
+    customerNameInput.value = state.customer.name;
+  }
 
-    // Phone listener (Quotation Tab)
-    const phoneInput = document.getElementById('phone');
-    if (phoneInput) {
-        phoneInput.addEventListener('input', (e) => {
-            state.customer.phone = e.target.value;
-            localStorage.setItem('customerPhone', e.target.value);
-            // Sync with Anchor tab input
-            const anchorInput = document.getElementById('anchorCustomerPhone');
-            if (anchorInput) anchorInput.value = e.target.value;
-        });
-        // Initialize from state
-        phoneInput.value = state.customer.phone;
-    }
+  // Phone listener (Quotation Tab)
+  const phoneInput = document.getElementById("phone");
+  if (phoneInput) {
+    phoneInput.addEventListener("input", (e) => {
+      state.customer.phone = e.target.value;
+      localStorage.setItem("customerPhone", e.target.value);
+      // Sync with Anchor tab input
+      const anchorInput = document.getElementById("anchorCustomerPhone");
+      if (anchorInput) anchorInput.value = e.target.value;
+    });
+    // Initialize from state
+    phoneInput.value = state.customer.phone;
+  }
 }
 
 function addManualItem() {
-    state.quotationItems.push({
-        description: '',
-        price: 0
-    });
-    renderQuotationItems();
+  state.quotationItems.push({
+    description: "",
+    price: 0,
+  });
+  renderQuotationItems();
 }
 
 function removeQuotationItem(index) {
-    state.quotationItems.splice(index, 1);
-    renderQuotationItems();
+  state.quotationItems.splice(index, 1);
+  renderQuotationItems();
 }
 
 function renderQuotationItems() {
-    const tbody = document.getElementById('itemsBody');
+  const tbody = document.getElementById("itemsBody");
 
-    if (state.quotationItems.length === 0) {
-        tbody.innerHTML = `
+  if (state.quotationItems.length === 0) {
+    tbody.innerHTML = `
       <tr>
         <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">
           No products yet. Add from Signage or Lightbox tab.
         </td>
       </tr>
     `;
-        updateQuotationTotals();
-        return;
-    }
+    updateQuotationTotals();
+    return;
+  }
 
-    tbody.innerHTML = state.quotationItems.map((item, index) => `
+  tbody.innerHTML = state.quotationItems
+    .map(
+      (item, index) => `
     <tr>
       <td>
         <input type="text" placeholder="Product name" 
@@ -1071,587 +1274,645 @@ function renderQuotationItems() {
       </td>
       <td>
         <input type="number" placeholder="0" min="0" step="0.01"
-               value="${item.price || ''}" 
+               value="${item.price || ""}" 
                data-index="${index}" data-field="price">
       </td>
       <td>
         <button class="remove-item-btn" data-index="${index}">✕</button>
       </td>
     </tr>
-  `).join('');
+  `,
+    )
+    .join("");
 
-    // Add event listeners
-    tbody.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', handleItemInput);
-    });
+  // Add event listeners
+  tbody.querySelectorAll("input").forEach((input) => {
+    input.addEventListener("input", handleItemInput);
+  });
 
-    tbody.querySelectorAll('.remove-item-btn').forEach(btn => {
-        btn.addEventListener('click', () => removeQuotationItem(parseInt(btn.dataset.index)));
-    });
+  tbody.querySelectorAll(".remove-item-btn").forEach((btn) => {
+    btn.addEventListener("click", () =>
+      removeQuotationItem(parseInt(btn.dataset.index)),
+    );
+  });
 
-    updateQuotationTotals();
+  updateQuotationTotals();
 }
 
 function handleItemInput(e) {
-    const index = parseInt(e.target.dataset.index);
-    const field = e.target.dataset.field;
-    let value = e.target.value;
+  const index = parseInt(e.target.dataset.index);
+  const field = e.target.dataset.field;
+  let value = e.target.value;
 
-    if (field === 'price') {
-        value = parseFloat(value) || 0;
-    }
+  if (field === "price") {
+    value = parseFloat(value) || 0;
+  }
 
-    state.quotationItems[index][field] = value;
-    updateQuotationTotals();
+  state.quotationItems[index][field] = value;
+  updateQuotationTotals();
 }
 
 function updateQuotationTotals() {
-    // Calculate items subtotal
-    let subtotal = state.quotationItems.reduce((sum, item) => sum + (item.price || 0), 0);
+  // Calculate items subtotal
+  let subtotal = state.quotationItems.reduce(
+    (sum, item) => sum + (item.price || 0),
+    0,
+  );
 
-    // Add installation if checked
-    const installationChecked = document.getElementById('installationCheck').checked;
-    const installationPrice = parseFloat(document.getElementById('installationPrice').value) || 0;
+  // Add installation if checked
+  const installationChecked =
+    document.getElementById("installationCheck").checked;
+  const installationPrice =
+    parseFloat(document.getElementById("installationPrice").value) || 0;
 
-    if (installationChecked && installationPrice > 0) {
-        subtotal += installationPrice;
-    }
+  if (installationChecked && installationPrice > 0) {
+    subtotal += installationPrice;
+  }
 
-    state.dp = parseFloat(document.getElementById('dpAmount').value) || 0;
-    const total = subtotal - state.dp;
+  state.dp = parseFloat(document.getElementById("dpAmount").value) || 0;
+  const total = subtotal - state.dp;
 
-    document.getElementById('subtotalDisplay').textContent = formatNumber(subtotal);
-    document.getElementById('totalDisplay').textContent = formatNumber(total);
+  document.getElementById("subtotalDisplay").textContent =
+    formatNumber(subtotal);
+  document.getElementById("totalDisplay").textContent = formatNumber(total);
 }
 
 // ==================== Image Upload ====================
 function setupImageListeners() {
-    const uploadArea = document.getElementById('imageUploadArea');
-    const input = document.getElementById('imageInput');
+  const uploadArea = document.getElementById("imageUploadArea");
+  const input = document.getElementById("imageInput");
 
-    uploadArea.addEventListener('click', () => input.click());
-    input.addEventListener('change', handleImageSelect);
+  uploadArea.addEventListener("click", () => input.click());
+  input.addEventListener("change", handleImageSelect);
 
-    uploadArea.addEventListener('dragover', handleDragOver);
-    uploadArea.addEventListener('dragleave', handleDragLeave);
-    uploadArea.addEventListener('drop', handleDrop);
+  uploadArea.addEventListener("dragover", handleDragOver);
+  uploadArea.addEventListener("dragleave", handleDragLeave);
+  uploadArea.addEventListener("drop", handleDrop);
 
-    document.addEventListener('paste', handleGlobalPaste);
+  document.addEventListener("paste", handleGlobalPaste);
 }
 
 function handleImageSelect(e) {
-    const files = Array.from(e.target.files);
-    addImages(files);
+  const files = Array.from(e.target.files);
+  addImages(files);
 }
 
 function handleDragOver(e) {
-    e.preventDefault();
-    document.getElementById('imageUploadArea').classList.add('dragover');
+  e.preventDefault();
+  document.getElementById("imageUploadArea").classList.add("dragover");
 }
 
 function handleDragLeave(e) {
-    e.preventDefault();
-    document.getElementById('imageUploadArea').classList.remove('dragover');
+  e.preventDefault();
+  document.getElementById("imageUploadArea").classList.remove("dragover");
 }
 
 function handleDrop(e) {
-    e.preventDefault();
-    document.getElementById('imageUploadArea').classList.remove('dragover');
+  e.preventDefault();
+  document.getElementById("imageUploadArea").classList.remove("dragover");
 
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    addImages(files);
+  const files = Array.from(e.dataTransfer.files).filter((f) =>
+    f.type.startsWith("image/"),
+  );
+  addImages(files);
 }
 
 function handleGlobalPaste(e) {
-    const activeElement = document.activeElement;
-    if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
-        return;
-    }
+  const activeElement = document.activeElement;
+  if (
+    activeElement.tagName === "INPUT" ||
+    activeElement.tagName === "TEXTAREA"
+  ) {
+    return;
+  }
 
-    const items = e.clipboardData?.items;
-    if (!items) return;
+  const items = e.clipboardData?.items;
+  if (!items) return;
 
-    const imageFiles = [];
-    for (const item of items) {
-        if (item.type.startsWith('image/')) {
-            const file = item.getAsFile();
-            if (file) imageFiles.push(file);
-        }
+  const imageFiles = [];
+  for (const item of items) {
+    if (item.type.startsWith("image/")) {
+      const file = item.getAsFile();
+      if (file) imageFiles.push(file);
     }
+  }
 
-    if (imageFiles.length > 0) {
-        e.preventDefault();
-        document.getElementById('imageUploadArea').classList.add('dragover');
-        setTimeout(() => {
-            document.getElementById('imageUploadArea').classList.remove('dragover');
-        }, 300);
-        addImages(imageFiles);
-    }
+  if (imageFiles.length > 0) {
+    e.preventDefault();
+    document.getElementById("imageUploadArea").classList.add("dragover");
+    setTimeout(() => {
+      document.getElementById("imageUploadArea").classList.remove("dragover");
+    }, 300);
+    addImages(imageFiles);
+  }
 }
 
 function addImages(files) {
-    files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            state.images.push({
-                name: file.name,
-                data: e.target.result
-            });
-            renderImagePreviews();
-        };
-        reader.readAsDataURL(file);
-    });
+  files.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      state.images.push({
+        name: file.name,
+        data: e.target.result,
+      });
+      renderImagePreviews();
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function renderImagePreviews() {
-    const getLabel = (index) => index === 0 ? 'Layout' : `Additional ${index}`;
+  const getLabel = (index) => (index === 0 ? "Layout" : `Additional ${index}`);
 
-    document.getElementById('imagePreviews').innerHTML = state.images.map((img, index) => `
+  document.getElementById("imagePreviews").innerHTML = state.images
+    .map(
+      (img, index) => `
     <div class="image-preview-item">
       <img src="${img.data}" alt="${img.name}">
       <button class="remove-btn" data-index="${index}">✕</button>
       <div class="image-label">${getLabel(index)}</div>
     </div>
-  `).join('');
+  `,
+    )
+    .join("");
 
-    document.querySelectorAll('#imagePreviews .remove-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const index = parseInt(e.target.dataset.index);
-            state.images.splice(index, 1);
-            renderImagePreviews();
-        });
+  document.querySelectorAll("#imagePreviews .remove-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const index = parseInt(e.target.dataset.index);
+      state.images.splice(index, 1);
+      renderImagePreviews();
     });
+  });
 }
 
 // ==================== Export ====================
 function setupExportListeners() {
-    document.getElementById('previewBtn').addEventListener('click', showPreview);
-    document.getElementById('closePreview').addEventListener('click', hidePreview);
-    document.getElementById('copyImageBtn').addEventListener('click', copyImageToClipboard);
-    document.getElementById('exportPdfBtn').addEventListener('click', exportPDF);
-    document.getElementById('exportImageBtn').addEventListener('click', exportImage);
+  document.getElementById("previewBtn").addEventListener("click", showPreview);
+  document
+    .getElementById("closePreview")
+    .addEventListener("click", hidePreview);
+  document
+    .getElementById("copyImageBtn")
+    .addEventListener("click", copyImageToClipboard);
+  document.getElementById("exportPdfBtn").addEventListener("click", exportPDF);
+  document
+    .getElementById("exportImageBtn")
+    .addEventListener("click", exportImage);
 }
 
 function updatePDFTemplate() {
-    const template = document.getElementById('pdfTemplate');
+  const template = document.getElementById("pdfTemplate");
 
-    // Customer info
-    template.querySelector('#pdfCustomerName').textContent = document.getElementById('customerName').value || '';
-    template.querySelector('#pdfAddress').textContent = document.getElementById('address').value || '';
-    template.querySelector('#pdfPhone').textContent = document.getElementById('phone').value || '';
+  // Customer info
+  template.querySelector("#pdfCustomerName").textContent =
+    document.getElementById("customerName").value || "";
+  template.querySelector("#pdfAddress").textContent =
+    document.getElementById("address").value || "";
+  template.querySelector("#pdfPhone").textContent =
+    document.getElementById("phone").value || "";
 
-    // Date
-    const date = document.getElementById('quoteDate').value;
-    const formattedDate = date ? new Date(date).toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-    }) : '';
-    template.querySelector('#pdfDate').textContent = formattedDate;
+  // Date
+  const date = document.getElementById("quoteDate").value;
+  const formattedDate = date
+    ? new Date(date).toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+      })
+    : "";
+  template.querySelector("#pdfDate").textContent = formattedDate;
 
-    // Items
-    const itemsBody = template.querySelector('#pdfItemsBody');
-    itemsBody.innerHTML = '';
+  // Items
+  const itemsBody = template.querySelector("#pdfItemsBody");
+  itemsBody.innerHTML = "";
 
-    let subtotal = 0;
-    state.quotationItems.forEach(item => {
-        if (item.description || item.price > 0) {
-            subtotal += item.price || 0;
+  let subtotal = 0;
+  state.quotationItems.forEach((item) => {
+    if (item.description || item.price > 0) {
+      subtotal += item.price || 0;
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
         <td>${item.description}</td>
         <td></td>
         <td></td>
         <td>${formatNumber(item.price || 0)}</td>
       `;
-            itemsBody.appendChild(tr);
-        }
-    });
+      itemsBody.appendChild(tr);
+    }
+  });
 
-    // Add installation if checked
-    const installationChecked = document.getElementById('installationCheck').checked;
-    const installationPrice = parseFloat(document.getElementById('installationPrice').value) || 0;
+  // Add installation if checked
+  const installationChecked =
+    document.getElementById("installationCheck").checked;
+  const installationPrice =
+    parseFloat(document.getElementById("installationPrice").value) || 0;
 
-    if (installationChecked && installationPrice > 0) {
-        subtotal += installationPrice;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+  if (installationChecked && installationPrice > 0) {
+    subtotal += installationPrice;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
         <td>Installation Fee</td>
         <td></td>
         <td></td>
         <td>${formatNumber(installationPrice)}</td>
       `;
-        itemsBody.appendChild(tr);
+    itemsBody.appendChild(tr);
+  }
+
+  // Totals
+  const dp = parseFloat(document.getElementById("dpAmount").value) || 0;
+  const total = subtotal - dp;
+
+  template.querySelector("#pdfDP").textContent = formatNumber(dp);
+  template.querySelector("#pdfSubtotal").textContent = formatNumber(subtotal);
+  template.querySelector("#pdfTotal").textContent = formatNumber(total);
+
+  // Update payment terms note based on installation
+  const termsNote = template.querySelector(".terms-note");
+  if (termsNote) {
+    if (installationChecked && installationPrice > 0) {
+      termsNote.innerHTML =
+        "<strong>Note:</strong> Price includes accompanying accessories. This is a NON-VAT receipt.";
+    } else {
+      termsNote.innerHTML =
+        "<strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not included. This is a NON-VAT receipt.";
     }
+  }
 
-    // Totals
-    const dp = parseFloat(document.getElementById('dpAmount').value) || 0;
-    const total = subtotal - dp;
+  // Images
+  const layoutContainer = template.querySelector("#pdfLayoutImage");
+  const imagesSection = template.querySelector("#pdfImagesSection");
 
-    template.querySelector('#pdfDP').textContent = formatNumber(dp);
-    template.querySelector('#pdfSubtotal').textContent = formatNumber(subtotal);
-    template.querySelector('#pdfTotal').textContent = formatNumber(total);
-
-    // Update payment terms note based on installation
-    const termsNote = template.querySelector('.terms-note');
-    if (termsNote) {
-        if (installationChecked && installationPrice > 0) {
-            termsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. This is a NON-VAT receipt.';
-        } else {
-            termsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not included. This is a NON-VAT receipt.';
-        }
-    }
-
-    // Images
-    const layoutContainer = template.querySelector('#pdfLayoutImage');
-    const imagesSection = template.querySelector('#pdfImagesSection');
-
-    if (layoutContainer) {
-        if (state.images.length > 0) {
-            layoutContainer.innerHTML = state.images.map((img, i) =>
-                `<div class="pdf-image-row">
+  if (layoutContainer) {
+    if (state.images.length > 0) {
+      layoutContainer.innerHTML = state.images
+        .map(
+          (img, i) =>
+            `<div class="pdf-image-row">
           <img src="${img.data}" alt="Layout ${i + 1}">
           <div class="pdf-image-label">Layout ${i + 1} of ${state.images.length}</div>
-        </div>`
-            ).join('');
-            imagesSection.style.display = 'block';
-        } else {
-            layoutContainer.innerHTML = '';
-            imagesSection.style.display = 'none';
-        }
+        </div>`,
+        )
+        .join("");
+      imagesSection.style.display = "block";
+    } else {
+      layoutContainer.innerHTML = "";
+      imagesSection.style.display = "none";
     }
+  }
 }
 
 function showPreview() {
-    updatePDFTemplate();
+  updatePDFTemplate();
 
-    const template = document.getElementById('pdfTemplate');
-    document.getElementById('previewContainer').innerHTML = template.innerHTML;
+  const template = document.getElementById("pdfTemplate");
+  document.getElementById("previewContainer").innerHTML = template.innerHTML;
 
-    document.getElementById('previewSection').classList.add('active');
-    document.body.style.overflow = 'hidden';
+  document.getElementById("previewSection").classList.add("active");
+  document.body.style.overflow = "hidden";
 }
 
 function hidePreview() {
-    document.getElementById('previewSection').classList.remove('active');
-    document.body.style.overflow = '';
+  document.getElementById("previewSection").classList.remove("active");
+  document.body.style.overflow = "";
 }
 
 function exportPDF() {
-    if (!document.getElementById('customerName').value.trim()) {
-        showNotification('Please enter customer name!', 'error');
-        document.getElementById('customerName').focus();
-        return;
-    }
+  if (!document.getElementById("customerName").value.trim()) {
+    showNotification("Please enter customer name!", "error");
+    document.getElementById("customerName").focus();
+    return;
+  }
 
-    updatePDFTemplate();
+  updatePDFTemplate();
 
-    const template = document.getElementById('pdfTemplate');
-    const pdfContent = template.querySelector('.pdf-content');
-    const customerName = document.getElementById('customerName').value.replace(/[^a-zA-Z0-9]/g, '_');
-    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
-    const filename = `Quotation_${customerName}_${date}.pdf`;
+  const template = document.getElementById("pdfTemplate");
+  const pdfContent = template.querySelector(".pdf-content");
+  const customerName = document
+    .getElementById("customerName")
+    .value.replace(/[^a-zA-Z0-9]/g, "_");
+  const date = new Date().toISOString().split("T")[0].replace(/-/g, "");
+  const filename = `Quotation_${customerName}_${date}.pdf`;
 
-    const btn = document.getElementById('exportPdfBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="icon">⏳</span> Generating...';
+  const btn = document.getElementById("exportPdfBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="icon">⏳</span> Generating...';
 
-    template.style.position = 'static';
-    template.style.left = 'auto';
+  template.style.position = "static";
+  template.style.left = "auto";
 
-    html2canvas(pdfContent, {
-        scale: 2,
-        useCORS: true,
-        logging: false
-    }).then(canvas => {
-        const imgData = canvas.toDataURL('image/jpeg', 0.98);
-        const imgWidth = 210;
-        const pageHeight = (canvas.height * imgWidth) / canvas.width;
+  html2canvas(pdfContent, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+  })
+    .then((canvas) => {
+      const imgData = canvas.toDataURL("image/jpeg", 0.98);
+      const imgWidth = 210;
+      const pageHeight = (canvas.height * imgWidth) / canvas.width;
 
-        const pdf = new jspdf.jsPDF({
-            unit: 'mm',
-            format: [imgWidth, pageHeight],
-            orientation: 'portrait'
-        });
+      const pdf = new jspdf.jsPDF({
+        unit: "mm",
+        format: [imgWidth, pageHeight],
+        orientation: "portrait",
+      });
 
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, pageHeight);
-        pdf.save(filename);
+      pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, pageHeight);
+      pdf.save(filename);
 
-        template.style.position = 'absolute';
-        template.style.left = '-9999px';
+      template.style.position = "absolute";
+      template.style.left = "-9999px";
 
-        btn.disabled = false;
-        btn.innerHTML = '<span class="icon">📄</span> Export PDF';
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">📄</span> Export PDF';
 
-        showNotification('PDF exported successfully!', 'success');
-    }).catch(error => {
-        console.error('Error generating PDF:', error);
+      showNotification("PDF exported successfully!", "success");
+    })
+    .catch((error) => {
+      console.error("Error generating PDF:", error);
 
-        template.style.position = 'absolute';
-        template.style.left = '-9999px';
+      template.style.position = "absolute";
+      template.style.left = "-9999px";
 
-        btn.disabled = false;
-        btn.innerHTML = '<span class="icon">📄</span> Export PDF';
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">📄</span> Export PDF';
 
-        showNotification('Error generating PDF. Please try again!', 'error');
+      showNotification("Error generating PDF. Please try again!", "error");
     });
 }
 
 function exportImage() {
-    if (!document.getElementById('customerName').value.trim()) {
-        showNotification('Please enter customer name!', 'error');
-        document.getElementById('customerName').focus();
-        return;
-    }
+  if (!document.getElementById("customerName").value.trim()) {
+    showNotification("Please enter customer name!", "error");
+    document.getElementById("customerName").focus();
+    return;
+  }
 
-    updatePDFTemplate();
+  updatePDFTemplate();
 
-    const template = document.getElementById('pdfTemplate');
-    const pdfContent = template.querySelector('.pdf-content');
-    const customerName = document.getElementById('customerName').value.replace(/[^a-zA-Z0-9]/g, '_');
-    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
-    const filename = `Quotation_${customerName}_${date}.png`;
+  const template = document.getElementById("pdfTemplate");
+  const pdfContent = template.querySelector(".pdf-content");
+  const customerName = document
+    .getElementById("customerName")
+    .value.replace(/[^a-zA-Z0-9]/g, "_");
+  const date = new Date().toISOString().split("T")[0].replace(/-/g, "");
+  const filename = `Quotation_${customerName}_${date}.png`;
 
-    const btn = document.getElementById('exportImageBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="icon">⏳</span> Generating...';
+  const btn = document.getElementById("exportImageBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="icon">⏳</span> Generating...';
 
-    template.style.position = 'static';
-    template.style.left = 'auto';
+  template.style.position = "static";
+  template.style.left = "auto";
 
-    html2canvas(pdfContent, {
-        scale: 2,
-        useCORS: true,
-        logging: false
-    }).then(canvas => {
-        canvas.toBlob(blob => {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+  html2canvas(pdfContent, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+  })
+    .then((canvas) => {
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
 
-            template.style.position = 'absolute';
-            template.style.left = '-9999px';
-
-            btn.disabled = false;
-            btn.innerHTML = '<span class="icon">🖼️</span> Export Image';
-
-            showNotification('Image exported successfully!', 'success');
-        }, 'image/png');
-    }).catch(error => {
-        console.error('Error generating image:', error);
-
-        template.style.position = 'absolute';
-        template.style.left = '-9999px';
+        template.style.position = "absolute";
+        template.style.left = "-9999px";
 
         btn.disabled = false;
         btn.innerHTML = '<span class="icon">🖼️</span> Export Image';
 
-        showNotification('Error generating image. Please try again!', 'error');
+        showNotification("Image exported successfully!", "success");
+      }, "image/png");
+    })
+    .catch((error) => {
+      console.error("Error generating image:", error);
+
+      template.style.position = "absolute";
+      template.style.left = "-9999px";
+
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">🖼️</span> Export Image';
+
+      showNotification("Error generating image. Please try again!", "error");
     });
 }
 
 function copyImageToClipboard() {
-    if (!document.getElementById('customerName').value.trim()) {
-        showNotification('Please enter customer name!', 'error');
-        document.getElementById('customerName').focus();
-        return;
-    }
+  if (!document.getElementById("customerName").value.trim()) {
+    showNotification("Please enter customer name!", "error");
+    document.getElementById("customerName").focus();
+    return;
+  }
 
-    updatePDFTemplate();
+  updatePDFTemplate();
 
-    const template = document.getElementById('pdfTemplate');
-    const pdfContent = template.querySelector('.pdf-content');
+  const template = document.getElementById("pdfTemplate");
+  const pdfContent = template.querySelector(".pdf-content");
 
-    const btn = document.getElementById('copyImageBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="icon">⏳</span> Copying...';
+  const btn = document.getElementById("copyImageBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="icon">⏳</span> Copying...';
 
-    template.style.position = 'static';
-    template.style.left = 'auto';
+  template.style.position = "static";
+  template.style.left = "auto";
 
-    html2canvas(pdfContent, {
-        scale: 2,
-        useCORS: true,
-        logging: false
-    }).then(canvas => {
-        canvas.toBlob(async blob => {
-            try {
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        'image/png': blob
-                    })
-                ]);
+  html2canvas(pdfContent, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+  })
+    .then((canvas) => {
+      canvas.toBlob(async (blob) => {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              "image/png": blob,
+            }),
+          ]);
 
-                template.style.position = 'absolute';
-                template.style.left = '-9999px';
+          template.style.position = "absolute";
+          template.style.left = "-9999px";
 
-                btn.disabled = false;
-                btn.innerHTML = '<span class="icon">📋</span> Copy Image';
+          btn.disabled = false;
+          btn.innerHTML = '<span class="icon">📋</span> Copy Image';
 
-                showNotification('Image copied to clipboard!', 'success');
-            } catch (err) {
-                console.error('Failed to copy image:', err);
+          showNotification("Image copied to clipboard!", "success");
+        } catch (err) {
+          console.error("Failed to copy image:", err);
 
-                template.style.position = 'absolute';
-                template.style.left = '-9999px';
+          template.style.position = "absolute";
+          template.style.left = "-9999px";
 
-                btn.disabled = false;
-                btn.innerHTML = '<span class="icon">📋</span> Copy Image';
+          btn.disabled = false;
+          btn.innerHTML = '<span class="icon">📋</span> Copy Image';
 
-                showNotification('Failed to copy. Try Export Image instead.', 'error');
-            }
-        }, 'image/png');
-    }).catch(error => {
-        console.error('Error generating image:', error);
+          showNotification(
+            "Failed to copy. Try Export Image instead.",
+            "error",
+          );
+        }
+      }, "image/png");
+    })
+    .catch((error) => {
+      console.error("Error generating image:", error);
 
-        template.style.position = 'absolute';
-        template.style.left = '-9999px';
+      template.style.position = "absolute";
+      template.style.left = "-9999px";
 
-        btn.disabled = false;
-        btn.innerHTML = '<span class="icon">📋</span> Copy Image';
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">📋</span> Copy Image';
 
-        showNotification('Error generating image. Please try again!', 'error');
+      showNotification("Error generating image. Please try again!", "error");
     });
 }
 
 // ==================== Utilities ====================
 function updateAllCalculations() {
-    // Update all letter calculations
-    state.letters.forEach(letter => {
-        updateLetterCalculation(letter.id);
-    });
+  // Update all letter calculations
+  state.letters.forEach((letter) => {
+    updateLetterCalculation(letter.id);
+  });
 
-    // Update logo and panel
-    updateLogoCalculation();
-    updatePanelCalculation();
+  // Update logo and panel
+  updateLogoCalculation();
+  updatePanelCalculation();
 
-    // Update lightbox
-    updateLightboxCalculation();
+  // Update lightbox
+  updateLightboxCalculation();
 
-    // Update summary
-    updateSignageSummary();
+  // Update summary
+  updateSignageSummary();
 }
 
 // ==================== Anchor Pricing ====================
 function setupAnchorPricingListeners() {
-    // Generate quotation document button (only if it exists - removed old inputs)
-    const generateBtn = document.getElementById('generateAnchorQuotation');
-    if (generateBtn) {
-        generateBtn.addEventListener('click', generateAnchorQuotationDocument);
-    }
+  // Generate quotation document button (only if it exists - removed old inputs)
+  const generateBtn = document.getElementById("generateAnchorQuotation");
+  if (generateBtn) {
+    generateBtn.addEventListener("click", generateAnchorQuotationDocument);
+  }
 
-    const copyBtn = document.getElementById('copyAnchorQuotation');
-    if (copyBtn) {
-        copyBtn.addEventListener('click', copyAnchorQuotationToClipboard);
-    }
+  const copyBtn = document.getElementById("copyAnchorQuotation");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", copyAnchorQuotationToClipboard);
+  }
 
-    // "Add to Quotation" buttons (if they still exist)
-    const addPremiumBtn = document.getElementById('addAnchorPremium');
-    if (addPremiumBtn) {
-        addPremiumBtn.addEventListener('click', () => addAnchorOption('premium'));
-    }
+  // "Add to Quotation" buttons (if they still exist)
+  const addPremiumBtn = document.getElementById("addAnchorPremium");
+  if (addPremiumBtn) {
+    addPremiumBtn.addEventListener("click", () => addAnchorOption("premium"));
+  }
 
-    const addRecommendedBtn = document.getElementById('addAnchorRecommended');
-    if (addRecommendedBtn) {
-        addRecommendedBtn.addEventListener('click', () => addAnchorOption('recommended'));
-    }
+  const addRecommendedBtn = document.getElementById("addAnchorRecommended");
+  if (addRecommendedBtn) {
+    addRecommendedBtn.addEventListener("click", () =>
+      addAnchorOption("recommended"),
+    );
+  }
 
-    const addBudgetBtn = document.getElementById('addAnchorBudget');
-    if (addBudgetBtn) {
-        addBudgetBtn.addEventListener('click', () => addAnchorOption('budget'));
-    }
+  const addBudgetBtn = document.getElementById("addAnchorBudget");
+  if (addBudgetBtn) {
+    addBudgetBtn.addEventListener("click", () => addAnchorOption("budget"));
+  }
 
-    const addAllBtn = document.getElementById('addAllAnchorOptions');
-    if (addAllBtn) {
-        addAllBtn.addEventListener('click', addAllAnchorOptions);
-    }
+  const addAllBtn = document.getElementById("addAllAnchorOptions");
+  if (addAllBtn) {
+    addAllBtn.addEventListener("click", addAllAnchorOptions);
+  }
 
-    // Update anchor pricing when switching to the tab
-    const anchorTab = document.querySelector('[data-tab="anchor"]');
-    if (anchorTab) {
-        anchorTab.addEventListener('click', () => {
-            setTimeout(() => updateAnchorPricing(), 100);
-        });
-    }
+  // Update anchor pricing when switching to the tab
+  const anchorTab = document.querySelector('[data-tab="anchor"]');
+  if (anchorTab) {
+    anchorTab.addEventListener("click", () => {
+      setTimeout(() => updateAnchorPricing(), 100);
+    });
+  }
 
-    // Customer information listeners (Anchor Tab)
-    const anchorCustomerName = document.getElementById('anchorCustomerName');
-    if (anchorCustomerName) {
-        anchorCustomerName.addEventListener('input', (e) => {
-            state.customer.name = e.target.value;
-            localStorage.setItem('customerName', e.target.value);
-            // Sync with Quotation tab input
-            const quoteInput = document.getElementById('customerName');
-            if (quoteInput) quoteInput.value = e.target.value;
-        });
-    }
+  // Customer information listeners (Anchor Tab)
+  const anchorCustomerName = document.getElementById("anchorCustomerName");
+  if (anchorCustomerName) {
+    anchorCustomerName.addEventListener("input", (e) => {
+      state.customer.name = e.target.value;
+      localStorage.setItem("customerName", e.target.value);
+      // Sync with Quotation tab input
+      const quoteInput = document.getElementById("customerName");
+      if (quoteInput) quoteInput.value = e.target.value;
+    });
+  }
 
-    const anchorCustomerCompany = document.getElementById('anchorCustomerCompany');
-    if (anchorCustomerCompany) {
-        anchorCustomerCompany.addEventListener('input', (e) => {
-            state.customer.company = e.target.value;
-            localStorage.setItem('customerCompany', e.target.value);
-        });
-    }
+  const anchorCustomerCompany = document.getElementById(
+    "anchorCustomerCompany",
+  );
+  if (anchorCustomerCompany) {
+    anchorCustomerCompany.addEventListener("input", (e) => {
+      state.customer.company = e.target.value;
+      localStorage.setItem("customerCompany", e.target.value);
+    });
+  }
 
-    const anchorCustomerPhone = document.getElementById('anchorCustomerPhone');
-    if (anchorCustomerPhone) {
-        anchorCustomerPhone.addEventListener('input', (e) => {
-            state.customer.phone = e.target.value;
-            localStorage.setItem('customerPhone', e.target.value);
-            // Sync with Quotation tab input
-            const quoteInput = document.getElementById('phone');
-            if (quoteInput) quoteInput.value = e.target.value;
-        });
-    }
+  const anchorCustomerPhone = document.getElementById("anchorCustomerPhone");
+  if (anchorCustomerPhone) {
+    anchorCustomerPhone.addEventListener("input", (e) => {
+      state.customer.phone = e.target.value;
+      localStorage.setItem("customerPhone", e.target.value);
+      // Sync with Quotation tab input
+      const quoteInput = document.getElementById("phone");
+      if (quoteInput) quoteInput.value = e.target.value;
+    });
+  }
 
-    const anchorCustomerEmail = document.getElementById('anchorCustomerEmail');
-    if (anchorCustomerEmail) {
-        anchorCustomerEmail.addEventListener('input', (e) => {
-            state.customer.email = e.target.value;
-            localStorage.setItem('customerEmail', e.target.value);
-        });
-    }
+  const anchorCustomerEmail = document.getElementById("anchorCustomerEmail");
+  if (anchorCustomerEmail) {
+    anchorCustomerEmail.addEventListener("input", (e) => {
+      state.customer.email = e.target.value;
+      localStorage.setItem("customerEmail", e.target.value);
+    });
+  }
 
-    // Initialize anchor input values from state
-    if (anchorCustomerName) anchorCustomerName.value = state.customer.name;
-    if (anchorCustomerCompany) anchorCustomerCompany.value = state.customer.company;
-    if (anchorCustomerPhone) anchorCustomerPhone.value = state.customer.phone;
-    if (anchorCustomerEmail) anchorCustomerEmail.value = state.customer.email;
+  // Initialize anchor input values from state
+  if (anchorCustomerName) anchorCustomerName.value = state.customer.name;
+  if (anchorCustomerCompany)
+    anchorCustomerCompany.value = state.customer.company;
+  if (anchorCustomerPhone) anchorCustomerPhone.value = state.customer.phone;
+  if (anchorCustomerEmail) anchorCustomerEmail.value = state.customer.email;
 }
 
 function updateAnchorPricing() {
-    const hasLetters = state.letters && state.letters.length > 0;
-    const hasLogo = state.logo && state.logo.length > 0 && state.logo.width > 0;
-    const hasPanel = state.panel && state.panel.length > 0 && state.panel.width > 0;
+  const hasLetters = state.letters && state.letters.length > 0;
+  const hasLogo = state.logo && state.logo.length > 0 && state.logo.width > 0;
+  const hasPanel =
+    state.panel && state.panel.length > 0 && state.panel.width > 0;
 
-    if (!hasLetters && !hasLogo && !hasPanel) {
-        // Show empty state
-        document.getElementById('anchorProductList').innerHTML = `
+  if (!hasLetters && !hasLogo && !hasPanel) {
+    // Show empty state
+    document.getElementById("anchorProductList").innerHTML = `
             <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
                 <div style="font-size: 3.5rem; margin-bottom: 1rem;">📦</div>
                 <div style="font-size: 1.1rem; font-weight: 500;">No products configured yet</div>
                 <div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Add letters, logo, or panel in the Signage tab first</div>
             </div>
         `;
-        document.getElementById('anchorComparisonCard').style.display = 'none';
-        return;
-    }
+    document.getElementById("anchorComparisonCard").style.display = "none";
+    return;
+  }
 
-    // Build product list HTML
-    let productListHTML = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+  // Build product list HTML
+  let productListHTML =
+    '<div style="display: flex; flex-direction: column; gap: 1rem;">';
 
-    // Add letters
-    if (hasLetters) {
-        state.letters.forEach((letter, index) => {
-            const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productListHTML += `
+  // Add letters
+  if (hasLetters) {
+    state.letters.forEach((letter, index) => {
+      const typeName =
+        LETTER_TYPES.find((t) => t.id === letter.type)?.name || letter.type;
+      productListHTML += `
                 <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
                     <div style="font-weight: 600; margin-bottom: 0.5rem;">✍️ ${letter.name || `Letters #${index + 1}`}</div>
                     <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
@@ -1660,362 +1921,448 @@ function updateAnchorPricing() {
                     </div>
                 </div>
             `;
-        });
-    }
+    });
+  }
 
-    // Add logo
-    if (hasLogo) {
-        const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        productListHTML += `
+  // Add logo
+  if (hasLogo) {
+    const typeName =
+      LETTER_TYPES.find((t) => t.id === state.logo.type)?.name ||
+      state.logo.type;
+    productListHTML += `
             <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
-                <div style="font-weight: 600; margin-bottom: 0.5rem;">🎨 ${state.logo.name || 'Logo'}</div>
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">🎨 ${state.logo.name || "Logo"}</div>
                 <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
                     <div><strong>Type:</strong> ${typeName}</div>
                 </div>
             </div>
         `;
-    }
+  }
 
-    // Add panel
-    if (hasPanel) {
-        productListHTML += `
+  // Add panel
+  if (hasPanel) {
+    productListHTML += `
             <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
-                <div style="font-weight: 600; margin-bottom: 0.5rem;">📋 ${state.panel.name || 'Background Panel'}</div>
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">📋 ${state.panel.name || "Background Panel"}</div>
             </div>
         `;
-    }
+  }
 
-    productListHTML += '</div>';
-    document.getElementById('anchorProductList').innerHTML = productListHTML;
+  productListHTML += "</div>";
+  document.getElementById("anchorProductList").innerHTML = productListHTML;
 
-    // Calculate pricing for all products combined
-    let premiumTotal = 0;
-    let recommendedTotal = 0;
-    let budgetTotal = 0;
-    let productInfoHTML = '';
+  // Calculate pricing for all products combined
+  let premiumTotal = 0;
+  let recommendedTotal = 0;
+  let budgetTotal = 0;
+  let productInfoHTML = "";
 
-    // Calculate letters
-    if (hasLetters) {
-        state.letters.forEach((letter, index) => {
-            // Recommended = Actual selected type
-            const recommendedResult = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices);
-            recommendedTotal += recommendedResult.price;
+  // Calculate letters
+  if (hasLetters) {
+    state.letters.forEach((letter, index) => {
+      // Recommended = Actual selected type
+      const recommendedResult = calculateLetterPrice(
+        letter.height,
+        letter.charCount,
+        letter.type,
+        state.prices,
+      );
+      recommendedTotal += recommendedResult.price;
 
-            // Calculate Acrylic price for reference (Illuminated)
-            const acrylicResult = calculateLetterPrice(letter.height, letter.charCount, 'illuminated', state.prices);
+      // Calculate Acrylic price for reference (Illuminated)
+      const acrylicResult = calculateLetterPrice(
+        letter.height,
+        letter.charCount,
+        "illuminated",
+        state.prices,
+      );
 
-            // Premium (Inox) = 2.2x Acrylic price - User request
-            premiumTotal += acrylicResult.price * (state.prices.anchorMultiplier || 2.2);
+      // Premium (Inox) = 2.2x Acrylic price - User request
+      premiumTotal +=
+        acrylicResult.price * (state.prices.anchorMultiplier || 2.2);
 
-            // Budget = Non-illuminated (calc using nonIlluminated price from settings)
-            const budgetResult = calculateLetterPrice(letter.height, letter.charCount, 'nonIlluminated', state.prices);
-            budgetTotal += budgetResult.price;
+      // Budget = Non-illuminated (calc using nonIlluminated price from settings)
+      const budgetResult = calculateLetterPrice(
+        letter.height,
+        letter.charCount,
+        "nonIlluminated",
+        state.prices,
+      );
+      budgetTotal += budgetResult.price;
 
-            const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productInfoHTML += `
+      const typeName =
+        LETTER_TYPES.find((t) => t.id === letter.type)?.name || letter.type;
+      productInfoHTML += `
                 <div style="margin-bottom: 0.5rem;">
                     <strong>${letter.name || `Letters #${index + 1}`}:</strong><br>
                     ${typeName} - ${letter.height}cm × ${letter.charCount} letters
                 </div>
             `;
-        });
-    }
+    });
+  }
 
-    // Calculate logo
-    if (hasLogo) {
-        // Recommended = Actual selected type
-        const recommendedResult = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices);
-        recommendedTotal += recommendedResult.price;
+  // Calculate logo
+  if (hasLogo) {
+    // Recommended = Actual selected type
+    const recommendedResult = calculateLogoPrice(
+      state.logo.length,
+      state.logo.width,
+      state.logo.type,
+      state.prices,
+    );
+    recommendedTotal += recommendedResult.price;
 
-        // Premium = Same as Recommended (User request: only letters get 1.9x multiplier)
-        premiumTotal += recommendedResult.price;
+    // Premium = Same as Recommended (User request: only letters get 1.9x multiplier)
+    premiumTotal += recommendedResult.price;
 
-        // Budget = 75% of Best Value
-        budgetTotal += recommendedResult.price * 0.75;
+    // Budget = 75% of Best Value
+    budgetTotal += recommendedResult.price * 0.75;
 
-        const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        const area = ((state.logo.length * state.logo.width) / 10000).toFixed(2);
-        productInfoHTML += `
+    const typeName =
+      LETTER_TYPES.find((t) => t.id === state.logo.type)?.name ||
+      state.logo.type;
+    const area = ((state.logo.length * state.logo.width) / 10000).toFixed(2);
+    productInfoHTML += `
             <div style="margin-bottom: 0.5rem;">
-                <strong>${state.logo.name || 'Logo'}:</strong><br>
+                <strong>${state.logo.name || "Logo"}:</strong><br>
                 ${typeName} - ${state.logo.length}cm × ${state.logo.width}cm (${area}m²)
             </div>
         `;
-    }
+  }
 
-    // Calculate panel
-    if (hasPanel) {
-        const panelResult = calculatePanelPrice(state.panel.length, state.panel.width, state.prices);
-        const panelPrice = panelResult.price;
+  // Calculate panel
+  if (hasPanel) {
+    const panelResult = calculatePanelPrice(
+      state.panel.length,
+      state.panel.width,
+      state.prices,
+    );
+    const panelPrice = panelResult.price;
 
-        // Premium = Same as Recommended (User request: only letters get multiplier)
-        premiumTotal += panelPrice;
+    // Premium = Same as Recommended (User request: only letters get multiplier)
+    premiumTotal += panelPrice;
 
-        // Recommended = Actual panel price
-        recommendedTotal += panelPrice;
+    // Recommended = Actual panel price
+    recommendedTotal += panelPrice;
 
-        // Budget = 75% of Best Value
-        budgetTotal += panelPrice * 0.75;
+    // Budget = 75% of Best Value
+    budgetTotal += panelPrice * 0.75;
 
-        const area = ((state.panel.length * state.panel.width) / 10000).toFixed(2);
-        productInfoHTML += `
+    const area = ((state.panel.length * state.panel.width) / 10000).toFixed(2);
+    productInfoHTML += `
             <div style="margin-bottom: 0.5rem;">
-                <strong>${state.panel.name || 'Background Panel'}:</strong><br>
+                <strong>${state.panel.name || "Background Panel"}:</strong><br>
                 Alu Panel - ${state.panel.length}cm × ${state.panel.width}cm (${area}m²)
             </div>
         `;
-    }
+  }
 
-    // Update pricing display
-    document.getElementById('anchorPricePremium').textContent = `${formatNumber(premiumTotal)} ₱`;
-    document.getElementById('anchorPriceRecommended').textContent = `${formatNumber(recommendedTotal)} ₱`;
-    document.getElementById('anchorPriceBudget').textContent = `${formatNumber(budgetTotal)} ₱`;
+  // Update pricing display
+  document.getElementById("anchorPricePremium").textContent =
+    `${formatNumber(premiumTotal)} ₱`;
+  document.getElementById("anchorPriceRecommended").textContent =
+    `${formatNumber(recommendedTotal)} ₱`;
+  document.getElementById("anchorPriceBudget").textContent =
+    `${formatNumber(budgetTotal)} ₱`;
 
-    const savings = premiumTotal - recommendedTotal;
-    document.getElementById('anchorSavings').textContent = savings > 0 ? `Save ${formatNumber(savings)} ₱ vs Inox!` : '';
+  const savings = premiumTotal - recommendedTotal;
+  document.getElementById("anchorSavings").textContent =
+    savings > 0 ? `Save ${formatNumber(savings)} ₱ vs Inox!` : "";
 
-    // Update product info in Best Value card
-    const productInfoDiv = document.getElementById('anchorProductInfo');
-    if (productInfoDiv) {
-        productInfoDiv.innerHTML = `
+  // Update product info in Best Value card
+  const productInfoDiv = document.getElementById("anchorProductInfo");
+  if (productInfoDiv) {
+    productInfoDiv.innerHTML = `
             <div style="font-weight: 600; color: #16a34a; margin-bottom: 0.5rem;">📦 PRODUCT DETAILS:</div>
             ${productInfoHTML}
         `;
-    }
+  }
 
-    // Show comparison card
-    document.getElementById('anchorComparisonCard').style.display = 'block';
+  // Show comparison card
+  document.getElementById("anchorComparisonCard").style.display = "block";
 }
 
 function addAnchorOption(optionType) {
-    const premiumPriceText = document.getElementById('anchorPricePremium').textContent;
-    const recommendedPriceText = document.getElementById('anchorPriceRecommended').textContent;
-    const budgetPriceText = document.getElementById('anchorPriceBudget').textContent;
+  const premiumPriceText =
+    document.getElementById("anchorPricePremium").textContent;
+  const recommendedPriceText = document.getElementById(
+    "anchorPriceRecommended",
+  ).textContent;
+  const budgetPriceText =
+    document.getElementById("anchorPriceBudget").textContent;
 
-    let description = '';
-    let price = 0;
-    let optionName = '';
+  let description = "";
+  let price = 0;
+  let optionName = "";
 
-    if (optionType === 'premium') {
-        optionName = 'Premium Stainless Steel (Inox)';
-        description = 'Stainless Steel (Inox) - Premium Option';
-        price = parseFloat(premiumPriceText.replace(/[^\d.-]/g, ''));
-    } else if (optionType === 'recommended') {
-        optionName = 'Recommended Acrylic';
-        description = 'Acrylic - Best Value ⭐';
-        price = parseFloat(recommendedPriceText.replace(/[^\d.-]/g, ''));
-    } else if (optionType === 'budget') {
-        optionName = 'Budget 3D';
-        description = '3D Non-LED - Budget Option';
-        price = parseFloat(budgetPriceText.replace(/[^\d.-]/g, ''));
-    }
+  if (optionType === "premium") {
+    optionName = "Premium Stainless Steel (Inox)";
+    description = "Stainless Steel (Inox) - Premium Option";
+    price = parseFloat(premiumPriceText.replace(/[^\d.-]/g, ""));
+  } else if (optionType === "recommended") {
+    optionName = "Recommended Acrylic";
+    description = "Acrylic - Best Value ⭐";
+    price = parseFloat(recommendedPriceText.replace(/[^\d.-]/g, ""));
+  } else if (optionType === "budget") {
+    optionName = "Budget 3D";
+    description = "3D Non-LED - Budget Option";
+    price = parseFloat(budgetPriceText.replace(/[^\d.-]/g, ""));
+  }
 
-    if (price > 0) {
-        state.quotationItems.push({ description, price });
-        renderQuotationItems();
+  if (price > 0) {
+    state.quotationItems.push({ description, price });
+    renderQuotationItems();
 
-        // Switch to quotation tab
-        document.querySelector('[data-tab="quotation"]').click();
+    // Switch to quotation tab
+    document.querySelector('[data-tab="quotation"]').click();
 
-        showNotification(`${optionName} added to quotation!`, 'success');
-    }
+    showNotification(`${optionName} added to quotation!`, "success");
+  }
 }
 
 function addAllAnchorOptions() {
-    const premiumPriceText = document.getElementById('anchorPricePremium').textContent;
-    const recommendedPriceText = document.getElementById('anchorPriceRecommended').textContent;
-    const budgetPriceText = document.getElementById('anchorPriceBudget').textContent;
+  const premiumPriceText =
+    document.getElementById("anchorPricePremium").textContent;
+  const recommendedPriceText = document.getElementById(
+    "anchorPriceRecommended",
+  ).textContent;
+  const budgetPriceText =
+    document.getElementById("anchorPriceBudget").textContent;
 
-    const premiumPrice = parseFloat(premiumPriceText.replace(/[^\d.-]/g, ''));
-    const recommendedPrice = parseFloat(recommendedPriceText.replace(/[^\d.-]/g, ''));
-    const budgetPrice = parseFloat(budgetPriceText.replace(/[^\d.-]/g, ''));
+  const premiumPrice = parseFloat(premiumPriceText.replace(/[^\d.-]/g, ""));
+  const recommendedPrice = parseFloat(
+    recommendedPriceText.replace(/[^\d.-]/g, ""),
+  );
+  const budgetPrice = parseFloat(budgetPriceText.replace(/[^\d.-]/g, ""));
 
-    if (premiumPrice > 0) {
-        state.quotationItems.push({ description: 'Option 1: Stainless Steel (Inox) - Premium', price: premiumPrice });
-        state.quotationItems.push({ description: 'Option 2: Acrylic - Best Value ⭐', price: recommendedPrice });
-        state.quotationItems.push({ description: 'Option 3: 3D Non-LED - Budget', price: budgetPrice });
+  if (premiumPrice > 0) {
+    state.quotationItems.push({
+      description: "Option 1: Stainless Steel (Inox) - Premium",
+      price: premiumPrice,
+    });
+    state.quotationItems.push({
+      description: "Option 2: Acrylic - Best Value ⭐",
+      price: recommendedPrice,
+    });
+    state.quotationItems.push({
+      description: "Option 3: 3D Non-LED - Budget",
+      price: budgetPrice,
+    });
 
-        renderQuotationItems();
+    renderQuotationItems();
 
-        // Switch to quotation tab
-        document.querySelector('[data-tab="quotation"]').click();
+    // Switch to quotation tab
+    document.querySelector('[data-tab="quotation"]').click();
 
-        showNotification('All 3 options added to quotation!', 'success');
-    } else {
-        showNotification('Please configure products in Signage tab first!', 'error');
-    }
+    showNotification("All 3 options added to quotation!", "success");
+  } else {
+    showNotification(
+      "Please configure products in Signage tab first!",
+      "error",
+    );
+  }
 }
 
 function generateAnchorQuotationDocument() {
-    const hasProducts = (state.letters && state.letters.length > 0) ||
-        (state.logo && state.logo.length > 0 && state.logo.width > 0) ||
-        (state.panel && state.panel.length > 0 && state.panel.width > 0);
+  const hasProducts =
+    (state.letters && state.letters.length > 0) ||
+    (state.logo && state.logo.length > 0 && state.logo.width > 0) ||
+    (state.panel && state.panel.length > 0 && state.panel.width > 0);
 
-    if (!hasProducts) {
-        showNotification('Please add products in the Signage tab first!', 'error');
-        return;
-    }
+  if (!hasProducts) {
+    showNotification("Please add products in the Signage tab first!", "error");
+    return;
+  }
 
-    // Validate customer information
-    if (!state.customer.name) {
-        showNotification('Please enter customer name!', 'error');
-        return;
-    }
+  // Validate customer information
+  if (!state.customer.name) {
+    showNotification("Please enter customer name!", "error");
+    return;
+  }
 
-    // Update calculations
-    updateAnchorPricing();
+  // Update calculations
+  updateAnchorPricing();
 
-    // Populate customer information in QUOTATION TO section
-    const customerInfoHTML = `
+  // Populate customer information in QUOTATION TO section
+  const customerInfoHTML = `
         <div><strong>Name:</strong> ${state.customer.name}</div>
-        ${state.customer.company ? `<div><strong>Company:</strong> ${state.customer.company}</div>` : ''}
+        ${state.customer.company ? `<div><strong>Company:</strong> ${state.customer.company}</div>` : ""}
         <div><strong>Phone:</strong> ${state.customer.phone}</div>
-        ${state.customer.email ? `<div><strong>Email:</strong> ${state.customer.email}</div>` : ''}
+        ${state.customer.email ? `<div><strong>Email:</strong> ${state.customer.email}</div>` : ""}
     `;
-    document.getElementById('anchorCustomerInfo').innerHTML = customerInfoHTML;
+  document.getElementById("anchorCustomerInfo").innerHTML = customerInfoHTML;
 
-    // Build product specification (without customer information)
-    let productSpec = '';
+  // Build product specification (without customer information)
+  let productSpec = "";
 
-    // Add products section
-    productSpec += '<div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; color: #2563eb;">📦 Products</div>';
-    productSpec += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+  // Add products section
+  productSpec +=
+    '<div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; color: #2563eb;">📦 Products</div>';
+  productSpec +=
+    '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
 
-    if (state.letters && state.letters.length > 0) {
-        state.letters.forEach((letter, index) => {
-            const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productSpec += `
+  if (state.letters && state.letters.length > 0) {
+    state.letters.forEach((letter, index) => {
+      const typeName =
+        LETTER_TYPES.find((t) => t.id === letter.type)?.name || letter.type;
+      productSpec += `
                 <div><strong>${index + 1}. ${letter.name || `Letters #${index + 1}`}:</strong> ${typeName} - ${letter.height}cm height</div>
             `;
-        });
-    }
+    });
+  }
 
-    if (state.logo && state.logo.length > 0 && state.logo.width > 0) {
-        const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        const area = ((state.logo.length * state.logo.width) / 10000).toFixed(2);
-        productSpec += `
-            <div><strong>Logo:</strong> ${state.logo.name || 'Logo'} - ${typeName} - ${state.logo.length}cm × ${state.logo.width}cm (${area}m²)</div>
+  if (state.logo && state.logo.length > 0 && state.logo.width > 0) {
+    const typeName =
+      LETTER_TYPES.find((t) => t.id === state.logo.type)?.name ||
+      state.logo.type;
+    const area = ((state.logo.length * state.logo.width) / 10000).toFixed(2);
+    productSpec += `
+            <div><strong>Logo:</strong> ${state.logo.name || "Logo"} - ${typeName} - ${state.logo.length}cm × ${state.logo.width}cm (${area}m²)</div>
         `;
-    }
+  }
 
-    if (state.panel && state.panel.length > 0 && state.panel.width > 0) {
-        const area = ((state.panel.length * state.panel.width) / 10000).toFixed(2);
-        productSpec += `
-            <div><strong>Panel:</strong> ${state.panel.name || 'Background Panel'} - ${state.panel.length}cm × ${state.panel.width}cm (${area}m²)</div>
+  if (state.panel && state.panel.length > 0 && state.panel.width > 0) {
+    const area = ((state.panel.length * state.panel.width) / 10000).toFixed(2);
+    productSpec += `
+            <div><strong>Panel:</strong> ${state.panel.name || "Background Panel"} - ${state.panel.length}cm × ${state.panel.width}cm (${area}m²)</div>
         `;
-    }
+  }
 
-    productSpec += '</div>';
+  productSpec += "</div>";
 
-    // Get calculated prices
-    const premiumPriceText = document.getElementById('anchorPricePremium').textContent;
-    const recommendedPriceText = document.getElementById('anchorPriceRecommended').textContent;
-    const budgetPriceText = document.getElementById('anchorPriceBudget').textContent;
-    const savingsText = document.getElementById('anchorSavings').textContent;
+  // Get calculated prices
+  const premiumPriceText =
+    document.getElementById("anchorPricePremium").textContent;
+  const recommendedPriceText = document.getElementById(
+    "anchorPriceRecommended",
+  ).textContent;
+  const budgetPriceText =
+    document.getElementById("anchorPriceBudget").textContent;
+  const savingsText = document.getElementById("anchorSavings").textContent;
 
-    // Update quotation document
-    document.getElementById('anchorProductSpec').innerHTML = productSpec;
+  // Update quotation document
+  document.getElementById("anchorProductSpec").innerHTML = productSpec;
 
-    // Populate product details in the Best Value card
-    let productDetailsHTML = '';
-    if (state.letters && state.letters.length > 0) {
-        state.letters.forEach((letter, index) => {
-            const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productDetailsHTML += `<div><strong>${letter.name || `#${index + 1}`}:</strong><br>${typeName} - ${letter.height}cm</div>`;
-        });
-    }
-    if (state.logo && state.logo.length > 0 && state.logo.width > 0) {
-        const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        productDetailsHTML += `<div><strong>Logo:</strong><br>${typeName} - ${state.logo.length}cm × ${state.logo.width}cm</div>`;
-    }
-    if (state.panel && state.panel.length > 0 && state.panel.width > 0) {
-        productDetailsHTML += `<div><strong>Panel:</strong><br>${state.panel.length}cm × ${state.panel.width}cm</div>`;
-    }
-    document.getElementById('anchorDocProductDetails').innerHTML = productDetailsHTML;
+  // Populate product details in the Best Value card
+  let productDetailsHTML = "";
+  if (state.letters && state.letters.length > 0) {
+    state.letters.forEach((letter, index) => {
+      const typeName =
+        LETTER_TYPES.find((t) => t.id === letter.type)?.name || letter.type;
+      productDetailsHTML += `<div><strong>${letter.name || `#${index + 1}`}:</strong><br>${typeName} - ${letter.height}cm</div>`;
+    });
+  }
+  if (state.logo && state.logo.length > 0 && state.logo.width > 0) {
+    const typeName =
+      LETTER_TYPES.find((t) => t.id === state.logo.type)?.name ||
+      state.logo.type;
+    productDetailsHTML += `<div><strong>Logo:</strong><br>${typeName} - ${state.logo.length}cm × ${state.logo.width}cm</div>`;
+  }
+  if (state.panel && state.panel.length > 0 && state.panel.width > 0) {
+    productDetailsHTML += `<div><strong>Panel:</strong><br>${state.panel.length}cm × ${state.panel.width}cm</div>`;
+  }
+  document.getElementById("anchorDocProductDetails").innerHTML =
+    productDetailsHTML;
 
-    document.getElementById('anchorDocPricePremium').textContent = premiumPriceText;
-    document.getElementById('anchorDocPriceRecommended').textContent = recommendedPriceText;
-    document.getElementById('anchorDocPriceBudget').textContent = budgetPriceText;
-    document.getElementById('anchorDocSavings').textContent = savingsText || '';
+  document.getElementById("anchorDocPricePremium").textContent =
+    premiumPriceText;
+  document.getElementById("anchorDocPriceRecommended").textContent =
+    recommendedPriceText;
+  document.getElementById("anchorDocPriceBudget").textContent = budgetPriceText;
+  document.getElementById("anchorDocSavings").textContent = savingsText || "";
 
-    // Update date and quotation number
-    const today = new Date();
-    const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-    const validUntil = new Date(today);
-    validUntil.setDate(validUntil.getDate() + 10); // Changed from 30 to 10 days
-    const validUntilStr = validUntil.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+  // Update date and quotation number
+  const today = new Date();
+  const dateStr = today.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+  const validUntil = new Date(today);
+  validUntil.setDate(validUntil.getDate() + 10); // Changed from 30 to 10 days
+  const validUntilStr = validUntil.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
 
-    const quoteNumber = `QT-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+  const quoteNumber = `QT-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}`;
 
-    document.getElementById('anchorQuoteDate').textContent = dateStr;
-    document.getElementById('anchorQuoteValidUntil').textContent = validUntilStr;
-    document.getElementById('anchorQuoteNumber').textContent = quoteNumber;
+  document.getElementById("anchorQuoteDate").textContent = dateStr;
+  document.getElementById("anchorQuoteValidUntil").textContent = validUntilStr;
+  document.getElementById("anchorQuoteNumber").textContent = quoteNumber;
 
-    // Show quotation preview
-    document.getElementById('anchorQuotationPreview').style.display = 'block';
+  // Show quotation preview
+  document.getElementById("anchorQuotationPreview").style.display = "block";
 
-    // Scroll to preview
-    document.getElementById('anchorQuotationPreview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Scroll to preview
+  document
+    .getElementById("anchorQuotationPreview")
+    .scrollIntoView({ behavior: "smooth", block: "start" });
 
-    showNotification('Quotation document generated! You can now copy it to clipboard.', 'success');
+  showNotification(
+    "Quotation document generated! You can now copy it to clipboard.",
+    "success",
+  );
 }
 
 function copyAnchorQuotationToClipboard() {
-    // Check for file protocol limitation
-    if (window.location.protocol === 'file:') {
-        alert('⚠️ BROWSER SECURITY LIMITATION\n\nCannot copy image when opening file directly (file://).\n\nPlease open this app via Localhost to use this feature.\n(Check your terminal for the localhost link, usually http://localhost:8080)');
-        return;
-    }
+  // Check for file protocol limitation
+  if (window.location.protocol === "file:") {
+    alert(
+      "⚠️ BROWSER SECURITY LIMITATION\n\nCannot copy image when opening file directly (file://).\n\nPlease open this app via Localhost to use this feature.\n(Check your terminal for the localhost link, usually http://localhost:8080)",
+    );
+    return;
+  }
 
-    const quotationDoc = document.getElementById('anchorQuotationDocument');
+  const quotationDoc = document.getElementById("anchorQuotationDocument");
 
-    if (!quotationDoc) {
-        showNotification('No quotation to copy!', 'error');
-        return;
-    }
+  if (!quotationDoc) {
+    showNotification("No quotation to copy!", "error");
+    return;
+  }
 
-    const btn = document.getElementById('copyAnchorQuotation');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="icon">⏳</span> Copying...';
+  const btn = document.getElementById("copyAnchorQuotation");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="icon">⏳</span> Copying...';
 
-    // Use html2canvas to convert to image and copy to clipboard
-    html2canvas(quotationDoc, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-    }).then(canvas => {
-        canvas.toBlob(async blob => {
-            try {
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        'image/png': blob
-                    })
-                ]);
+  // Use html2canvas to convert to image and copy to clipboard
+  html2canvas(quotationDoc, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    backgroundColor: "#ffffff",
+  })
+    .then((canvas) => {
+      canvas.toBlob(async (blob) => {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              "image/png": blob,
+            }),
+          ]);
 
-                btn.disabled = false;
-                btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
-                showNotification('Quotation image copied to clipboard!', 'success');
-            } catch (err) {
-                console.error('Failed to copy image:', err);
-                btn.disabled = false;
-                btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
-                showNotification('Failed to copy. Try "Export Image" button instead.', 'error');
-            }
-        }, 'image/png');
-    }).catch(error => {
-        console.error('Error generating image:', error);
-        btn.disabled = false;
-        btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
-        showNotification('Error generating image. Please try again!', 'error');
+          btn.disabled = false;
+          btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
+          showNotification("Quotation image copied to clipboard!", "success");
+        } catch (err) {
+          console.error("Failed to copy image:", err);
+          btn.disabled = false;
+          btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
+          showNotification(
+            'Failed to copy. Try "Export Image" button instead.',
+            "error",
+          );
+        }
+      }, "image/png");
+    })
+    .catch((error) => {
+      console.error("Error generating image:", error);
+      btn.disabled = false;
+      btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
+      showNotification("Error generating image. Please try again!", "error");
     });
 }
 
-
-
-
-
-
 // ==================== Start ====================
-document.addEventListener('DOMContentLoaded', init);
-
+document.addEventListener("DOMContentLoaded", init);
