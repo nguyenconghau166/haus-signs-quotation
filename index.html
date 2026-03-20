@@ -53,10 +53,7 @@
         <span class="tab-icon">⚖️</span>
         Anchor Pricing
       </button>
-      <button class="tab-btn" data-tab="quotation">
-        <span class="tab-icon">📋</span>
-        Quotation
-      </button>
+      <!-- Quotation tab removed - always visible on right panel -->
       <button class="tab-btn" data-tab="settings" id="settingsTabBtn" style="display: none;">
         <span class="tab-icon">⚙️</span>
         Settings
@@ -64,7 +61,9 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="main">
+    <main class="main split-layout">
+      <!-- Left Panel: Input Tabs -->
+      <div class="input-panel">
       <!-- Tab: Signage -->
       <section class="tab-content active" id="signage-tab">
         <!-- Raised Letters Section -->
@@ -638,95 +637,182 @@
         </div>
       </section>
 
-      <!-- Tab: Quotation -->
-      <section class="tab-content" id="quotation-tab">
-        <div class="card">
-          <h2 class="card-title">📋 Customer Information</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="customerName">Customer Name *</label>
-              <input type="text" id="customerName" placeholder="Enter customer name" required>
-            </div>
-            <div class="form-group">
-              <label for="quoteDate">Quotation Date</label>
-              <input type="date" id="quoteDate">
-            </div>
-            <div class="form-group full-width">
-              <label for="address">Address</label>
-              <input type="text" id="address" placeholder="Enter address">
-            </div>
-            <div class="form-group">
-              <label for="phone">Phone Number</label>
-              <input type="tel" id="phone" placeholder="Enter phone number">
-            </div>
-          </div>
-        </div>
+      </div><!-- /input-panel -->
 
-        <div class="card">
-          <h2 class="card-title">🛒 Product List</h2>
-          <div class="items-table-container">
-            <table class="items-table simple" id="itemsTable">
-              <thead>
-                <tr>
-                  <th class="col-desc">Product</th>
-                  <th class="col-price">Price</th>
-                  <th class="col-action"></th>
-                </tr>
-              </thead>
-              <tbody id="itemsBody">
-                <!-- Items will be added here by JS -->
-              </tbody>
-            </table>
-            <button id="addItemBtn" class="btn btn-ghost">
-              <span class="icon">➕</span> Add Manually
-            </button>
-          </div>
-
-          <!-- Installation Option -->
-          <div class="installation-section">
-            <label class="checkbox-label">
-              <input type="checkbox" id="installationCheck">
-              <span class="checkmark"></span>
-              <span>Include installation fee</span>
-            </label>
-            <div class="installation-price" id="installationPriceSection" style="display: none;">
-              <label for="installationPrice">Installation Fee (₱)</label>
-              <input type="number" id="installationPrice" value="0" min="0" placeholder="Enter installation fee">
+      <!-- Right Panel: Quotation (always visible) -->
+      <div class="quotation-panel">
+      <section class="tab-content active" id="quotation-tab">
+        <div class="quote-document">
+          <!-- Document Header -->
+          <div class="quote-doc-header">
+            <div class="quote-doc-brand">
+              <div class="quote-doc-logo">H</div>
+              <div class="quote-doc-company">
+                <span class="quote-doc-company-name">HAUS SIGNS</span>
+                <span class="quote-doc-company-sub">Premium Signage Solutions</span>
+              </div>
+            </div>
+            <div class="quote-doc-title-block">
+              <h1 class="quote-doc-title">QUOTATION</h1>
+              <div class="quote-doc-meta">
+                <div class="quote-meta-row">
+                  <span class="quote-meta-label">Quote #:</span>
+                  <span class="quote-meta-value" id="quoteNumber">QT-2026-001</span>
+                </div>
+                <div class="quote-meta-row">
+                  <span class="quote-meta-label">Date:</span>
+                  <input type="date" id="quoteDate" class="quote-meta-input">
+                </div>
+                <div class="quote-meta-row">
+                  <span class="quote-meta-label">Valid Until:</span>
+                  <input type="date" id="quoteValidUntil" class="quote-meta-input">
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="totals-section">
-            <div class="total-row">
-              <span>Down Payment (DP):</span>
-              <input type="number" id="dpAmount" value="0" min="0">
-            </div>
-            <div class="total-row subtotal">
-              <span>Subtotal:</span>
-              <span id="subtotalDisplay">0</span>
-            </div>
-            <div class="total-row total">
-              <span>Balance:</span>
-              <span id="totalDisplay">0</span>
-            </div>
-          </div>
-        </div>
+          <!-- Accent Bar -->
+          <div class="quote-doc-accent-bar"></div>
 
-        <div class="card">
-          <h2 class="card-title">🖼️ Mockup Images</h2>
-          <p class="card-subtitle">Drag and drop, click to select, or Ctrl+V to paste images</p>
-          <div class="image-upload-area" id="imageUploadArea">
-            <div class="upload-placeholder" id="uploadPlaceholder">
-              <span class="upload-icon">📁</span>
-              <span class="upload-text">Drop images here, click to select, or Ctrl+V to paste</span>
-              <span class="upload-hint">Supported: JPG, PNG, WEBP</span>
+          <!-- Client Information -->
+          <div class="quote-doc-section">
+            <div class="quote-section-label">BILL TO / CLIENT INFORMATION</div>
+            <div class="quote-client-grid">
+              <div class="quote-client-field">
+                <label>Client Name <span class="required">*</span></label>
+                <input type="text" id="customerName" placeholder="e.g., Juan Dela Cruz" required>
+              </div>
+              <div class="quote-client-field">
+                <label>Company / Business Name</label>
+                <input type="text" id="companyName" placeholder="e.g., ABC Trading Corp.">
+              </div>
+              <div class="quote-client-field full">
+                <label>Address</label>
+                <input type="text" id="address" placeholder="e.g., 123 Rizal St., Brgy. San Antonio, Makati City">
+              </div>
+              <div class="quote-client-field">
+                <label>Contact Number</label>
+                <input type="tel" id="phone" placeholder="e.g., 0917-123-4567">
+              </div>
+              <div class="quote-client-field">
+                <label>Email</label>
+                <input type="email" id="clientEmail" placeholder="e.g., client@email.com">
+              </div>
             </div>
-            <input type="file" id="imageInput" accept="image/*" multiple hidden>
           </div>
-          <div class="image-previews" id="imagePreviews"></div>
+
+          <!-- Items Table -->
+          <div class="quote-doc-section">
+            <div class="quote-section-label">SCOPE OF WORK / ITEMS</div>
+            <div class="quote-items-wrapper">
+              <table class="quote-items-table" id="itemsTable">
+                <thead>
+                  <tr>
+                    <th class="col-no">#</th>
+                    <th class="col-desc">Description</th>
+                    <th class="col-amount">Amount (₱)</th>
+                    <th class="col-action"></th>
+                  </tr>
+                </thead>
+                <tbody id="itemsBody">
+                  <!-- Items will be added here by JS -->
+                </tbody>
+              </table>
+              <button id="addItemBtn" class="btn btn-ghost quote-add-btn">
+                + Add Item
+              </button>
+            </div>
+
+            <!-- Installation Option -->
+            <div class="quote-installation">
+              <label class="checkbox-label">
+                <input type="checkbox" id="installationCheck">
+                <span>Include Installation Fee</span>
+              </label>
+              <div class="installation-price" id="installationPriceSection" style="display: none;">
+                <label for="installationPrice">Installation Fee (₱)</label>
+                <input type="number" id="installationPrice" value="0" min="0" placeholder="0.00">
+              </div>
+            </div>
+
+            <!-- Totals Box -->
+            <div class="quote-totals-box">
+              <div class="quote-total-row">
+                <span>Subtotal</span>
+                <span class="quote-total-value" id="subtotalDisplay">₱ 0.00</span>
+              </div>
+              <div class="quote-total-row quote-dp-row">
+                <span>Down Payment (DP)</span>
+                <div class="quote-dp-input-wrap">
+                  <span class="quote-currency">₱</span>
+                  <input type="number" id="dpAmount" value="0" min="0" placeholder="0.00">
+                </div>
+              </div>
+              <div class="quote-total-row quote-grand-total">
+                <span>BALANCE DUE</span>
+                <span class="quote-total-value" id="totalDisplay">₱ 0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Terms -->
+          <div class="quote-doc-section quote-terms-section">
+            <div class="quote-section-label">Payment Terms</div>
+            <div class="quote-terms-content">
+              <ul>
+                <li><strong>30% deposit</strong> required to proceed with the order</li>
+                <li><strong>70% balance</strong> upon completion, prior to delivery/installation</li>
+              </ul>
+              <div class="quote-terms-note">
+                <strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not included. This is a NON-VAT receipt.
+              </div>
+              <div class="quote-validity-note">
+                This quotation is valid for <strong>15 days</strong> from the date of issue.
+              </div>
+            </div>
+          </div>
+
+          <!-- Mockup Images -->
+          <div class="quote-doc-section">
+            <div class="quote-section-label">MOCKUP / DESIGN REFERENCE</div>
+            <div class="image-upload-area" id="imageUploadArea">
+              <div class="upload-placeholder" id="uploadPlaceholder">
+                <span class="upload-icon">📁</span>
+                <span class="upload-text">Drop images here, click to select, or Ctrl+V to paste</span>
+                <span class="upload-hint">Supported: JPG, PNG, WEBP</span>
+              </div>
+              <input type="file" id="imageInput" accept="image/*" multiple hidden>
+            </div>
+            <div class="image-previews" id="imagePreviews"></div>
+          </div>
+
+          <!-- Signature Block -->
+          <div class="quote-signature-block">
+            <div class="quote-sig-col">
+              <div class="quote-sig-label">Prepared by:</div>
+              <div class="quote-sig-line"></div>
+              <div class="quote-sig-name">HAUS SIGNS</div>
+              <div class="quote-sig-title">Authorized Representative</div>
+            </div>
+            <div class="quote-sig-col">
+              <div class="quote-sig-label">Conforme / Accepted by:</div>
+              <div class="quote-sig-line"></div>
+              <div class="quote-sig-name-input">
+                <input type="text" id="conformeName" placeholder="Client Name / Signature">
+              </div>
+              <div class="quote-sig-title">Date: _______________</div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="quote-doc-footer">
+            <span>HAUS SIGNS &middot; Premium Signage Solutions &middot; Philippines</span>
+          </div>
         </div>
       </section>
+      </div><!-- /quotation-panel -->
 
-      <!-- Tab: Settings -->
+      <!-- Tab: Settings (full width, outside split layout) -->
       <section class="tab-content" id="settings-tab">
         <div class="card">
           <h2 class="card-title">⚙️ Unit Price Settings</h2>
@@ -1000,6 +1086,10 @@
               <span class="quote-label">Date:</span>
               <span class="quote-value" id="pdfDate"></span>
             </div>
+            <div class="pdf-quote-date">
+              <span class="quote-label">Valid Until:</span>
+              <span class="quote-value" id="pdfValidUntil"></span>
+            </div>
           </div>
         </div>
 
@@ -1007,7 +1097,7 @@
         <div class="pdf-customer-section">
           <div class="pdf-section-title">
             <span class="section-icon">👤</span>
-            CUSTOMER INFORMATION
+            BILL TO / CLIENT INFORMATION
           </div>
           <div class="pdf-customer-grid">
             <div class="customer-field">
@@ -1015,12 +1105,20 @@
               <span class="field-value" id="pdfCustomerName"></span>
             </div>
             <div class="customer-field">
-              <span class="field-label">Phone:</span>
-              <span class="field-value" id="pdfPhone"></span>
+              <span class="field-label">Company:</span>
+              <span class="field-value" id="pdfCompanyName"></span>
             </div>
             <div class="customer-field full">
               <span class="field-label">Address:</span>
               <span class="field-value" id="pdfAddress"></span>
+            </div>
+            <div class="customer-field">
+              <span class="field-label">Phone:</span>
+              <span class="field-value" id="pdfPhone"></span>
+            </div>
+            <div class="customer-field">
+              <span class="field-label">Email:</span>
+              <span class="field-value" id="pdfEmail"></span>
             </div>
           </div>
         </div>
@@ -1082,6 +1180,9 @@
             <div class="terms-note">
               <strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not
               included. This is a NON-VAT receipt.
+            </div>
+            <div class="terms-validity">
+              This quotation is valid for <strong>15 days</strong> from the date of issue.
             </div>
           </div>
 
