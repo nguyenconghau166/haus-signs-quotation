@@ -71,9 +71,13 @@ async function init() {
     renderLightboxFormulaList();
     setupLightboxFormulaListeners();
 
-    // Set default date
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('quoteDate').value = today;
+    // Set default date and validity
+    const today = new Date();
+    document.getElementById('quoteDate').value = today.toISOString().split('T')[0];
+    const validUntil = new Date(today);
+    validUntil.setDate(validUntil.getDate() + 15);
+    const validUntilEl = document.getElementById('quoteValidUntil');
+    if (validUntilEl) validUntilEl.value = validUntil.toISOString().split('T')[0];
 
     // Add initial letter row
     addLetterRow();
@@ -182,8 +186,8 @@ function setupTabListeners() {
             tabBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            // Show corresponding content
-            document.querySelectorAll('.tab-content').forEach(content => {
+            // Show corresponding content (only toggle input-panel tabs, not quotation)
+            document.querySelectorAll('.input-panel .tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             document.getElementById(`${tabId}-tab`).classList.add('active');
@@ -757,9 +761,6 @@ function updateSignageSummary() {
 }
 
 function addSignageToQuotation() {
-    // Track if any illuminated products are added
-    let hasIlluminatedProduct = false;
-
     // Calculate total letter price for surcharge
     let totalLetterPrice = 0;
     let lettersWithPrice = [];
@@ -812,10 +813,6 @@ function addSignageToQuotation() {
             price: displayPrice
         });
 
-        // Check if illuminated product exists
-        if (isLedCapableType(item.type) && !item.noLed) {
-            hasIlluminatedProduct = true;
-        }
     });
 
     // Add logo
@@ -831,10 +828,6 @@ function addSignageToQuotation() {
             price: result.price
         });
 
-        // Check if illuminated
-        if (isLedCapableType(state.logo.type) && !state.logo.noLed) {
-            hasIlluminatedProduct = true;
-        }
     }
 
     // Add acrylic logo
@@ -853,8 +846,6 @@ function addSignageToQuotation() {
             price: result.price
         });
 
-        // Acrylic logo is always illuminated
-        hasIlluminatedProduct = true;
     }
 
     // Add panel
@@ -867,21 +858,14 @@ function addSignageToQuotation() {
         });
     }
 
-    // Add FREE Sign Board bonus for illuminated orders
-    if (hasIlluminatedProduct) {
-        state.quotationItems.push({
-            description: '🎁 FREE BONUS: Sign Board/Frame (Aluminum Composite Background Panel - ACP) - Gift for Illuminated Letter Orders',
-            price: 0
-        });
-    }
-
     renderQuotationItems();
     clearSignage();
 
-    // Switch to quotation tab
-    document.querySelector('[data-tab="quotation"]').click();
+    // Scroll quotation panel to top to show new items
+    const qPanel = document.querySelector('.quotation-panel');
+    if (qPanel) qPanel.scrollTop = 0;
 
-    showNotification('Added to quotation!' + (hasIlluminatedProduct ? ' 🎁 FREE Sign Board/Frame included!' : ''), 'success');
+    showNotification('Added to quotation!', 'success');
 }
 
 function clearSignage() {
@@ -1169,8 +1153,9 @@ function addLightboxToQuotation() {
     document.getElementById('customDepth').value = '';
     document.getElementById('lightboxResult').textContent = '0 ₱';
 
-    // Switch to quotation tab
-    document.querySelector('[data-tab="quotation"]').click();
+    // Scroll quotation panel to top to show new items
+    const qPanel = document.querySelector('.quotation-panel');
+    if (qPanel) qPanel.scrollTop = 0;
 
     showNotification('Lightbox added to quotation!', 'success');
 }
@@ -1240,8 +1225,8 @@ function renderQuotationItems() {
     if (state.quotationItems.length === 0) {
         tbody.innerHTML = `
       <tr>
-        <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-          No products yet. Add from Signage or Lightbox tab.
+        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem; font-style: italic; font-size: 0.8125rem;">
+          No items yet. Add from Signage or Lightbox tab.
         </td>
       </tr>
     `;
@@ -1251,14 +1236,15 @@ function renderQuotationItems() {
 
     tbody.innerHTML = state.quotationItems.map((item, index) => `
     <tr>
+      <td class="row-number">${index + 1}</td>
       <td>
-        <input type="text" placeholder="Product name" 
-               value="${item.description}" 
+        <input type="text" placeholder="Item description"
+               value="${item.description}"
                data-index="${index}" data-field="description">
       </td>
       <td>
-        <input type="number" placeholder="0" min="0" step="0.01"
-               value="${item.price || ''}" 
+        <input type="number" placeholder="0.00" min="0" step="0.01"
+               value="${item.price || ''}"
                data-index="${index}" data-field="price">
       </td>
       <td>
@@ -1307,8 +1293,8 @@ function updateQuotationTotals() {
     state.dp = parseFloat(document.getElementById('dpAmount').value) || 0;
     const total = subtotal - state.dp;
 
-    document.getElementById('subtotalDisplay').textContent = formatNumber(subtotal);
-    document.getElementById('totalDisplay').textContent = formatNumber(total);
+    document.getElementById('subtotalDisplay').textContent = '₱ ' + formatNumber(subtotal);
+    document.getElementById('totalDisplay').textContent = '₱ ' + formatNumber(total);
 }
 
 // ==================== Image Upload ====================
@@ -1426,15 +1412,23 @@ function updatePDFTemplate() {
     template.querySelector('#pdfCustomerName').textContent = document.getElementById('customerName').value || '';
     template.querySelector('#pdfAddress').textContent = document.getElementById('address').value || '';
     template.querySelector('#pdfPhone').textContent = document.getElementById('phone').value || '';
+    const pdfCompany = template.querySelector('#pdfCompanyName');
+    if (pdfCompany) pdfCompany.textContent = (document.getElementById('companyName')?.value) || '';
+    const pdfEmail = template.querySelector('#pdfEmail');
+    if (pdfEmail) pdfEmail.textContent = (document.getElementById('clientEmail')?.value) || '';
 
     // Date
+    const dateFormat = { month: '2-digit', day: '2-digit', year: 'numeric' };
     const date = document.getElementById('quoteDate').value;
-    const formattedDate = date ? new Date(date).toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-    }) : '';
+    const formattedDate = date ? new Date(date).toLocaleDateString('en-US', dateFormat) : '';
     template.querySelector('#pdfDate').textContent = formattedDate;
+
+    // Valid Until
+    const validUntil = document.getElementById('quoteValidUntil')?.value;
+    const pdfValidUntil = template.querySelector('#pdfValidUntil');
+    if (pdfValidUntil) {
+        pdfValidUntil.textContent = validUntil ? new Date(validUntil).toLocaleDateString('en-US', dateFormat) : '';
+    }
 
     // Items
     const itemsBody = template.querySelector('#pdfItemsBody');
@@ -1487,6 +1481,16 @@ function updatePDFTemplate() {
             termsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. This is a NON-VAT receipt.';
         } else {
             termsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not included. This is a NON-VAT receipt.';
+        }
+    }
+
+    // Also update the quotation form terms note
+    const quoteTermsNote = document.querySelector('.quote-terms-note');
+    if (quoteTermsNote) {
+        if (installationChecked && installationPrice > 0) {
+            quoteTermsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. This is a NON-VAT receipt.';
+        } else {
+            quoteTermsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not included. This is a NON-VAT receipt.';
         }
     }
 
@@ -2011,8 +2015,9 @@ function addAnchorOption(optionType) {
         state.quotationItems.push({ description, price });
         renderQuotationItems();
 
-        // Switch to quotation tab
-        document.querySelector('[data-tab="quotation"]').click();
+        // Scroll quotation panel to top to show new items
+        const qPanel = document.querySelector('.quotation-panel');
+        if (qPanel) qPanel.scrollTop = 0;
 
         showNotification(`${optionName} added to quotation!`, 'success');
     }
@@ -2034,8 +2039,9 @@ function addAllAnchorOptions() {
 
         renderQuotationItems();
 
-        // Switch to quotation tab
-        document.querySelector('[data-tab="quotation"]').click();
+        // Scroll quotation panel to top to show new items
+        const qPanel = document.querySelector('.quotation-panel');
+        if (qPanel) qPanel.scrollTop = 0;
 
         showNotification('All 3 options added to quotation!', 'success');
     } else {
