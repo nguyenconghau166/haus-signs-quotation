@@ -218,6 +218,7 @@ body {
 
 .input-panel {
   min-width: 0;
+  overflow: hidden;
 }
 
 .quotation-panel {
@@ -1091,8 +1092,13 @@ body {
 /* Custom Lightbox Size Grid - 3 pairs of inches/cm */
 .lightbox-custom-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.75rem;
+}
+
+.lightbox-custom-grid .form-group input {
+  min-width: 0;
+  width: 100%;
 }
 
 @media (max-width: 900px) {
