@@ -1194,8 +1194,12 @@ body {
 }
 
 /* Simplified 2-column table */
+.items-table.simple .col-qty {
+  width: 60px;
+}
+
 .items-table.simple .col-desc {
-  width: 70%;
+  width: auto;
 }
 
 .items-table.simple .col-price {
@@ -1256,6 +1260,16 @@ body {
   height: 20px;
   accent-color: var(--primary);
   cursor: pointer;
+}
+
+.checkbox-label.compact {
+  gap: 0.4rem;
+  font-size: 0.875rem;
+}
+
+.checkbox-label.compact input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
 }
 
 .checkbox-group-inline {
@@ -1717,6 +1731,17 @@ body {
   letter-spacing: 0.5px;
 }
 
+.pdf-content.premium .pdf-company-address {
+  font-size: 9px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.pdf-content.premium .pdf-company-contact {
+  font-size: 9px;
+  color: #64748b;
+}
+
 .pdf-content.premium .pdf-title-section {
   text-align: right;
 }
@@ -1819,10 +1844,19 @@ body {
   letter-spacing: 0.5px;
 }
 
-.pdf-content.premium .pdf-items-table.premium th.col-qty,
-.pdf-content.premium .pdf-items-table.premium th.col-price,
-.pdf-content.premium .pdf-items-table.premium th.col-total {
+.pdf-content.premium .pdf-items-table.premium th.col-itemno {
+  width: 70px;
   text-align: center;
+}
+
+.pdf-content.premium .pdf-items-table.premium th.col-pc {
+  width: 50px;
+  text-align: center;
+}
+
+.pdf-content.premium .pdf-items-table.premium th.col-price {
+  width: 120px;
+  text-align: right;
 }
 
 .pdf-content.premium .pdf-items-table.premium tbody tr:nth-child(odd) {
@@ -1840,10 +1874,13 @@ body {
   border-bottom: 1px solid #e2e8f0;
 }
 
-.pdf-content.premium .pdf-items-table.premium td:nth-child(2),
-.pdf-content.premium .pdf-items-table.premium td:nth-child(3),
-.pdf-content.premium .pdf-items-table.premium td:nth-child(4) {
+.pdf-content.premium .pdf-items-table.premium td:nth-child(1),
+.pdf-content.premium .pdf-items-table.premium td:nth-child(2) {
   text-align: center;
+}
+
+.pdf-content.premium .pdf-items-table.premium td:nth-child(4) {
+  text-align: right;
 }
 
 .pdf-content.premium .pdf-totals-section {
@@ -1857,7 +1894,7 @@ body {
   border: 2px solid #1e3a5f;
   border-radius: 8px;
   padding: 15px 25px;
-  min-width: 250px;
+  min-width: 280px;
 }
 
 .pdf-content.premium .pdf-totals-box .total-row {
@@ -1902,6 +1939,66 @@ body {
   font-size: 10px;
   color: #64748b;
   margin-top: 8px;
+}
+
+.pdf-content.premium .pdf-timeline-section {
+  padding: 15px 40px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pdf-content.premium .timeline-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pdf-content.premium .timeline-item {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.pdf-content.premium .timeline-label {
+  font-weight: 600;
+  color: #1e3a5f;
+}
+
+.pdf-content.premium .timeline-value {
+  color: #334155;
+}
+
+.pdf-content.premium .timeline-note {
+  grid-column: span 2;
+  font-size: 10px;
+  color: #64748b;
+  font-style: italic;
+  margin-top: 6px;
+}
+
+.pdf-content.premium .pdf-services-section {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 15px 40px;
+}
+
+.pdf-content.premium .service-badge {
+  background: #1e3a5f;
+  color: #c9a227;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+
+.pdf-content.premium .footer-tagline {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c9a227;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
 }
 
 .pdf-content.premium .pdf-footer-grid {

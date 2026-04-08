@@ -37,6 +37,8 @@ const state = {
     quotationItems: [],
     images: [],
     dp: 0,
+    discount: 0,
+    vatEnabled: false,
     customer: {
         name: localStorage.getItem('customerName') || '',
         company: localStorage.getItem('customerCompany') || '',
@@ -810,7 +812,8 @@ function addSignageToQuotation() {
 
         state.quotationItems.push({
             description: `${displayName} - ${typeInfo?.name || ''} (${item.height}cm x ${item.charCount} letters${item.noLed ? ', No LED' : ''}${item.difficult ? ', Difficult lettering' : ''})`,
-            price: displayPrice
+            price: displayPrice,
+            quantity: 1
         });
 
     });
@@ -825,7 +828,8 @@ function addSignageToQuotation() {
         const displayName = state.logo.name || 'Logo';
         state.quotationItems.push({
             description: `${displayName} - ${typeInfo?.name || ''} (${state.logo.length}×${state.logo.width}cm${state.logo.noLed ? ', No LED' : ''}${state.logo.difficult ? ', Difficult lettering' : ''})`,
-            price: result.price
+            price: result.price,
+            quantity: 1
         });
 
     }
@@ -843,7 +847,8 @@ function addSignageToQuotation() {
         const shapeText = state.acrylicLogo.shape === 'square' ? 'square' : 'round';
         state.quotationItems.push({
             description: `${displayName} - Illuminated Acrylic Logo (${shapeText}${state.acrylicLogo.complex ? ', complex shape' : ''}) (${state.acrylicLogo.length}×${state.acrylicLogo.width}cm)`,
-            price: result.price
+            price: result.price,
+            quantity: 1
         });
 
     }
@@ -854,7 +859,17 @@ function addSignageToQuotation() {
         const displayName = state.panel.name || 'Aluminum Panel';
         state.quotationItems.push({
             description: `${displayName} (${state.panel.length}×${state.panel.width}cm${state.panel.hasSticker ? ', sticker print included' : ''})`,
-            price: result.price
+            price: result.price,
+            quantity: 1
+        });
+    }
+
+    // Add FREE Sign Board bonus for illuminated orders
+    if (hasIlluminatedProduct) {
+        state.quotationItems.push({
+            description: '🎁 FREE BONUS: Sign Board/Frame (Aluminum Composite Background Panel - ACP) - Gift for Illuminated Letter Orders',
+            price: 0,
+            quantity: 1
         });
     }
 
@@ -1135,7 +1150,8 @@ function addLightboxToQuotation() {
 
     state.quotationItems.push({
         description: `${style.name} - ${sizeLabel}`,
-        price: result.totalPrice
+        price: result.totalPrice,
+        quantity: 1
     });
 
     renderQuotationItems();
@@ -1176,6 +1192,8 @@ function setupQuotationListeners() {
     });
 
     document.getElementById('installationPrice').addEventListener('input', updateQuotationTotals);
+    document.getElementById('discountAmount').addEventListener('input', updateQuotationTotals);
+    document.getElementById('vatCheck').addEventListener('change', updateQuotationTotals);
 
     // Customer Name listener (Quotation Tab)
     const customerNameInput = document.getElementById('customerName');
@@ -1209,7 +1227,8 @@ function setupQuotationListeners() {
 function addManualItem() {
     state.quotationItems.push({
         description: '',
-        price: 0
+        price: 0,
+        quantity: 1
     });
     renderQuotationItems();
 }
@@ -1225,8 +1244,8 @@ function renderQuotationItems() {
     if (state.quotationItems.length === 0) {
         tbody.innerHTML = `
       <tr>
-        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem; font-style: italic; font-size: 0.8125rem;">
-          No items yet. Add from Signage or Lightbox tab.
+        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          No products yet. Add from Signage or Lightbox tab.
         </td>
       </tr>
     `;
@@ -1238,12 +1257,18 @@ function renderQuotationItems() {
     <tr>
       <td class="row-number">${index + 1}</td>
       <td>
-        <input type="text" placeholder="Item description"
+        <input type="number" placeholder="1" min="1" step="1"
+               value="${item.quantity || 1}"
+               data-index="${index}" data-field="quantity"
+               style="width: 60px; text-align: center;">
+      </td>
+      <td>
+        <input type="text" placeholder="Product name"
                value="${item.description}"
                data-index="${index}" data-field="description">
       </td>
       <td>
-        <input type="number" placeholder="0.00" min="0" step="0.01"
+        <input type="number" placeholder="0" min="0" step="0.01"
                value="${item.price || ''}"
                data-index="${index}" data-field="price">
       </td>
@@ -1270,7 +1295,7 @@ function handleItemInput(e) {
     const field = e.target.dataset.field;
     let value = e.target.value;
 
-    if (field === 'price') {
+    if (field === 'price' || field === 'quantity') {
         value = parseFloat(value) || 0;
     }
 
@@ -1279,8 +1304,8 @@ function handleItemInput(e) {
 }
 
 function updateQuotationTotals() {
-    // Calculate items subtotal
-    let subtotal = state.quotationItems.reduce((sum, item) => sum + (item.price || 0), 0);
+    // Calculate items subtotal (price * quantity)
+    let subtotal = state.quotationItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
 
     // Add installation if checked
     const installationChecked = document.getElementById('installationCheck').checked;
@@ -1290,11 +1315,23 @@ function updateQuotationTotals() {
         subtotal += installationPrice;
     }
 
-    state.dp = parseFloat(document.getElementById('dpAmount').value) || 0;
-    const total = subtotal - state.dp;
+    // Discount
+    state.discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+    const afterDiscount = subtotal - state.discount;
 
-    document.getElementById('subtotalDisplay').textContent = '₱ ' + formatNumber(subtotal);
-    document.getElementById('totalDisplay').textContent = '₱ ' + formatNumber(total);
+    // VAT
+    state.vatEnabled = document.getElementById('vatCheck').checked;
+    const vat = state.vatEnabled ? afterDiscount * 0.12 : 0;
+
+    // Deposit
+    state.dp = parseFloat(document.getElementById('dpAmount').value) || 0;
+
+    // Remaining balance
+    const remainingBalance = afterDiscount + vat - state.dp;
+
+    document.getElementById('subtotalDisplay').textContent = formatNumber(subtotal);
+    document.getElementById('vatDisplay').textContent = formatNumber(vat);
+    document.getElementById('totalDisplay').textContent = formatNumber(remainingBalance);
 }
 
 // ==================== Image Upload ====================
@@ -1435,18 +1472,20 @@ function updatePDFTemplate() {
     itemsBody.innerHTML = '';
 
     let subtotal = 0;
+    let itemIndex = 1;
     state.quotationItems.forEach(item => {
         if (item.description || item.price > 0) {
-            subtotal += item.price || 0;
+            subtotal += (item.price || 0) * (item.quantity || 1);
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
+        <td>${itemIndex}</td>
+        <td>${item.quantity || 1}</td>
         <td>${item.description}</td>
-        <td></td>
-        <td></td>
         <td>${formatNumber(item.price || 0)}</td>
       `;
             itemsBody.appendChild(tr);
+            itemIndex++;
         }
     });
 
@@ -1458,29 +1497,35 @@ function updatePDFTemplate() {
         subtotal += installationPrice;
         const tr = document.createElement('tr');
         tr.innerHTML = `
+        <td>${itemIndex}</td>
+        <td>1</td>
         <td>Installation Fee</td>
-        <td></td>
-        <td></td>
         <td>${formatNumber(installationPrice)}</td>
       `;
         itemsBody.appendChild(tr);
     }
 
     // Totals
+    const discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+    const afterDiscount = subtotal - discount;
+    const vatChecked = document.getElementById('vatCheck').checked;
+    const vat = vatChecked ? afterDiscount * 0.12 : 0;
     const dp = parseFloat(document.getElementById('dpAmount').value) || 0;
-    const total = subtotal - dp;
+    const remainingBalance = afterDiscount + vat - dp;
 
-    template.querySelector('#pdfDP').textContent = formatNumber(dp);
     template.querySelector('#pdfSubtotal').textContent = formatNumber(subtotal);
-    template.querySelector('#pdfTotal').textContent = formatNumber(total);
+    template.querySelector('#pdfDiscount').textContent = formatNumber(discount);
+    template.querySelector('#pdfDP').textContent = formatNumber(dp);
+    template.querySelector('#pdfVAT').textContent = formatNumber(vat);
+    template.querySelector('#pdfTotal').textContent = formatNumber(remainingBalance);
 
     // Update payment terms note based on installation
     const termsNote = template.querySelector('.terms-note');
     if (termsNote) {
         if (installationChecked && installationPrice > 0) {
-            termsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. This is a NON-VAT receipt.';
+            termsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories.';
         } else {
-            termsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not included. This is a NON-VAT receipt.';
+            termsNote.innerHTML = '<strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not included.';
         }
     }
 
@@ -2012,7 +2057,7 @@ function addAnchorOption(optionType) {
     }
 
     if (price > 0) {
-        state.quotationItems.push({ description, price });
+        state.quotationItems.push({ description, price, quantity: 1 });
         renderQuotationItems();
 
         // Scroll quotation panel to top to show new items
@@ -2033,9 +2078,9 @@ function addAllAnchorOptions() {
     const budgetPrice = parseFloat(budgetPriceText.replace(/[^\d.-]/g, ''));
 
     if (premiumPrice > 0) {
-        state.quotationItems.push({ description: 'Option 1: Stainless Steel (Inox) - Premium', price: premiumPrice });
-        state.quotationItems.push({ description: 'Option 2: Acrylic - Best Value ⭐', price: recommendedPrice });
-        state.quotationItems.push({ description: 'Option 3: 3D Non-LED - Budget', price: budgetPrice });
+        state.quotationItems.push({ description: 'Option 1: Stainless Steel (Inox) - Premium', price: premiumPrice, quantity: 1 });
+        state.quotationItems.push({ description: 'Option 2: Acrylic - Best Value ⭐', price: recommendedPrice, quantity: 1 });
+        state.quotationItems.push({ description: 'Option 3: 3D Non-LED - Budget', price: budgetPrice, quantity: 1 });
 
         renderQuotationItems();
 

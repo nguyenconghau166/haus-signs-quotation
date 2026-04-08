@@ -639,40 +639,66 @@
 
       </div><!-- /input-panel -->
 
-      <!-- Right Panel: Quotation (always visible) -->
-      <div class="quotation-panel">
-      <section class="tab-content active" id="quotation-tab">
-        <div class="quote-document">
-          <!-- Document Header -->
-          <div class="quote-doc-header">
-            <div class="quote-doc-brand">
-              <div class="quote-doc-logo">H</div>
-              <div class="quote-doc-company">
-                <span class="quote-doc-company-name">HAUS SIGNS</span>
-                <span class="quote-doc-company-sub">Premium Signage Solutions</span>
-              </div>
-            </div>
-            <div class="quote-doc-title-block">
-              <h1 class="quote-doc-title">QUOTATION</h1>
-              <div class="quote-doc-meta">
-                <div class="quote-meta-row">
-                  <span class="quote-meta-label">Quote #:</span>
-                  <span class="quote-meta-value" id="quoteNumber">QT-2026-001</span>
-                </div>
-                <div class="quote-meta-row">
-                  <span class="quote-meta-label">Date:</span>
-                  <input type="date" id="quoteDate" class="quote-meta-input">
-                </div>
-                <div class="quote-meta-row">
-                  <span class="quote-meta-label">Valid Until:</span>
-                  <input type="date" id="quoteValidUntil" class="quote-meta-input">
-                </div>
-              </div>
+        <div class="card">
+          <h2 class="card-title">🛒 Product List</h2>
+          <div class="items-table-container">
+            <table class="items-table simple" id="itemsTable">
+              <thead>
+                <tr>
+                  <th class="col-qty">PC</th>
+                  <th class="col-desc">Product</th>
+                  <th class="col-price">Price</th>
+                  <th class="col-action"></th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody">
+                <!-- Items will be added here by JS -->
+              </tbody>
+            </table>
+            <button id="addItemBtn" class="btn btn-ghost">
+              <span class="icon">➕</span> Add Manually
+            </button>
+          </div>
+
+          <!-- Installation Option -->
+          <div class="installation-section">
+            <label class="checkbox-label">
+              <input type="checkbox" id="installationCheck">
+              <span class="checkmark"></span>
+              <span>Include installation fee</span>
+            </label>
+            <div class="installation-price" id="installationPriceSection" style="display: none;">
+              <label for="installationPrice">Installation Fee (₱)</label>
+              <input type="number" id="installationPrice" value="0" min="0" placeholder="Enter installation fee">
             </div>
           </div>
 
-          <!-- Accent Bar -->
-          <div class="quote-doc-accent-bar"></div>
+          <div class="totals-section">
+            <div class="total-row subtotal">
+              <span>Subtotal:</span>
+              <span id="subtotalDisplay">0</span>
+            </div>
+            <div class="total-row">
+              <span>Discount:</span>
+              <input type="number" id="discountAmount" value="0" min="0">
+            </div>
+            <div class="total-row">
+              <span>Deposit:</span>
+              <input type="number" id="dpAmount" value="0" min="0">
+            </div>
+            <div class="total-row">
+              <label class="checkbox-label compact">
+                <input type="checkbox" id="vatCheck">
+                <span>12% VAT:</span>
+              </label>
+              <span id="vatDisplay">0</span>
+            </div>
+            <div class="total-row total">
+              <span>Remaining Balance:</span>
+              <span id="totalDisplay">0</span>
+            </div>
+          </div>
+        </div>
 
           <!-- Client Information -->
           <div class="quote-doc-section">
@@ -1074,6 +1100,8 @@
             <div class="pdf-logo-text">
               <span class="pdf-company-name">HAUS SIGNS</span>
               <span class="pdf-company-tagline">Premium Signage Solutions</span>
+              <span class="pdf-company-address">Karuhatan, Manotoc, 15 F. Lazaro, Valenzuela, 1442 Metro Manila</span>
+              <span class="pdf-company-contact">09105 838383 | signs.haus@gmail.com</span>
             </div>
           </div>
           <div class="pdf-title-section">
@@ -1128,10 +1156,10 @@
           <table class="pdf-items-table premium">
             <thead>
               <tr>
+                <th class="col-itemno">ITEM NO.</th>
+                <th class="col-pc">PC</th>
                 <th class="col-desc">DESCRIPTION</th>
-                <th class="col-qty">QUANTITY</th>
                 <th class="col-price">UNIT PRICE</th>
-                <th class="col-total">TOTAL</th>
               </tr>
             </thead>
             <tbody id="pdfItemsBody">
@@ -1143,15 +1171,23 @@
         <div class="pdf-totals-section">
           <div class="pdf-totals-box">
             <div class="total-row">
-              <span>Subtotal:</span>
+              <span>SUB TOTAL:</span>
               <span id="pdfSubtotal">0</span>
             </div>
             <div class="total-row">
-              <span>Down Payment:</span>
+              <span>DISCOUNT:</span>
+              <span id="pdfDiscount">0</span>
+            </div>
+            <div class="total-row">
+              <span>DEPOSIT:</span>
               <span id="pdfDP">0</span>
             </div>
+            <div class="total-row">
+              <span>12% VAT:</span>
+              <span id="pdfVAT">0</span>
+            </div>
             <div class="total-row grand">
-              <span>GRAND TOTAL:</span>
+              <span>REMAINING BALANCE:</span>
               <span id="pdfTotal">0</span>
             </div>
           </div>
@@ -1164,6 +1200,27 @@
             LAYOUT PREVIEW <span class="on-next-page">(on the next page)</span>
           </div>
           <div class="pdf-images-list" id="pdfLayoutImage">
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="pdf-timeline-section">
+          <div class="pdf-section-title">
+            <span class="section-icon">📅</span>
+            TIMELINE
+          </div>
+          <div class="timeline-grid">
+            <div class="timeline-item">
+              <span class="timeline-label">Editing Timeline:</span>
+              <span class="timeline-value">3-5 days</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-label">Production Timeline:</span>
+              <span class="timeline-value">7-15 days</span>
+            </div>
+            <div class="timeline-note">
+              Note: Production lead time begins after final layout approval.
+            </div>
           </div>
         </div>
 
@@ -1190,14 +1247,21 @@
             <div class="bank-title">Bank Transfer Details</div>
             <div class="bank-logo">BDO</div>
             <div class="bank-details">
-              <p><strong>Account Name:</strong> HausSigns</p>
-              <p><strong>Account No:</strong> 003890144424</p>
+              <p><strong>Account Name:</strong> Jertrude Sagad</p>
+              <p><strong>Account No:</strong> 0029 0021 6539</p>
             </div>
             <div class="qr-code">
               <img src="/public/qr-code.png" alt="BDO QR Code" class="qr-code-img">
               <span>Scan to pay</span>
             </div>
           </div>
+        </div>
+
+        <!-- Service Categories -->
+        <div class="pdf-services-section">
+          <div class="service-badge">BOX LIGHTED LOGO</div>
+          <div class="service-badge">3D TEXT</div>
+          <div class="service-badge">SIGNAGE</div>
         </div>
 
         <!-- Trust Badges -->
@@ -1218,9 +1282,11 @@
 
         <!-- Footer -->
         <div class="pdf-footer-bar">
+          <div class="footer-tagline">Elevate Your Business with Premium Signage</div>
           <div class="footer-content">
-            <span>📍 Street, Manotok Subdivision, 15 F. Lazaro, Valenzuela, 1440 Metro Manila, Philippines</span>
+            <span>📍 Karuhatan, Manotoc, 15 F. Lazaro, Valenzuela, 1442 Metro Manila</span>
             <span>📞 09105 838383</span>
+            <span>✉️ signs.haus@gmail.com</span>
             <span>🌐 signs.haus</span>
           </div>
         </div>
