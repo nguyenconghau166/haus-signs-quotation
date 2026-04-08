@@ -864,15 +864,6 @@ function addSignageToQuotation() {
         });
     }
 
-    // Add FREE Sign Board bonus for illuminated orders
-    if (hasIlluminatedProduct) {
-        state.quotationItems.push({
-            description: '🎁 FREE BONUS: Sign Board/Frame (Aluminum Composite Background Panel - ACP) - Gift for Illuminated Letter Orders',
-            price: 0,
-            quantity: 1
-        });
-    }
-
     renderQuotationItems();
     clearSignage();
 
