@@ -639,66 +639,40 @@
 
       </div><!-- /input-panel -->
 
-        <div class="card">
-          <h2 class="card-title">🛒 Product List</h2>
-          <div class="items-table-container">
-            <table class="items-table simple" id="itemsTable">
-              <thead>
-                <tr>
-                  <th class="col-qty">PC</th>
-                  <th class="col-desc">Product</th>
-                  <th class="col-price">Price</th>
-                  <th class="col-action"></th>
-                </tr>
-              </thead>
-              <tbody id="itemsBody">
-                <!-- Items will be added here by JS -->
-              </tbody>
-            </table>
-            <button id="addItemBtn" class="btn btn-ghost">
-              <span class="icon">➕</span> Add Manually
-            </button>
-          </div>
-
-          <!-- Installation Option -->
-          <div class="installation-section">
-            <label class="checkbox-label">
-              <input type="checkbox" id="installationCheck">
-              <span class="checkmark"></span>
-              <span>Include installation fee</span>
-            </label>
-            <div class="installation-price" id="installationPriceSection" style="display: none;">
-              <label for="installationPrice">Installation Fee (₱)</label>
-              <input type="number" id="installationPrice" value="0" min="0" placeholder="Enter installation fee">
+      <!-- Right Panel: Quotation (always visible) -->
+      <div class="quotation-panel">
+      <section class="tab-content active" id="quotation-tab">
+        <div class="quote-document">
+          <!-- Document Header -->
+          <div class="quote-doc-header">
+            <div class="quote-doc-brand">
+              <div class="quote-doc-logo">H</div>
+              <div class="quote-doc-company">
+                <span class="quote-doc-company-name">HAUS SIGNS</span>
+                <span class="quote-doc-company-sub">Premium Signage Solutions</span>
+              </div>
+            </div>
+            <div class="quote-doc-title-block">
+              <h1 class="quote-doc-title">QUOTATION</h1>
+              <div class="quote-doc-meta">
+                <div class="quote-meta-row">
+                  <span class="quote-meta-label">Quote #:</span>
+                  <span class="quote-meta-value" id="quoteNumber">QT-2026-001</span>
+                </div>
+                <div class="quote-meta-row">
+                  <span class="quote-meta-label">Date:</span>
+                  <input type="date" id="quoteDate" class="quote-meta-input">
+                </div>
+                <div class="quote-meta-row">
+                  <span class="quote-meta-label">Valid Until:</span>
+                  <input type="date" id="quoteValidUntil" class="quote-meta-input">
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="totals-section">
-            <div class="total-row subtotal">
-              <span>Subtotal:</span>
-              <span id="subtotalDisplay">0</span>
-            </div>
-            <div class="total-row">
-              <span>Discount:</span>
-              <input type="number" id="discountAmount" value="0" min="0">
-            </div>
-            <div class="total-row">
-              <span>Deposit:</span>
-              <input type="number" id="dpAmount" value="0" min="0">
-            </div>
-            <div class="total-row">
-              <label class="checkbox-label compact">
-                <input type="checkbox" id="vatCheck">
-                <span>12% VAT:</span>
-              </label>
-              <span id="vatDisplay">0</span>
-            </div>
-            <div class="total-row total">
-              <span>Remaining Balance:</span>
-              <span id="totalDisplay">0</span>
-            </div>
-          </div>
-        </div>
+          <!-- Accent Bar -->
+          <div class="quote-doc-accent-bar"></div>
 
           <!-- Client Information -->
           <div class="quote-doc-section">
@@ -735,6 +709,7 @@
                 <thead>
                   <tr>
                     <th class="col-no">#</th>
+                    <th class="col-qty">PC</th>
                     <th class="col-desc">Description</th>
                     <th class="col-amount">Amount (₱)</th>
                     <th class="col-action"></th>
@@ -768,14 +743,28 @@
                 <span class="quote-total-value" id="subtotalDisplay">₱ 0.00</span>
               </div>
               <div class="quote-total-row quote-dp-row">
-                <span>Down Payment (DP)</span>
+                <span>Discount</span>
+                <div class="quote-dp-input-wrap">
+                  <span class="quote-currency">₱</span>
+                  <input type="number" id="discountAmount" value="0" min="0" placeholder="0.00">
+                </div>
+              </div>
+              <div class="quote-total-row quote-dp-row">
+                <span>Deposit</span>
                 <div class="quote-dp-input-wrap">
                   <span class="quote-currency">₱</span>
                   <input type="number" id="dpAmount" value="0" min="0" placeholder="0.00">
                 </div>
               </div>
+              <div class="quote-total-row">
+                <label class="checkbox-label compact" style="margin:0">
+                  <input type="checkbox" id="vatCheck">
+                  <span>12% VAT</span>
+                </label>
+                <span class="quote-total-value" id="vatDisplay">₱ 0.00</span>
+              </div>
               <div class="quote-total-row quote-grand-total">
-                <span>BALANCE DUE</span>
+                <span>REMAINING BALANCE</span>
                 <span class="quote-total-value" id="totalDisplay">₱ 0.00</span>
               </div>
             </div>

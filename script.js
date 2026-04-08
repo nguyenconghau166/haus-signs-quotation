@@ -1244,7 +1244,7 @@ function renderQuotationItems() {
     if (state.quotationItems.length === 0) {
         tbody.innerHTML = `
       <tr>
-        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
           No products yet. Add from Signage or Lightbox tab.
         </td>
       </tr>
@@ -1329,9 +1329,9 @@ function updateQuotationTotals() {
     // Remaining balance
     const remainingBalance = afterDiscount + vat - state.dp;
 
-    document.getElementById('subtotalDisplay').textContent = formatNumber(subtotal);
-    document.getElementById('vatDisplay').textContent = formatNumber(vat);
-    document.getElementById('totalDisplay').textContent = formatNumber(remainingBalance);
+    document.getElementById('subtotalDisplay').textContent = '₱ ' + formatNumber(subtotal);
+    document.getElementById('vatDisplay').textContent = '₱ ' + formatNumber(vat);
+    document.getElementById('totalDisplay').textContent = '₱ ' + formatNumber(remainingBalance);
 }
 
 // ==================== Image Upload ====================
