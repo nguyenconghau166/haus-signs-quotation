@@ -1250,25 +1250,27 @@ function renderQuotationItems() {
         const amount = qty * price;
         return `
     <tr class="ef-item-row">
-      <td style="text-align:center;width:50px;font-weight:600;color:#666;font-size:10px;">${index + 1}</td>
-      <td style="width:40px;">
+      <td class="ef-col-no">${index + 1}</td>
+      <td class="ef-col-qty">
         <input type="number" placeholder="1" min="1" step="1"
                value="${qty}"
-               data-index="${index}" data-field="quantity"
-               style="width:36px;text-align:center;">
+               data-index="${index}" data-field="quantity">
       </td>
-      <td style="width:30px;text-align:center;font-size:10px;color:#666;">pc</td>
-      <td colspan="4">
+      <td class="ef-col-pc">pc</td>
+      <td colspan="3" class="ef-col-desc">
         <input type="text" placeholder="Product name"
                value="${item.description}"
                data-index="${index}" data-field="description">
       </td>
-      <td colspan="2" style="width:80px;">
+      <td colspan="2" class="ef-col-price">
         <input type="number" placeholder="0" min="0" step="0.01"
                value="${price || ''}"
                data-index="${index}" data-field="price">
       </td>
-      <td style="text-align:right;width:80px;font-size:10px;">\u20B1${formatNumber(amount)}</td>
+      <td class="ef-col-amount">\u20B1${formatNumber(amount)}</td>
+      <td class="ef-col-action">
+        <button class="remove-item-btn" data-index="${index}">\u2715</button>
+      </td>
     </tr>
   `;
     }).join('');
@@ -1295,6 +1297,18 @@ function handleItemInput(e) {
     }
 
     state.quotationItems[index][field] = value;
+
+    // Re-render amount for this row without losing focus
+    if (field === 'price' || field === 'quantity') {
+        const row = e.target.closest('tr');
+        const amountCell = row.querySelector('.ef-col-amount');
+        if (amountCell) {
+            const qty = state.quotationItems[index].quantity || 1;
+            const price = state.quotationItems[index].price || 0;
+            amountCell.textContent = '\u20B1' + formatNumber(qty * price);
+        }
+    }
+
     updateQuotationTotals();
 }
 
@@ -1507,29 +1521,19 @@ function updatePDFTemplate() {
         });
     }
 
-    // Render item rows (always show 10 rows minimum)
-    const totalRows = Math.max(10, itemRows.length);
-    for (let i = 0; i < totalRows; i++) {
+    // Render item rows dynamically (only actual items, no empty rows)
+    for (let i = 0; i < itemRows.length; i++) {
         const tr = document.createElement('tr');
         tr.className = 'excel-item-row';
-        if (i < itemRows.length) {
-            const r = itemRows[i];
-            tr.innerHTML = `
-                <td class="col-itemno">${r.itemNo}</td>
-                <td class="col-qty">${r.qty}</td>
-                <td class="col-pc">${r.pc}</td>
-                <td colspan="4" class="col-desc">${r.description}</td>
-                <td colspan="2" class="col-unitprice">${formatNumber(r.unitPrice)}</td>
-                <td class="col-amount">\u20B1${formatNumber(r.amount)}</td>
-            `;
-        } else {
-            tr.innerHTML = `
-                <td></td><td></td><td></td>
-                <td colspan="4"></td>
-                <td colspan="2"></td>
-                <td></td>
-            `;
-        }
+        const r = itemRows[i];
+        tr.innerHTML = `
+            <td class="col-itemno">${r.itemNo}</td>
+            <td class="col-qty">${r.qty}</td>
+            <td class="col-pc">${r.pc}</td>
+            <td colspan="4" class="col-desc">${r.description}</td>
+            <td colspan="2" class="col-unitprice">${formatNumber(r.unitPrice)}</td>
+            <td class="col-amount">\u20B1${formatNumber(r.amount)}</td>
+        `;
         itemsBody.appendChild(tr);
     }
 

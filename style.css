@@ -271,8 +271,8 @@ body {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   color: #000;
   font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-  font-size: 11px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .excel-form-sheet {
@@ -283,9 +283,9 @@ body {
 
 .excel-form-sheet td {
   border: 1px solid #c0c0c0;
-  padding: 3px 6px;
+  padding: 5px 8px;
   vertical-align: middle;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 /* Green bar */
@@ -295,59 +295,68 @@ body {
 .ef-logo-row td { text-align: left; padding: 12px 8px 4px; border-color: transparent; }
 .ef-logo-area { display: flex; align-items: center; gap: 8px; }
 .ef-logo-img { width: 30px; height: auto; object-fit: contain; }
-.ef-company-name { font-size: 22px; font-weight: 700; color: #000; letter-spacing: 2px; }
+.ef-company-name { font-size: 26px; font-weight: 700; color: #000; letter-spacing: 2px; }
 
 /* Info rows */
 .ef-info-row td { border-color: transparent; padding: 1px 8px; }
-.ef-address { font-size: 9px; color: #333; }
-.ef-contact-text { font-size: 9px; color: #333; }
+.ef-address { font-size: 11px; color: #333; }
+.ef-contact-text { font-size: 11px; color: #333; }
 
 /* Spacer */
 .ef-spacer td { height: 8px; border-color: transparent; padding: 0; }
 
 /* Client rows */
-.ef-client-row td { border: 1px solid #999; padding: 4px 6px; height: 18px; }
-.ef-field-cell { display: flex; align-items: center; gap: 4px; }
-.ef-field-label { font-weight: 600; font-size: 10px; color: #000; white-space: nowrap; }
+.ef-client-row td { border: 1px solid #999; padding: 5px 8px; height: 22px; }
+.ef-field-cell { display: flex; align-items: center; gap: 6px; }
+.ef-field-label { font-weight: 600; font-size: 12px; color: #000; white-space: nowrap; }
 .ef-field-input {
   flex: 1; border: none; border-bottom: 1px solid #ccc; background: transparent;
-  font-size: 11px; color: #000; padding: 2px 4px; font-family: inherit;
+  font-size: 13px; color: #000; padding: 3px 4px; font-family: inherit;
 }
 .ef-field-input:focus { outline: none; border-bottom-color: #00b050; background: #f0fff0; }
 .ef-field-input::placeholder { color: #bbb; font-style: italic; }
 .ef-date-input { width: 110px; flex: none; }
 .ef-quote-badge {
-  text-align: center; vertical-align: middle; font-size: 16px;
+  text-align: center; vertical-align: middle; font-size: 20px;
   font-weight: 700; color: #000; border: 1px solid #999;
 }
 
 /* Balance */
-.ef-balance-row td { border: 1px solid #999; padding: 5px 8px; font-size: 11px; }
+.ef-balance-row td { border: 1px solid #999; padding: 6px 10px; font-size: 13px; }
 .ef-balance-label { font-weight: 600; text-align: right; padding-right: 12px !important; }
-.ef-balance-value { text-align: right; font-weight: 700; font-size: 12px; }
+.ef-balance-value { text-align: right; font-weight: 700; font-size: 14px; }
 
 /* Items header */
 .ef-items-header td {
-  background: #00b050; color: white; font-weight: 700; font-size: 9px;
-  text-align: center; padding: 6px 4px; border: 1px solid #009040; letter-spacing: 0.3px;
+  background: #00b050; color: white; font-weight: 700; font-size: 11px;
+  text-align: center; padding: 8px 6px; border: 1px solid #009040; letter-spacing: 0.3px;
 }
+.ef-items-header td.col-action { background: transparent; border: none; width: 24px; }
 
-/* Items body rows (rendered by JS - reuse excel-item-row styles) */
+/* Items body rows (rendered by JS) */
 .excel-form-sheet .excel-item-row td,
 .excel-form-sheet .ef-item-row td {
-  border: 1px solid #c0c0c0; padding: 3px 4px; height: 16px; font-size: 11px;
+  border: 1px solid #c0c0c0; padding: 5px 6px; height: 22px; font-size: 13px;
 }
 .excel-form-sheet .ef-item-row td input {
-  width: 100%; border: none; background: transparent; font-size: 11px;
-  color: #000; padding: 1px 3px; font-family: inherit;
+  width: 100%; border: none; background: transparent; font-size: 13px;
+  color: #000; padding: 2px 4px; font-family: inherit;
 }
 .excel-form-sheet .ef-item-row td input:focus { outline: none; background: #f0fff0; }
 .excel-form-sheet .ef-item-row td input[type="number"] { text-align: right; }
-.excel-form-sheet .ef-item-row .remove-item-btn {
-  background: none; border: none; color: #ccc; cursor: pointer; font-size: 12px;
-  padding: 2px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+.ef-col-no { text-align: center; width: 45px; font-weight: 600; color: #666; }
+.ef-col-qty { width: 40px; }
+.ef-col-qty input { width: 36px; text-align: center; }
+.ef-col-pc { width: 28px; text-align: center; color: #888; font-size: 11px; }
+.ef-col-desc { }
+.ef-col-price { width: 80px; }
+.ef-col-amount { text-align: right; width: 85px; font-weight: 600; }
+.ef-col-action { width: 24px; border: none !important; padding: 0 2px !important; }
+.ef-item-row .remove-item-btn {
+  background: none; border: none; color: #ccc; cursor: pointer; font-size: 14px;
+  padding: 2px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
 }
-.excel-form-sheet .ef-item-row .remove-item-btn:hover { color: #e00; }
+.ef-item-row .remove-item-btn:hover { color: #e00; }
 
 /* Add item row */
 .ef-add-row td { border-color: transparent; padding: 4px 6px; }
@@ -368,20 +377,20 @@ body {
 }
 
 /* Totals */
-.ef-totals-row td { border: 1px solid #c0c0c0; padding: 3px 6px; font-size: 11px; }
+.ef-totals-row td { border: 1px solid #c0c0c0; padding: 5px 8px; font-size: 13px; }
 .ef-totals-spacer { border: none !important; }
-.ef-totals-label { text-align: right; font-weight: 600; font-size: 10px; padding-right: 8px !important; }
-.ef-totals-value { text-align: right; font-weight: 600; }
+.ef-totals-label { text-align: right; font-weight: 600; font-size: 12px; padding-right: 10px !important; }
+.ef-totals-value { text-align: right; font-weight: 600; font-size: 13px; }
 .ef-totals-input-cell { text-align: right; }
-.ef-totals-input-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
-.ef-totals-input-wrap span { color: #666; font-size: 10px; }
+.ef-totals-input-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 3px; }
+.ef-totals-input-wrap span { color: #666; font-size: 12px; }
 .ef-totals-input-wrap input {
-  width: 70px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 2px;
-  font-size: 10px; text-align: right; color: #000; background: white;
+  width: 80px; padding: 3px 5px; border: 1px solid #ccc; border-radius: 2px;
+  font-size: 12px; text-align: right; color: #000; background: white;
 }
 .ef-totals-input-wrap input:focus { outline: none; border-color: #00b050; }
 .ef-totals-grand td { border-top: 2px solid #333; }
-.ef-grand-value { font-size: 12px !important; font-weight: 700 !important; color: #00b050 !important; }
+.ef-grand-value { font-size: 14px !important; font-weight: 700 !important; color: #00b050 !important; }
 
 /* Empty cell */
 .ef-empty-cell { border: none !important; }
@@ -1327,8 +1336,8 @@ body {
   background: white;
   color: #000;
   font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-  font-size: 11px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .pdf-content.excel .pdf-page {
@@ -1344,9 +1353,9 @@ body {
 
 .excel-sheet td {
   border: 1px solid #c0c0c0;
-  padding: 3px 6px;
+  padding: 5px 8px;
   vertical-align: middle;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 /* Green header bar */
@@ -1377,7 +1386,7 @@ body {
 }
 
 .excel-company-name {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
   color: #000;
   letter-spacing: 2px;
@@ -1390,12 +1399,12 @@ body {
 }
 
 .excel-address {
-  font-size: 10px;
+  font-size: 11px;
   color: #333;
 }
 
 .excel-contact {
-  font-size: 10px;
+  font-size: 11px;
   color: #333;
 }
 
@@ -1419,13 +1428,13 @@ body {
 
 .excel-field-label {
   font-weight: 600;
-  font-size: 10px;
+  font-size: 12px;
   color: #000;
   margin-right: 8px;
 }
 
 .excel-field-value {
-  font-size: 11px;
+  font-size: 13px;
   color: #000;
 }
 
@@ -1461,9 +1470,9 @@ body {
   background: #00b050;
   color: white;
   font-weight: 700;
-  font-size: 10px;
+  font-size: 11px;
   text-align: center;
-  padding: 8px 4px;
+  padding: 10px 6px;
   border: 1px solid #009040;
   letter-spacing: 0.3px;
 }
@@ -1475,9 +1484,9 @@ body {
 /* Items body */
 .excel-item-row td {
   border: 1px solid #c0c0c0;
-  padding: 5px 6px;
-  height: 14px;
-  font-size: 11px;
+  padding: 6px 8px;
+  height: 18px;
+  font-size: 13px;
   vertical-align: middle;
 }
 
@@ -1513,8 +1522,8 @@ body {
 /* Totals rows */
 .excel-totals-row td {
   border: 1px solid #c0c0c0;
-  padding: 4px 8px;
-  font-size: 11px;
+  padding: 6px 10px;
+  font-size: 13px;
 }
 
 .excel-totals-spacer {
@@ -1523,24 +1532,29 @@ body {
   padding: 0 !important;
 }
 
-.excel-totals-labels {
-  display: none;
-}
-
 .excel-totals-label {
   text-align: right;
   font-weight: 600;
-  font-size: 10px;
+  font-size: 12px;
   padding-right: 10px !important;
 }
 
 .excel-totals-value {
   text-align: right;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .excel-totals-vat td {
   border-bottom: 2px solid #999;
+}
+
+/* Green background for totals in export */
+.excel-totals-green td:not(.excel-totals-spacer) {
+  background: #00b050;
+  color: white;
+  font-weight: 700;
+  border-color: #009040;
 }
 
 /* Empty cell */

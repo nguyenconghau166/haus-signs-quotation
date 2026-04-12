@@ -701,9 +701,10 @@
               <td class="col-itemno">ITEM NO.</td>
               <td class="col-qty">QTY</td>
               <td class="col-pc">PC</td>
-              <td colspan="4" class="col-desc">DESCRIPTION</td>
+              <td colspan="3" class="col-desc">DESCRIPTION</td>
               <td colspan="2" class="col-unitprice">UNIT PRICE</td>
               <td class="col-amount">AMOUNT</td>
+              <td class="col-action"></td>
             </tr>
 
             <!-- Items body -->
@@ -1216,28 +1217,21 @@
             <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
           </tbody>
 
-          <!-- Totals rows -->
-          <tr class="excel-totals-row">
-            <td colspan="7" rowspan="4" class="excel-totals-spacer">
-              <div class="excel-totals-labels">
-                <div>SUB TOTAL:</div>
-                <div>DISCOUNT:</div>
-                <div>DEPOSIT :</div>
-                <div>12% VAT</div>
-              </div>
-            </td>
+          <!-- Totals rows (green background) -->
+          <tr class="excel-totals-row excel-totals-green">
+            <td colspan="7" rowspan="4" class="excel-totals-spacer"></td>
             <td colspan="2" class="excel-totals-label">SUB TOTAL:</td>
             <td class="excel-totals-value" id="pdfSubtotal">&#8369;0.00</td>
           </tr>
-          <tr class="excel-totals-row">
+          <tr class="excel-totals-row excel-totals-green">
             <td colspan="2" class="excel-totals-label">DISCOUNT:</td>
             <td class="excel-totals-value" id="pdfDiscount"></td>
           </tr>
-          <tr class="excel-totals-row">
+          <tr class="excel-totals-row excel-totals-green">
             <td colspan="2" class="excel-totals-label">DEPOSIT :</td>
             <td class="excel-totals-value" id="pdfDP"></td>
           </tr>
-          <tr class="excel-totals-row excel-totals-vat">
+          <tr class="excel-totals-row excel-totals-green">
             <td colspan="2" class="excel-totals-label">12% VAT</td>
             <td class="excel-totals-value" id="pdfVAT">&#8369;0.00</td>
           </tr>
