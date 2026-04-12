@@ -282,28 +282,28 @@ body {
 }
 
 .excel-form-sheet td {
-  border: 1px solid #c0c0c0;
+  border: none;
   padding: 5px 8px;
   vertical-align: middle;
   font-size: 13px;
 }
 
 /* Green bar */
-.ef-green-bar td { background: #00b050; height: 10px; padding: 0; border-color: #00b050; }
+.ef-green-bar td { background: #00b050; height: 10px; padding: 0; }
 
 /* Logo */
-.ef-logo-row td { text-align: left; padding: 12px 8px 4px; border-color: transparent; }
+.ef-logo-row td { text-align: left; padding: 12px 8px 4px; }
 .ef-logo-area { display: flex; align-items: center; gap: 8px; }
 .ef-logo-img { width: 30px; height: auto; object-fit: contain; }
 .ef-company-name { font-size: 26px; font-weight: 700; color: #000; letter-spacing: 2px; }
 
 /* Info rows */
-.ef-info-row td { border-color: transparent; padding: 1px 8px; }
+.ef-info-row td { padding: 1px 8px; }
 .ef-address { font-size: 11px; color: #333; }
 .ef-contact-text { font-size: 11px; color: #333; }
 
 /* Spacer */
-.ef-spacer td { height: 8px; border-color: transparent; padding: 0; }
+.ef-spacer td { height: 8px; padding: 0; }
 
 /* Client rows */
 .ef-client-row td { border: 1px solid #999; padding: 5px 8px; height: 22px; }
@@ -376,7 +376,7 @@ body {
 .ef-item-row .remove-item-btn:hover { color: #e00; }
 
 /* Add item row */
-.ef-add-row td { border-color: transparent; padding: 4px 6px; }
+.ef-add-row td { padding: 4px 6px; }
 .ef-add-btn {
   background: none; border: 1px dashed #00b050; color: #00b050; padding: 4px 12px;
   font-size: 10px; font-weight: 600; cursor: pointer; border-radius: 3px;
@@ -384,7 +384,7 @@ body {
 .ef-add-btn:hover { background: #f0fff0; }
 
 /* Installation */
-.ef-install-row td { border-color: transparent; padding: 4px 8px; }
+.ef-install-row td { padding: 4px 8px; }
 .ef-install-cell { display: flex; align-items: center; gap: 12px; }
 .ef-install-cell .checkbox-label { color: #333; font-size: 11px; }
 .excel-form-sheet .checkbox-label { color: #333; }
@@ -418,9 +418,6 @@ body {
 .ef-section-row td { border: 1px solid #c0c0c0; padding: 3px 6px; font-size: 10px; }
 .ef-payment-title { font-weight: 700; font-size: 11px; text-align: center; }
 .ef-payment-detail { font-size: 11px; }
-.ef-qr-cell { text-align: center; padding: 8px !important; }
-.ef-qr-img { width: 120px; height: auto; }
-.ef-qr-label { font-size: 9px; color: #666; margin-top: 3px; }
 .ef-warranty-cell { text-align: center; border: 1px solid #c0c0c0; }
 .ef-warranty-title { font-weight: 700; font-size: 11px; }
 .ef-warranty-value { font-size: 10px; }
@@ -1374,7 +1371,7 @@ body {
 }
 
 .excel-sheet td {
-  border: 1px solid #c0c0c0;
+  border: none;
   padding: 5px 8px;
   vertical-align: middle;
   font-size: 13px;
@@ -1385,14 +1382,12 @@ body {
   background: #00b050;
   height: 12px;
   padding: 0;
-  border-color: #00b050;
 }
 
 /* Logo row */
 .excel-logo-row td {
   text-align: left;
   padding: 15px 10px 5px;
-  border-color: transparent;
 }
 
 .excel-logo-area {
@@ -1416,7 +1411,6 @@ body {
 
 /* Info rows */
 .excel-info-row td {
-  border-color: transparent;
   padding: 1px 10px;
 }
 
@@ -1433,7 +1427,6 @@ body {
 /* Spacer */
 .excel-spacer td {
   height: 10px;
-  border-color: transparent;
   padding: 0;
 }
 
@@ -1621,22 +1614,6 @@ body {
 
 .excel-payment-detail {
   font-size: 12px;
-}
-
-.excel-qr-cell {
-  text-align: center;
-  padding: 10px !important;
-}
-
-.excel-qr-img {
-  width: 140px;
-  height: auto;
-}
-
-.excel-qr-label {
-  font-size: 10px;
-  color: #666;
-  margin-top: 4px;
 }
 
 /* Warranty */
