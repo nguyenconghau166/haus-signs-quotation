@@ -321,6 +321,22 @@ body {
   font-weight: 700; color: #000; border: 1px solid #999;
 }
 
+/* Quote block with DATE + VALID UNTIL (form) */
+.ef-quote-block {
+  text-align: center; vertical-align: top; border: 1px solid #999;
+  padding: 8px 10px !important;
+}
+.ef-quote-title {
+  font-size: 18px; font-weight: 700; color: #000; margin-bottom: 6px;
+}
+.ef-quote-meta {
+  display: flex; justify-content: center; align-items: center;
+  gap: 4px; font-size: 11px; margin-top: 3px;
+}
+.ef-quote-meta .ef-date-input {
+  width: 120px; font-size: 11px; padding: 2px 4px;
+}
+
 /* Balance */
 .ef-balance-row td { border: 1px solid #999; padding: 6px 10px; font-size: 13px; }
 .ef-balance-label { font-weight: 600; text-align: right; padding-right: 12px !important; }
@@ -1445,6 +1461,28 @@ body {
   font-weight: 700;
   color: #000;
   border: 1px solid #999;
+}
+
+/* Quote block with DATE + VALID UNTIL (export) */
+.excel-quote-block {
+  text-align: center;
+  vertical-align: top;
+  border: 1px solid #999;
+  padding: 8px 10px !important;
+}
+.excel-quote-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 6px;
+}
+.excel-quote-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  margin-top: 3px;
 }
 
 /* Remaining Balance */

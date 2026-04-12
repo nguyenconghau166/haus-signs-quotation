@@ -668,7 +668,17 @@
                 <span class="ef-field-label">CLIENT'S NAME :</span>
                 <input type="text" id="customerName" class="ef-field-input" placeholder="Enter client name" required>
               </td>
-              <td colspan="4" class="ef-quote-badge" rowspan="2">QUOTE</td>
+              <td colspan="4" class="ef-quote-block" rowspan="4">
+                <div class="ef-quote-title">QUOTE</div>
+                <div class="ef-quote-meta">
+                  <span class="ef-field-label">DATE :</span>
+                  <input type="date" id="quoteDate" class="ef-field-input ef-date-input">
+                </div>
+                <div class="ef-quote-meta">
+                  <span class="ef-field-label">VALID UNTIL :</span>
+                  <input type="date" id="quoteValidUntil" class="ef-field-input ef-date-input">
+                </div>
+              </td>
             </tr>
             <tr class="ef-client-row">
               <td colspan="6" class="ef-field-cell">
@@ -677,15 +687,16 @@
               </td>
             </tr>
             <tr class="ef-client-row">
-              <td colspan="3" class="ef-field-cell">
+              <td colspan="6" class="ef-field-cell">
                 <span class="ef-field-label">CONTACT :</span>
                 <input type="tel" id="phone" class="ef-field-input" placeholder="Phone">
               </td>
-              <td colspan="3" class="ef-field-cell">
-                <span class="ef-field-label">DATE :</span>
-                <input type="date" id="quoteDate" class="ef-field-input ef-date-input">
+            </tr>
+            <tr class="ef-client-row">
+              <td colspan="6" class="ef-field-cell">
+                <span class="ef-field-label">EMAIL :</span>
+                <input type="email" id="clientEmail" class="ef-field-input" placeholder="Email">
               </td>
-              <td colspan="4"></td>
             </tr>
 
             <tr class="ef-spacer"><td colspan="10"></td></tr>
@@ -859,8 +870,6 @@
           </table>
           <!-- Hidden fields for backward compatibility -->
           <input type="hidden" id="companyName">
-          <input type="hidden" id="clientEmail">
-          <input type="hidden" id="quoteValidUntil">
           <input type="hidden" id="conformeName">
         </div>
       </section>
@@ -1145,14 +1154,22 @@
           <!-- Spacer -->
           <tr class="excel-spacer"><td colspan="10"></td></tr>
 
-          <!-- Client info row 1: NAME + QUOTE -->
+          <!-- Client info row 1: NAME + QUOTE block -->
           <tr class="excel-client-row">
             <td colspan="6" class="excel-field-cell">
               <span class="excel-field-label">CLIENT'S NAME :</span>
               <span class="excel-field-value" id="pdfCustomerName"></span>
             </td>
-            <td colspan="4" class="excel-quote-badge" rowspan="2">
-              <span>QUOTE</span>
+            <td colspan="4" class="excel-quote-block" rowspan="4">
+              <div class="excel-quote-title">QUOTE</div>
+              <div class="excel-quote-meta">
+                <span class="excel-field-label">DATE :</span>
+                <span class="excel-field-value" id="pdfDate"></span>
+              </div>
+              <div class="excel-quote-meta">
+                <span class="excel-field-label">VALID UNTIL :</span>
+                <span class="excel-field-value" id="pdfValidUntil"></span>
+              </div>
             </td>
           </tr>
 
@@ -1164,17 +1181,20 @@
             </td>
           </tr>
 
-          <!-- Client info row 3: CONTACT + DATE -->
+          <!-- Client info row 3: CONTACT -->
           <tr class="excel-client-row">
-            <td colspan="3" class="excel-field-cell">
+            <td colspan="6" class="excel-field-cell">
               <span class="excel-field-label">CONTACT :</span>
               <span class="excel-field-value" id="pdfPhone"></span>
             </td>
-            <td colspan="3" class="excel-field-cell">
-              <span class="excel-field-label">DATE :</span>
-              <span class="excel-field-value" id="pdfDate"></span>
+          </tr>
+
+          <!-- Client info row 4: EMAIL -->
+          <tr class="excel-client-row">
+            <td colspan="6" class="excel-field-cell">
+              <span class="excel-field-label">EMAIL :</span>
+              <span class="excel-field-value" id="pdfEmail"></span>
             </td>
-            <td colspan="4"></td>
           </tr>
 
           <!-- Spacer -->
