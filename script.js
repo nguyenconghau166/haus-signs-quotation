@@ -9,7 +9,7 @@ const state = {
     letters: [],
     logo: {
         name: '',
-        type: 'frontLit',
+        type: 'acrylicFomex',
         noLed: false,
         difficult: false,
         length: 0,
@@ -350,7 +350,7 @@ function addLetterRow() {
     const letterData = {
         id: Date.now(),
         name: '',
-        type: 'frontLit',
+        type: 'acrylicFomex',
         noLed: false,
         difficult: false,
         height: 0,
@@ -880,7 +880,7 @@ function clearSignage() {
 
     state.logo = {
         name: '',
-        type: 'frontLit',
+        type: 'acrylicFomex',
         noLed: false,
         difficult: false,
         length: 0,
@@ -889,7 +889,7 @@ function clearSignage() {
         widthInches: 0
     };
     document.getElementById('logoName').value = '';
-    document.getElementById('logoType').value = 'frontLit';
+    document.getElementById('logoType').value = 'acrylicFomex';
     document.getElementById('logoNoLed').checked = false;
     document.getElementById('logoDifficult').checked = false;
     document.getElementById('logoLengthInches').value = '';
@@ -1458,24 +1458,29 @@ function updatePDFTemplate() {
         pdfValidUntil.textContent = validUntil ? new Date(validUntil).toLocaleDateString('en-US', dateFormat) : '';
     }
 
-    // Items
+    // Items - Excel style with 10 rows (ITEM NO., QTY, PC, DESCRIPTION, UNIT PRICE, AMOUNT)
     const itemsBody = template.querySelector('#pdfItemsBody');
     itemsBody.innerHTML = '';
 
     let subtotal = 0;
     let itemIndex = 1;
+    const itemRows = [];
+
     state.quotationItems.forEach(item => {
         if (item.description || item.price > 0) {
-            subtotal += (item.price || 0) * (item.quantity || 1);
+            const qty = item.quantity || 1;
+            const unitPrice = item.price || 0;
+            const amount = qty * unitPrice;
+            subtotal += amount;
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-        <td>${itemIndex}</td>
-        <td>${item.quantity || 1}</td>
-        <td>${item.description}</td>
-        <td>${formatNumber(item.price || 0)}</td>
-      `;
-            itemsBody.appendChild(tr);
+            itemRows.push({
+                itemNo: itemIndex,
+                qty: qty,
+                pc: '',
+                description: item.description,
+                unitPrice: unitPrice,
+                amount: amount
+            });
             itemIndex++;
         }
     });
@@ -1486,13 +1491,39 @@ function updatePDFTemplate() {
 
     if (installationChecked && installationPrice > 0) {
         subtotal += installationPrice;
+        itemRows.push({
+            itemNo: itemIndex,
+            qty: 1,
+            pc: '',
+            description: 'Installation Fee',
+            unitPrice: installationPrice,
+            amount: installationPrice
+        });
+    }
+
+    // Render item rows (always show 10 rows minimum)
+    const totalRows = Math.max(10, itemRows.length);
+    for (let i = 0; i < totalRows; i++) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-        <td>${itemIndex}</td>
-        <td>1</td>
-        <td>Installation Fee</td>
-        <td>${formatNumber(installationPrice)}</td>
-      `;
+        tr.className = 'excel-item-row';
+        if (i < itemRows.length) {
+            const r = itemRows[i];
+            tr.innerHTML = `
+                <td class="col-itemno">${r.itemNo}</td>
+                <td class="col-qty">${r.qty}</td>
+                <td class="col-pc">${r.pc}</td>
+                <td colspan="4" class="col-desc">${r.description}</td>
+                <td colspan="2" class="col-unitprice">${formatNumber(r.unitPrice)}</td>
+                <td class="col-amount">\u20B1${formatNumber(r.amount)}</td>
+            `;
+        } else {
+            tr.innerHTML = `
+                <td></td><td></td><td></td>
+                <td colspan="4"></td>
+                <td colspan="2"></td>
+                <td></td>
+            `;
+        }
         itemsBody.appendChild(tr);
     }
 
@@ -1504,11 +1535,11 @@ function updatePDFTemplate() {
     const dp = parseFloat(document.getElementById('dpAmount').value) || 0;
     const remainingBalance = afterDiscount + vat - dp;
 
-    template.querySelector('#pdfSubtotal').textContent = formatNumber(subtotal);
-    template.querySelector('#pdfDiscount').textContent = formatNumber(discount);
-    template.querySelector('#pdfDP').textContent = formatNumber(dp);
-    template.querySelector('#pdfVAT').textContent = formatNumber(vat);
-    template.querySelector('#pdfTotal').textContent = formatNumber(remainingBalance);
+    template.querySelector('#pdfSubtotal').textContent = '\u20B1' + formatNumber(subtotal);
+    template.querySelector('#pdfDiscount').textContent = discount > 0 ? '\u20B1' + formatNumber(discount) : '';
+    template.querySelector('#pdfDP').textContent = dp > 0 ? '\u20B1' + formatNumber(dp) : '';
+    template.querySelector('#pdfVAT').textContent = '\u20B1' + formatNumber(vat);
+    template.querySelector('#pdfTotal').textContent = '\u20B1' + formatNumber(remainingBalance);
 
     // Update payment terms note based on installation
     const termsNote = template.querySelector('.terms-note');

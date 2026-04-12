@@ -93,8 +93,7 @@
             <div class="form-group">
               <label for="logoType">Logo Type</label>
               <select id="logoType">
-                <option value="frontLit">Front-lit letters</option>
-                <option value="backLit">Back-lit letters</option>
+                <option value="acrylicFomex">Acrylic + Fomex letters</option>
                 <option value="fullAcrylic">Full acrylic letters</option>
                 <option value="cutOut">Cut-out letters</option>
                 <option value="aluAcrylic">Aluminum + acrylic letters</option>
@@ -837,16 +836,9 @@
             <div class="settings-group">
               <h3 class="settings-group-title">Raised Letters</h3>
               <div class="form-group">
-                <label for="priceLetterFrontLit">Front-lit letters</label>
+                <label for="priceLetterAcrylicFomex">Acrylic + Fomex letters</label>
                 <div class="input-with-unit">
-                  <input type="number" id="priceLetterFrontLit" value="20000" min="0">
-                  <span class="unit">₱/m²</span>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="priceLetterBackLit">Back-lit letters</label>
-                <div class="input-with-unit">
-                  <input type="number" id="priceLetterBackLit" value="21000" min="0">
+                  <input type="number" id="priceLetterAcrylicFomex" value="18000" min="0">
                   <span class="unit">₱/m²</span>
                 </div>
               </div>
@@ -1075,210 +1067,233 @@
 
   <!-- PDF Template (hidden) -->
   <div id="pdfTemplate" class="pdf-template">
-    <div class="pdf-content premium">
+    <div class="pdf-content excel">
       <div class="pdf-page">
-        <!-- Header with gradient bar -->
-        <div class="pdf-header-bar"></div>
+        <table class="excel-sheet" cellspacing="0" cellpadding="0">
+          <!-- Green header bar -->
+          <tr class="excel-green-bar">
+            <td colspan="10"></td>
+          </tr>
 
-        <!-- Company Header -->
-        <div class="pdf-header-section">
-          <div class="pdf-logo-section">
-            <div class="pdf-logo-icon">
-              <img src="/public/logo.png" alt="HAUS SIGNS" class="company-logo-img">
-            </div>
-            <div class="pdf-logo-text">
-              <span class="pdf-company-name">HAUS SIGNS</span>
-              <span class="pdf-company-tagline">Premium Signage Solutions</span>
-              <span class="pdf-company-address">Karuhatan, Manotoc, 15 F. Lazaro, Valenzuela, 1442 Metro Manila</span>
-              <span class="pdf-company-contact">09105 838383 | signs.haus@gmail.com</span>
-            </div>
-          </div>
-          <div class="pdf-title-section">
-            <h1 class="pdf-main-title">QUOTATION</h1>
-            <div class="pdf-quote-number">
-              <span class="quote-label">Quote #:</span>
-              <span class="quote-value" id="pdfQuoteNumber">QT-2026-001</span>
-            </div>
-            <div class="pdf-quote-date">
-              <span class="quote-label">Date:</span>
-              <span class="quote-value" id="pdfDate"></span>
-            </div>
-            <div class="pdf-quote-date">
-              <span class="quote-label">Valid Until:</span>
-              <span class="quote-value" id="pdfValidUntil"></span>
-            </div>
-          </div>
-        </div>
+          <!-- Logo / Company Name -->
+          <tr class="excel-logo-row">
+            <td colspan="10">
+              <div class="excel-logo-area">
+                <img src="/public/logo.png" alt="H" class="excel-logo-img">
+                <span class="excel-company-name">HAUS SIGNS</span>
+              </div>
+            </td>
+          </tr>
 
-        <!-- Customer Information -->
-        <div class="pdf-customer-section">
-          <div class="pdf-section-title">
-            <span class="section-icon">👤</span>
-            BILL TO / CLIENT INFORMATION
-          </div>
-          <div class="pdf-customer-grid">
-            <div class="customer-field">
-              <span class="field-label">Client Name:</span>
-              <span class="field-value" id="pdfCustomerName"></span>
-            </div>
-            <div class="customer-field">
-              <span class="field-label">Company:</span>
-              <span class="field-value" id="pdfCompanyName"></span>
-            </div>
-            <div class="customer-field full">
-              <span class="field-label">Address:</span>
-              <span class="field-value" id="pdfAddress"></span>
-            </div>
-            <div class="customer-field">
-              <span class="field-label">Phone:</span>
-              <span class="field-value" id="pdfPhone"></span>
-            </div>
-            <div class="customer-field">
-              <span class="field-label">Email:</span>
-              <span class="field-value" id="pdfEmail"></span>
-            </div>
-          </div>
-        </div>
+          <!-- Address -->
+          <tr class="excel-info-row">
+            <td colspan="10" class="excel-address">Karuhatan, Manotoc, 15 F. Lazaro, Valenzuela, 1442 Metro Manila</td>
+          </tr>
 
-        <!-- Items Table -->
-        <div class="pdf-items-section">
-          <table class="pdf-items-table premium">
-            <thead>
-              <tr>
-                <th class="col-itemno">ITEM NO.</th>
-                <th class="col-pc">PC</th>
-                <th class="col-desc">DESCRIPTION</th>
-                <th class="col-price">UNIT PRICE</th>
-              </tr>
-            </thead>
-            <tbody id="pdfItemsBody">
-            </tbody>
-          </table>
-        </div>
+          <!-- Phone -->
+          <tr class="excel-info-row">
+            <td colspan="3" class="excel-contact">09105 838383</td>
+            <td colspan="7"></td>
+          </tr>
 
-        <!-- Totals Section -->
-        <div class="pdf-totals-section">
-          <div class="pdf-totals-box">
-            <div class="total-row">
-              <span>SUB TOTAL:</span>
-              <span id="pdfSubtotal">0</span>
-            </div>
-            <div class="total-row">
-              <span>DISCOUNT:</span>
-              <span id="pdfDiscount">0</span>
-            </div>
-            <div class="total-row">
-              <span>DEPOSIT:</span>
-              <span id="pdfDP">0</span>
-            </div>
-            <div class="total-row">
-              <span>12% VAT:</span>
-              <span id="pdfVAT">0</span>
-            </div>
-            <div class="total-row grand">
-              <span>REMAINING BALANCE:</span>
-              <span id="pdfTotal">0</span>
-            </div>
-          </div>
-        </div>
+          <!-- Email -->
+          <tr class="excel-info-row">
+            <td colspan="3" class="excel-contact">signs.haus@gmail.com</td>
+            <td colspan="7"></td>
+          </tr>
 
-        <!-- Layout Images -->
-        <div class="pdf-images-section" id="pdfImagesSection">
-          <div class="pdf-section-title small">
-            <span class="section-icon">🖼️</span>
-            LAYOUT PREVIEW <span class="on-next-page">(on the next page)</span>
-          </div>
-          <div class="pdf-images-list" id="pdfLayoutImage">
-          </div>
-        </div>
+          <!-- Spacer -->
+          <tr class="excel-spacer"><td colspan="10"></td></tr>
 
-        <!-- Timeline -->
-        <div class="pdf-timeline-section">
-          <div class="pdf-section-title">
-            <span class="section-icon">📅</span>
-            TIMELINE
-          </div>
-          <div class="timeline-grid">
-            <div class="timeline-item">
-              <span class="timeline-label">Editing Timeline:</span>
-              <span class="timeline-value">3-5 days</span>
-            </div>
-            <div class="timeline-item">
-              <span class="timeline-label">Production Timeline:</span>
-              <span class="timeline-value">7-15 days</span>
-            </div>
-            <div class="timeline-note">
-              Note: Production lead time begins after final layout approval.
-            </div>
-          </div>
-        </div>
+          <!-- Client info row 1: NAME + QUOTE -->
+          <tr class="excel-client-row">
+            <td colspan="6" class="excel-field-cell">
+              <span class="excel-field-label">CLIENT'S NAME :</span>
+              <span class="excel-field-value" id="pdfCustomerName"></span>
+            </td>
+            <td colspan="4" class="excel-quote-badge" rowspan="2">
+              <span>QUOTE</span>
+            </td>
+          </tr>
 
-        <!-- Payment & Bank Info -->
-        <div class="pdf-footer-grid">
-          <div class="pdf-payment-terms">
-            <div class="terms-title">
-              <span class="icon">💳</span> Payment Terms
-            </div>
-            <ul class="terms-list">
-              <li><strong>30% deposit</strong> required to proceed with the order</li>
-              <li><strong>70% balance</strong> upon completion, prior to delivery/installation</li>
-            </ul>
-            <div class="terms-note">
-              <strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not
-              included. This is a NON-VAT receipt.
-            </div>
-            <div class="terms-validity">
-              This quotation is valid for <strong>15 days</strong> from the date of issue.
-            </div>
-          </div>
+          <!-- Client info row 2: ADDRESS -->
+          <tr class="excel-client-row">
+            <td colspan="6" class="excel-field-cell">
+              <span class="excel-field-label">ADDRESS :</span>
+              <span class="excel-field-value" id="pdfAddress"></span>
+            </td>
+          </tr>
 
-          <div class="pdf-bank-info">
-            <div class="bank-title">Bank Transfer Details</div>
-            <div class="bank-logo">BDO</div>
-            <div class="bank-details">
-              <p><strong>Account Name:</strong> Jertrude Sagad</p>
-              <p><strong>Account No:</strong> 0029 0021 6539</p>
-            </div>
-            <div class="qr-code">
-              <img src="/public/qr-code.png" alt="BDO QR Code" class="qr-code-img">
-              <span>Scan to pay</span>
-            </div>
-          </div>
-        </div>
+          <!-- Client info row 3: CONTACT + DATE -->
+          <tr class="excel-client-row">
+            <td colspan="3" class="excel-field-cell">
+              <span class="excel-field-label">CONTACT :</span>
+              <span class="excel-field-value" id="pdfPhone"></span>
+            </td>
+            <td colspan="3" class="excel-field-cell">
+              <span class="excel-field-label">DATE :</span>
+              <span class="excel-field-value" id="pdfDate"></span>
+            </td>
+            <td colspan="4"></td>
+          </tr>
 
-        <!-- Service Categories -->
-        <div class="pdf-services-section">
-          <div class="service-badge">BOX LIGHTED LOGO</div>
-          <div class="service-badge">3D TEXT</div>
-          <div class="service-badge">SIGNAGE</div>
-        </div>
+          <!-- Spacer -->
+          <tr class="excel-spacer"><td colspan="10"></td></tr>
 
-        <!-- Trust Badges -->
-        <div class="pdf-trust-section">
-          <div class="trust-badge">
-            <div class="badge-icon">🏆</div>
-            <span>12 Months Warranty</span>
-          </div>
-          <div class="trust-badge">
-            <div class="badge-icon">✅</div>
-            <span>Quality Guaranteed</span>
-          </div>
-          <div class="trust-badge">
-            <div class="badge-icon">🛡️</div>
-            <span>Licensed & Insured</span>
-          </div>
-        </div>
+          <!-- Remaining Balance -->
+          <tr class="excel-balance-row">
+            <td colspan="7" class="excel-balance-label">REMAINING BALANCE :</td>
+            <td colspan="3" class="excel-balance-value" id="pdfTotal">&#8369;0.00</td>
+          </tr>
 
-        <!-- Footer -->
-        <div class="pdf-footer-bar">
-          <div class="footer-tagline">Elevate Your Business with Premium Signage</div>
-          <div class="footer-content">
-            <span>📍 Karuhatan, Manotoc, 15 F. Lazaro, Valenzuela, 1442 Metro Manila</span>
-            <span>📞 09105 838383</span>
-            <span>✉️ signs.haus@gmail.com</span>
-            <span>🌐 signs.haus</span>
-          </div>
-        </div>
+          <!-- Items header (green) -->
+          <tr class="excel-items-header">
+            <td class="col-itemno">ITEM NO.</td>
+            <td class="col-qty">QTY</td>
+            <td class="col-pc">PC</td>
+            <td colspan="4" class="col-desc">DESCRIPTION</td>
+            <td colspan="2" class="col-unitprice">UNIT PRICE</td>
+            <td class="col-amount">AMOUNT</td>
+          </tr>
+
+          <!-- Items body (10 rows) -->
+          <tbody id="pdfItemsBody">
+            <tr class="excel-item-row">
+              <td class="col-itemno">1</td>
+              <td class="col-qty">1</td>
+              <td class="col-pc"></td>
+              <td colspan="4" class="col-desc"></td>
+              <td colspan="2" class="col-unitprice"></td>
+              <td class="col-amount">&#8369;0.00</td>
+            </tr>
+            <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
+            <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
+            <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
+            <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
+            <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
+            <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
+            <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
+            <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
+            <tr class="excel-item-row"><td></td><td></td><td></td><td colspan="4"></td><td colspan="2"></td><td></td></tr>
+          </tbody>
+
+          <!-- Totals rows -->
+          <tr class="excel-totals-row">
+            <td colspan="7" rowspan="4" class="excel-totals-spacer">
+              <div class="excel-totals-labels">
+                <div>SUB TOTAL:</div>
+                <div>DISCOUNT:</div>
+                <div>DEPOSIT :</div>
+                <div>12% VAT</div>
+              </div>
+            </td>
+            <td colspan="2" class="excel-totals-label">SUB TOTAL:</td>
+            <td class="excel-totals-value" id="pdfSubtotal">&#8369;0.00</td>
+          </tr>
+          <tr class="excel-totals-row">
+            <td colspan="2" class="excel-totals-label">DISCOUNT:</td>
+            <td class="excel-totals-value" id="pdfDiscount"></td>
+          </tr>
+          <tr class="excel-totals-row">
+            <td colspan="2" class="excel-totals-label">DEPOSIT :</td>
+            <td class="excel-totals-value" id="pdfDP"></td>
+          </tr>
+          <tr class="excel-totals-row excel-totals-vat">
+            <td colspan="2" class="excel-totals-label">12% VAT</td>
+            <td class="excel-totals-value" id="pdfVAT">&#8369;0.00</td>
+          </tr>
+
+          <!-- Spacer -->
+          <tr class="excel-spacer"><td colspan="10"></td></tr>
+
+          <!-- Payment + Warranty section -->
+          <tr class="excel-section-row">
+            <td colspan="5" rowspan="5" class="excel-empty-cell"></td>
+            <td colspan="5" class="excel-payment-title">PAYMENT OPTIONS</td>
+          </tr>
+          <tr class="excel-section-row">
+            <td colspan="5" class="excel-payment-detail">Bank: BDO</td>
+          </tr>
+          <tr class="excel-section-row">
+            <td colspan="5" class="excel-payment-detail">Bank Number: <span id="pdfBankNumber"></span></td>
+          </tr>
+          <tr class="excel-section-row">
+            <td colspan="5" class="excel-payment-detail">Bank Name: <span id="pdfBankName"></span></td>
+          </tr>
+          <tr class="excel-section-row">
+            <td colspan="5"></td>
+          </tr>
+
+          <!-- WARRANTY row -->
+          <tr class="excel-section-row">
+            <td colspan="3" class="excel-empty-cell"></td>
+            <td colspan="3" class="excel-empty-cell"></td>
+            <td colspan="4" class="excel-warranty-cell">
+              <div class="excel-warranty-title">WARRANTY</div>
+              <div class="excel-warranty-value">10 months</div>
+            </td>
+          </tr>
+
+          <!-- Payment Terms + Timeline -->
+          <tr class="excel-terms-row">
+            <td colspan="5" class="excel-terms-cell" rowspan="3">
+              <div class="excel-terms-title">Payment Terms:</div>
+              <div class="excel-terms-text">A 30% down payment is required to proceed with the order.</div>
+              <div class="excel-terms-text">70% balance upon completion and prior to delivery/installation</div>
+            </td>
+            <td colspan="5" class="excel-timeline-cell">
+              <div class="excel-timeline-title">TIMELINE :</div>
+            </td>
+          </tr>
+          <tr class="excel-terms-row">
+            <td colspan="5" class="excel-timeline-cell">
+              <div class="excel-timeline-item">Editing Timeline: 3-5 days</div>
+              <div class="excel-timeline-item">Production Timeline: 7-15 days</div>
+            </td>
+          </tr>
+          <tr class="excel-terms-row">
+            <td colspan="5" class="excel-timeline-cell">
+              <div class="excel-timeline-note">Production lead time starts once the final layout is approved.</div>
+            </td>
+          </tr>
+
+          <!-- Spacer -->
+          <tr class="excel-spacer"><td colspan="10"></td></tr>
+
+          <!-- Tagline -->
+          <tr class="excel-tagline-row">
+            <td colspan="10" class="excel-tagline">HAUS SIGNS - " Elevate Your Business with Premium Signage "</td>
+          </tr>
+
+          <!-- Service badges -->
+          <tr class="excel-services-row">
+            <td colspan="10" class="excel-services">
+              <span class="excel-service-badge">BOX LIGHTED LOGO</span>
+              <span class="excel-service-badge">3D TEXT</span>
+              <span class="excel-service-badge">SIGNAGE</span>
+            </td>
+          </tr>
+
+          <!-- Layout Images -->
+          <tr class="excel-images-row" id="pdfImagesSection" style="display:none;">
+            <td colspan="10">
+              <div class="excel-images-list" id="pdfLayoutImage"></div>
+            </td>
+          </tr>
+
+          <!-- Contact footer -->
+          <tr class="excel-footer-row">
+            <td colspan="10" class="excel-footer-text">
+              If you have any questions regarding the quotation, please feel free to contact us at <strong>09105 838383</strong> or email us at <strong>signs.haus@gmail.com</strong>
+            </td>
+          </tr>
+          <tr class="excel-footer-row">
+            <td colspan="10" class="excel-footer-thanks">Thank you for supporting our business!</td>
+          </tr>
+
+          <!-- Bottom spacer -->
+          <tr class="excel-spacer"><td colspan="10"></td></tr>
+        </table>
       </div>
     </div>
   </div>

@@ -5,8 +5,7 @@
 
 // Default prices (PHP per m²)
 const DEFAULT_PRICES = {
-  letterFrontLit: 20000,    // Front-lit letters
-  letterBackLit: 21000,     // Back-lit letters
+  letterAcrylicFomex: 18000, // Acrylic + Fomex letters
   letterFullAcrylic: 19000, // Full acrylic letters
   letterCutOut: 5500,       // Cut-out letters
   letterAluAcrylic: 16500,  // Aluminum + acrylic letters
@@ -29,8 +28,7 @@ const DEFAULT_PRICES = {
 
 // Letter type options
 const LETTER_TYPES = [
-  { id: 'frontLit', name: 'Front-lit letters', priceKey: 'letterFrontLit' },
-  { id: 'backLit', name: 'Back-lit letters', priceKey: 'letterBackLit' },
+  { id: 'acrylicFomex', name: 'Acrylic + Fomex letters', priceKey: 'letterAcrylicFomex' },
   { id: 'fullAcrylic', name: 'Full acrylic letters', priceKey: 'letterFullAcrylic' },
   { id: 'cutOut', name: 'Cut-out letters', priceKey: 'letterCutOut' },
   { id: 'aluAcrylic', name: 'Aluminum + acrylic letters', priceKey: 'letterAluAcrylic' },

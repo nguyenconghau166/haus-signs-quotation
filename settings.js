@@ -195,8 +195,7 @@ async function resetPrices() {
  * @param {object} prices - Current prices
  */
 function initSettingsForm(prices) {
-    document.getElementById('priceLetterFrontLit').value = prices.letterFrontLit;
-    document.getElementById('priceLetterBackLit').value = prices.letterBackLit;
+    document.getElementById('priceLetterAcrylicFomex').value = prices.letterAcrylicFomex;
     document.getElementById('priceLetterFullAcrylic').value = prices.letterFullAcrylic;
     document.getElementById('priceLetterCutOut').value = prices.letterCutOut;
     document.getElementById('priceLetterAluAcrylic').value = prices.letterAluAcrylic;
@@ -225,8 +224,7 @@ function initSettingsForm(prices) {
  */
 function getPricesFromForm() {
     return {
-        letterFrontLit: parseFloat(document.getElementById('priceLetterFrontLit').value) || DEFAULT_PRICES.letterFrontLit,
-        letterBackLit: parseFloat(document.getElementById('priceLetterBackLit').value) || DEFAULT_PRICES.letterBackLit,
+        letterAcrylicFomex: parseFloat(document.getElementById('priceLetterAcrylicFomex').value) || DEFAULT_PRICES.letterAcrylicFomex,
         letterFullAcrylic: parseFloat(document.getElementById('priceLetterFullAcrylic').value) || DEFAULT_PRICES.letterFullAcrylic,
         letterCutOut: parseFloat(document.getElementById('priceLetterCutOut').value) || DEFAULT_PRICES.letterCutOut,
         letterAluAcrylic: parseFloat(document.getElementById('priceLetterAluAcrylic').value) || DEFAULT_PRICES.letterAluAcrylic,
