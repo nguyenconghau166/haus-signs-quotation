@@ -348,6 +348,8 @@ body {
   text-align: center; padding: 8px 6px; border: 1px solid #009040; letter-spacing: 0.3px;
 }
 .ef-items-header td.col-action { background: transparent; border: none; width: 24px; }
+.ef-items-header td.col-itemno { width: 20px; padding: 8px 2px; }
+.ef-items-header td.col-qty { width: 44px; }
 
 /* Items body rows (rendered by JS) */
 .excel-form-sheet .excel-item-row td,
@@ -360,9 +362,9 @@ body {
 }
 .excel-form-sheet .ef-item-row td input:focus { outline: none; background: #f0fff0; }
 .excel-form-sheet .ef-item-row td input[type="number"] { text-align: right; }
-.ef-col-no { text-align: center; width: 30px; font-weight: 600; color: #666; font-size: 12px; }
-.ef-col-qty { width: 36px; }
-.ef-col-qty input { width: 32px; text-align: center; }
+.ef-col-no { text-align: center; width: 20px; font-weight: 600; color: #666; font-size: 11px; padding: 2px !important; }
+.ef-col-qty { width: 44px; }
+.ef-col-qty input { width: 40px; text-align: center; }
 .ef-col-unit { width: 38px; text-align: center; }
 .ef-col-unit input { width: 36px; text-align: center; font-size: 11px; }
 .ef-col-desc { }
@@ -1529,12 +1531,14 @@ body {
 
 .excel-item-row td.col-itemno {
   text-align: center;
-  width: 35px;
+  width: 20px;
+  font-size: 11px;
+  padding: 2px !important;
 }
 
 .excel-item-row td.col-qty {
   text-align: center;
-  width: 36px;
+  width: 44px;
 }
 
 .excel-item-row td.col-unit {
