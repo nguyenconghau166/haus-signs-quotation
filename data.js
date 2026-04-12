@@ -5,7 +5,7 @@
 
 // Default prices (PHP per m²)
 const DEFAULT_PRICES = {
-  letterAcrylicFomex: 18000, // Acrylic + Fomex letters
+  letterAcrylicFomex: 19000, // Acrylic + Fomex letters
   letterFullAcrylic: 19000, // Full acrylic letters
   letterCutOut: 5500,       // Cut-out letters
   letterAluAcrylic: 16500,  // Aluminum + acrylic letters

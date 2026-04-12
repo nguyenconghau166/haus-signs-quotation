@@ -1234,8 +1234,8 @@ function renderQuotationItems() {
 
     if (state.quotationItems.length === 0) {
         tbody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+      <tr class="ef-item-row">
+        <td colspan="10" style="text-align: center; color: #999; padding: 12px; font-size: 10px;">
           No products yet. Add from Signage or Lightbox tab.
         </td>
       </tr>
@@ -1244,30 +1244,34 @@ function renderQuotationItems() {
         return;
     }
 
-    tbody.innerHTML = state.quotationItems.map((item, index) => `
-    <tr>
-      <td class="row-number">${index + 1}</td>
-      <td>
+    tbody.innerHTML = state.quotationItems.map((item, index) => {
+        const qty = item.quantity || 1;
+        const price = item.price || 0;
+        const amount = qty * price;
+        return `
+    <tr class="ef-item-row">
+      <td style="text-align:center;width:50px;font-weight:600;color:#666;font-size:10px;">${index + 1}</td>
+      <td style="width:40px;">
         <input type="number" placeholder="1" min="1" step="1"
-               value="${item.quantity || 1}"
+               value="${qty}"
                data-index="${index}" data-field="quantity"
-               style="width: 60px; text-align: center;">
+               style="width:36px;text-align:center;">
       </td>
-      <td>
+      <td style="width:30px;text-align:center;font-size:10px;color:#666;">pc</td>
+      <td colspan="4">
         <input type="text" placeholder="Product name"
                value="${item.description}"
                data-index="${index}" data-field="description">
       </td>
-      <td>
+      <td colspan="2" style="width:80px;">
         <input type="number" placeholder="0" min="0" step="0.01"
-               value="${item.price || ''}"
+               value="${price || ''}"
                data-index="${index}" data-field="price">
       </td>
-      <td>
-        <button class="remove-item-btn" data-index="${index}">✕</button>
-      </td>
+      <td style="text-align:right;width:80px;font-size:10px;">\u20B1${formatNumber(amount)}</td>
     </tr>
-  `).join('');
+  `;
+    }).join('');
 
     // Add event listeners
     tbody.querySelectorAll('input').forEach(input => {
@@ -1320,9 +1324,11 @@ function updateQuotationTotals() {
     // Remaining balance
     const remainingBalance = afterDiscount + vat - state.dp;
 
-    document.getElementById('subtotalDisplay').textContent = '₱ ' + formatNumber(subtotal);
-    document.getElementById('vatDisplay').textContent = '₱ ' + formatNumber(vat);
-    document.getElementById('totalDisplay').textContent = '₱ ' + formatNumber(remainingBalance);
+    document.getElementById('subtotalDisplay').textContent = '\u20B1' + formatNumber(subtotal);
+    document.getElementById('vatDisplay').textContent = '\u20B1' + formatNumber(vat);
+    document.getElementById('totalDisplay').textContent = '\u20B1' + formatNumber(remainingBalance);
+    const totalBottom = document.getElementById('totalDisplayBottom');
+    if (totalBottom) totalBottom.textContent = '\u20B1' + formatNumber(remainingBalance);
 }
 
 // ==================== Image Upload ====================

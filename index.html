@@ -641,187 +641,226 @@
       <!-- Right Panel: Quotation (always visible) -->
       <div class="quotation-panel">
       <section class="tab-content active" id="quotation-tab">
-        <div class="quote-document">
-          <!-- Document Header -->
-          <div class="quote-doc-header">
-            <div class="quote-doc-brand">
-              <div class="quote-doc-logo">H</div>
-              <div class="quote-doc-company">
-                <span class="quote-doc-company-name">HAUS SIGNS</span>
-                <span class="quote-doc-company-sub">Premium Signage Solutions</span>
-              </div>
-            </div>
-            <div class="quote-doc-title-block">
-              <h1 class="quote-doc-title">QUOTATION</h1>
-              <div class="quote-doc-meta">
-                <div class="quote-meta-row">
-                  <span class="quote-meta-label">Quote #:</span>
-                  <span class="quote-meta-value" id="quoteNumber">QT-2026-001</span>
-                </div>
-                <div class="quote-meta-row">
-                  <span class="quote-meta-label">Date:</span>
-                  <input type="date" id="quoteDate" class="quote-meta-input">
-                </div>
-                <div class="quote-meta-row">
-                  <span class="quote-meta-label">Valid Until:</span>
-                  <input type="date" id="quoteValidUntil" class="quote-meta-input">
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="quote-document excel-form">
+          <!-- Excel-style table form -->
+          <table class="excel-form-sheet" cellspacing="0" cellpadding="0">
+            <!-- Green header bar -->
+            <tr class="ef-green-bar"><td colspan="10"></td></tr>
 
-          <!-- Accent Bar -->
-          <div class="quote-doc-accent-bar"></div>
-
-          <!-- Client Information -->
-          <div class="quote-doc-section">
-            <div class="quote-section-label">BILL TO / CLIENT INFORMATION</div>
-            <div class="quote-client-grid">
-              <div class="quote-client-field">
-                <label>Client Name <span class="required">*</span></label>
-                <input type="text" id="customerName" placeholder="e.g., Juan Dela Cruz" required>
-              </div>
-              <div class="quote-client-field">
-                <label>Company / Business Name</label>
-                <input type="text" id="companyName" placeholder="e.g., ABC Trading Corp.">
-              </div>
-              <div class="quote-client-field full">
-                <label>Address</label>
-                <input type="text" id="address" placeholder="e.g., 123 Rizal St., Brgy. San Antonio, Makati City">
-              </div>
-              <div class="quote-client-field">
-                <label>Contact Number</label>
-                <input type="tel" id="phone" placeholder="e.g., 0917-123-4567">
-              </div>
-              <div class="quote-client-field">
-                <label>Email</label>
-                <input type="email" id="clientEmail" placeholder="e.g., client@email.com">
-              </div>
-            </div>
-          </div>
-
-          <!-- Items Table -->
-          <div class="quote-doc-section">
-            <div class="quote-section-label">SCOPE OF WORK / ITEMS</div>
-            <div class="quote-items-wrapper">
-              <table class="quote-items-table" id="itemsTable">
-                <thead>
-                  <tr>
-                    <th class="col-no">#</th>
-                    <th class="col-qty">PC</th>
-                    <th class="col-desc">Description</th>
-                    <th class="col-amount">Amount (₱)</th>
-                    <th class="col-action"></th>
-                  </tr>
-                </thead>
-                <tbody id="itemsBody">
-                  <!-- Items will be added here by JS -->
-                </tbody>
-              </table>
-              <button id="addItemBtn" class="btn btn-ghost quote-add-btn">
-                + Add Item
-              </button>
-            </div>
-
-            <!-- Installation Option -->
-            <div class="quote-installation">
-              <label class="checkbox-label">
-                <input type="checkbox" id="installationCheck">
-                <span>Include Installation Fee</span>
-              </label>
-              <div class="installation-price" id="installationPriceSection" style="display: none;">
-                <label for="installationPrice">Installation Fee (₱)</label>
-                <input type="number" id="installationPrice" value="0" min="0" placeholder="0.00">
-              </div>
-            </div>
-
-            <!-- Totals Box -->
-            <div class="quote-totals-box">
-              <div class="quote-total-row">
-                <span>Subtotal</span>
-                <span class="quote-total-value" id="subtotalDisplay">₱ 0.00</span>
-              </div>
-              <div class="quote-total-row quote-dp-row">
-                <span>Discount</span>
-                <div class="quote-dp-input-wrap">
-                  <span class="quote-currency">₱</span>
-                  <input type="number" id="discountAmount" value="0" min="0" placeholder="0.00">
+            <!-- Logo + Company -->
+            <tr class="ef-logo-row">
+              <td colspan="10">
+                <div class="ef-logo-area">
+                  <img src="/public/logo.png" alt="H" class="ef-logo-img">
+                  <span class="ef-company-name">HAUS SIGNS</span>
                 </div>
-              </div>
-              <div class="quote-total-row quote-dp-row">
-                <span>Deposit</span>
-                <div class="quote-dp-input-wrap">
-                  <span class="quote-currency">₱</span>
-                  <input type="number" id="dpAmount" value="0" min="0" placeholder="0.00">
+              </td>
+            </tr>
+            <tr class="ef-info-row"><td colspan="10" class="ef-address">Karuhatan, Manotoc, 15 F. Lazaro, Valenzuela, 1442 Metro Manila</td></tr>
+            <tr class="ef-info-row"><td colspan="3" class="ef-contact-text">09105 838383</td><td colspan="7"></td></tr>
+            <tr class="ef-info-row"><td colspan="3" class="ef-contact-text">signs.haus@gmail.com</td><td colspan="7"></td></tr>
+
+            <tr class="ef-spacer"><td colspan="10"></td></tr>
+
+            <!-- Client info -->
+            <tr class="ef-client-row">
+              <td colspan="6" class="ef-field-cell">
+                <span class="ef-field-label">CLIENT'S NAME :</span>
+                <input type="text" id="customerName" class="ef-field-input" placeholder="Enter client name" required>
+              </td>
+              <td colspan="4" class="ef-quote-badge" rowspan="2">QUOTE</td>
+            </tr>
+            <tr class="ef-client-row">
+              <td colspan="6" class="ef-field-cell">
+                <span class="ef-field-label">ADDRESS :</span>
+                <input type="text" id="address" class="ef-field-input" placeholder="Enter address">
+              </td>
+            </tr>
+            <tr class="ef-client-row">
+              <td colspan="3" class="ef-field-cell">
+                <span class="ef-field-label">CONTACT :</span>
+                <input type="tel" id="phone" class="ef-field-input" placeholder="Phone">
+              </td>
+              <td colspan="3" class="ef-field-cell">
+                <span class="ef-field-label">DATE :</span>
+                <input type="date" id="quoteDate" class="ef-field-input ef-date-input">
+              </td>
+              <td colspan="4"></td>
+            </tr>
+
+            <tr class="ef-spacer"><td colspan="10"></td></tr>
+
+            <!-- Remaining Balance -->
+            <tr class="ef-balance-row">
+              <td colspan="7" class="ef-balance-label">REMAINING BALANCE :</td>
+              <td colspan="3" class="ef-balance-value" id="totalDisplay">&#8369;0</td>
+            </tr>
+
+            <!-- Items header (green) -->
+            <tr class="ef-items-header">
+              <td class="col-itemno">ITEM NO.</td>
+              <td class="col-qty">QTY</td>
+              <td class="col-pc">PC</td>
+              <td colspan="4" class="col-desc">DESCRIPTION</td>
+              <td colspan="2" class="col-unitprice">UNIT PRICE</td>
+              <td class="col-amount">AMOUNT</td>
+            </tr>
+
+            <!-- Items body -->
+            <tbody id="itemsBody">
+              <!-- Items will be added here by JS -->
+            </tbody>
+
+            <!-- Add item button row -->
+            <tr class="ef-add-row">
+              <td colspan="10">
+                <button id="addItemBtn" class="ef-add-btn">+ Add Item</button>
+              </td>
+            </tr>
+
+            <!-- Installation -->
+            <tr class="ef-install-row">
+              <td colspan="10" class="ef-install-cell">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="installationCheck">
+                  <span>Include Installation Fee</span>
+                </label>
+                <div class="ef-install-price" id="installationPriceSection" style="display: none;">
+                  <label>Fee (&#8369;)</label>
+                  <input type="number" id="installationPrice" value="0" min="0" placeholder="0">
                 </div>
-              </div>
-              <div class="quote-total-row">
-                <label class="checkbox-label compact" style="margin:0">
+              </td>
+            </tr>
+
+            <!-- Totals -->
+            <tr class="ef-totals-row">
+              <td colspan="7" class="ef-totals-spacer" rowspan="5"></td>
+              <td colspan="2" class="ef-totals-label">SUB TOTAL:</td>
+              <td class="ef-totals-value" id="subtotalDisplay">&#8369;0</td>
+            </tr>
+            <tr class="ef-totals-row">
+              <td colspan="2" class="ef-totals-label">DISCOUNT:</td>
+              <td class="ef-totals-input-cell">
+                <div class="ef-totals-input-wrap">
+                  <span>&#8369;</span>
+                  <input type="number" id="discountAmount" value="0" min="0" placeholder="0">
+                </div>
+              </td>
+            </tr>
+            <tr class="ef-totals-row">
+              <td colspan="2" class="ef-totals-label">DEPOSIT :</td>
+              <td class="ef-totals-input-cell">
+                <div class="ef-totals-input-wrap">
+                  <span>&#8369;</span>
+                  <input type="number" id="dpAmount" value="0" min="0" placeholder="0">
+                </div>
+              </td>
+            </tr>
+            <tr class="ef-totals-row">
+              <td colspan="2" class="ef-totals-label">
+                <label class="checkbox-label compact" style="margin:0;justify-content:flex-end;">
                   <input type="checkbox" id="vatCheck">
                   <span>12% VAT</span>
                 </label>
-                <span class="quote-total-value" id="vatDisplay">₱ 0.00</span>
-              </div>
-              <div class="quote-total-row quote-grand-total">
-                <span>REMAINING BALANCE</span>
-                <span class="quote-total-value" id="totalDisplay">₱ 0.00</span>
-              </div>
-            </div>
-          </div>
+              </td>
+              <td class="ef-totals-value" id="vatDisplay">&#8369;0</td>
+            </tr>
+            <tr class="ef-totals-row ef-totals-grand">
+              <td colspan="2" class="ef-totals-label">REMAINING:</td>
+              <td class="ef-totals-value ef-grand-value" id="totalDisplayBottom">&#8369;0</td>
+            </tr>
 
-          <!-- Payment Terms -->
-          <div class="quote-doc-section quote-terms-section">
-            <div class="quote-section-label">Payment Terms</div>
-            <div class="quote-terms-content">
-              <ul>
-                <li><strong>30% deposit</strong> required to proceed with the order</li>
-                <li><strong>70% balance</strong> upon completion, prior to delivery/installation</li>
-              </ul>
-              <div class="quote-terms-note">
-                <strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not included. This is a NON-VAT receipt.
-              </div>
-              <div class="quote-validity-note">
-                This quotation is valid for <strong>15 days</strong> from the date of issue.
-              </div>
-            </div>
-          </div>
+            <tr class="ef-spacer"><td colspan="10"></td></tr>
 
-          <!-- Mockup Images -->
-          <div class="quote-doc-section">
-            <div class="quote-section-label">MOCKUP / DESIGN REFERENCE</div>
-            <div class="image-upload-area" id="imageUploadArea">
-              <div class="upload-placeholder" id="uploadPlaceholder">
-                <span class="upload-icon">📁</span>
-                <span class="upload-text">Drop images here, click to select, or Ctrl+V to paste</span>
-                <span class="upload-hint">Supported: JPG, PNG, WEBP</span>
-              </div>
-              <input type="file" id="imageInput" accept="image/*" multiple hidden>
-            </div>
-            <div class="image-previews" id="imagePreviews"></div>
-          </div>
+            <!-- Payment + Warranty -->
+            <tr class="ef-section-row">
+              <td colspan="5" rowspan="4" class="ef-empty-cell"></td>
+              <td colspan="5" class="ef-payment-title">PAYMENT OPTIONS</td>
+            </tr>
+            <tr class="ef-section-row"><td colspan="5" class="ef-payment-detail">Bank: BDO</td></tr>
+            <tr class="ef-section-row"><td colspan="5" class="ef-payment-detail">Bank Number:</td></tr>
+            <tr class="ef-section-row"><td colspan="5" class="ef-payment-detail">Bank Name:</td></tr>
 
-          <!-- Signature Block -->
-          <div class="quote-signature-block">
-            <div class="quote-sig-col">
-              <div class="quote-sig-label">Prepared by:</div>
-              <div class="quote-sig-line"></div>
-              <div class="quote-sig-name">HAUS SIGNS</div>
-              <div class="quote-sig-title">Authorized Representative</div>
-            </div>
-            <div class="quote-sig-col">
-              <div class="quote-sig-label">Conforme / Accepted by:</div>
-              <div class="quote-sig-line"></div>
-              <div class="quote-sig-name-input">
-                <input type="text" id="conformeName" placeholder="Client Name / Signature">
-              </div>
-              <div class="quote-sig-title">Date: _______________</div>
-            </div>
-          </div>
+            <tr class="ef-section-row">
+              <td colspan="6" class="ef-empty-cell"></td>
+              <td colspan="4" class="ef-warranty-cell">
+                <div class="ef-warranty-title">WARRANTY</div>
+                <div class="ef-warranty-value">10 months</div>
+              </td>
+            </tr>
 
-          <!-- Footer -->
-          <div class="quote-doc-footer">
-            <span>HAUS SIGNS &middot; Premium Signage Solutions &middot; Philippines</span>
-          </div>
+            <!-- Terms + Timeline -->
+            <tr class="ef-terms-row">
+              <td colspan="5" class="ef-terms-cell" rowspan="3">
+                <div class="ef-terms-title">Payment Terms:</div>
+                <div class="ef-terms-text">A 30% down payment is required to proceed with the order.</div>
+                <div class="ef-terms-text">70% balance upon completion and prior to delivery/installation</div>
+                <div class="quote-terms-note" style="margin-top:6px;font-size:9px;padding:6px 8px;">
+                  <strong>Note:</strong> Price includes accompanying accessories. Installation fees and shipping are not included.
+                </div>
+              </td>
+              <td colspan="5" class="ef-timeline-cell">
+                <div class="ef-timeline-title">TIMELINE :</div>
+              </td>
+            </tr>
+            <tr class="ef-terms-row">
+              <td colspan="5" class="ef-timeline-cell">
+                <div class="ef-timeline-item">Editing Timeline: 3-5 days</div>
+                <div class="ef-timeline-item">Production Timeline: 7-15 days</div>
+              </td>
+            </tr>
+            <tr class="ef-terms-row">
+              <td colspan="5" class="ef-timeline-cell">
+                <div class="ef-timeline-note">Production lead time starts once the final layout is approved.</div>
+              </td>
+            </tr>
+
+            <tr class="ef-spacer"><td colspan="10"></td></tr>
+
+            <!-- Mockup Images -->
+            <tr class="ef-images-row">
+              <td colspan="10" class="ef-images-cell">
+                <div class="ef-section-title">MOCKUP / DESIGN REFERENCE</div>
+                <div class="image-upload-area" id="imageUploadArea">
+                  <div class="upload-placeholder" id="uploadPlaceholder">
+                    <span class="upload-icon">📁</span>
+                    <span class="upload-text">Drop images here, click to select, or Ctrl+V to paste</span>
+                    <span class="upload-hint">Supported: JPG, PNG, WEBP</span>
+                  </div>
+                  <input type="file" id="imageInput" accept="image/*" multiple hidden>
+                </div>
+                <div class="image-previews" id="imagePreviews"></div>
+              </td>
+            </tr>
+
+            <!-- Tagline -->
+            <tr class="ef-tagline-row">
+              <td colspan="10" class="ef-tagline">HAUS SIGNS - " Elevate Your Business with Premium Signage "</td>
+            </tr>
+            <tr class="ef-services-row">
+              <td colspan="10" class="ef-services">
+                <span class="ef-service-badge">BOX LIGHTED LOGO</span>
+                <span class="ef-service-badge">3D TEXT</span>
+                <span class="ef-service-badge">SIGNAGE</span>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr class="ef-footer-row">
+              <td colspan="10" class="ef-footer-text">
+                If you have any questions regarding the quotation, please feel free to contact us at <strong>09105 838383</strong> or email us at <strong>signs.haus@gmail.com</strong>
+              </td>
+            </tr>
+            <tr class="ef-footer-row">
+              <td colspan="10" class="ef-footer-thanks">Thank you for supporting our business!</td>
+            </tr>
+            <tr class="ef-spacer"><td colspan="10"></td></tr>
+          </table>
+          <!-- Hidden fields for backward compatibility -->
+          <input type="hidden" id="companyName">
+          <input type="hidden" id="clientEmail">
+          <input type="hidden" id="quoteValidUntil">
+          <input type="hidden" id="conformeName">
         </div>
       </section>
       </div><!-- /quotation-panel -->
@@ -838,7 +877,7 @@
               <div class="form-group">
                 <label for="priceLetterAcrylicFomex">Acrylic + Fomex letters</label>
                 <div class="input-with-unit">
-                  <input type="number" id="priceLetterAcrylicFomex" value="18000" min="0">
+                  <input type="number" id="priceLetterAcrylicFomex" value="19000" min="0">
                   <span class="unit">₱/m²</span>
                 </div>
               </div>
