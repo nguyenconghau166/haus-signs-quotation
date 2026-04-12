@@ -360,10 +360,11 @@ body {
 }
 .excel-form-sheet .ef-item-row td input:focus { outline: none; background: #f0fff0; }
 .excel-form-sheet .ef-item-row td input[type="number"] { text-align: right; }
-.ef-col-no { text-align: center; width: 45px; font-weight: 600; color: #666; }
-.ef-col-qty { width: 40px; }
-.ef-col-qty input { width: 36px; text-align: center; }
-.ef-col-pc { width: 28px; text-align: center; color: #888; font-size: 11px; }
+.ef-col-no { text-align: center; width: 30px; font-weight: 600; color: #666; font-size: 12px; }
+.ef-col-qty { width: 36px; }
+.ef-col-qty input { width: 32px; text-align: center; }
+.ef-col-unit { width: 38px; text-align: center; }
+.ef-col-unit input { width: 36px; text-align: center; font-size: 11px; }
 .ef-col-desc { }
 .ef-col-price { width: 80px; }
 .ef-col-amount { text-align: right; width: 85px; font-weight: 600; }
@@ -385,7 +386,9 @@ body {
 /* Installation */
 .ef-install-row td { border-color: transparent; padding: 4px 8px; }
 .ef-install-cell { display: flex; align-items: center; gap: 12px; }
-.ef-install-cell .checkbox-label { color: #333; font-size: 10px; }
+.ef-install-cell .checkbox-label { color: #333; font-size: 11px; }
+.excel-form-sheet .checkbox-label { color: #333; }
+.excel-form-sheet .checkbox-label span { color: #333; }
 .ef-install-price { display: flex; align-items: center; gap: 4px; }
 .ef-install-price label { font-size: 10px; color: #666; }
 .ef-install-price input {
@@ -414,7 +417,10 @@ body {
 /* Payment/Warranty/Terms sections */
 .ef-section-row td { border: 1px solid #c0c0c0; padding: 3px 6px; font-size: 10px; }
 .ef-payment-title { font-weight: 700; font-size: 11px; text-align: center; }
-.ef-payment-detail { font-size: 10px; }
+.ef-payment-detail { font-size: 11px; }
+.ef-qr-cell { text-align: center; padding: 8px !important; }
+.ef-qr-img { width: 120px; height: auto; }
+.ef-qr-label { font-size: 9px; color: #666; margin-top: 3px; }
 .ef-warranty-cell { text-align: center; border: 1px solid #c0c0c0; }
 .ef-warranty-title { font-weight: 700; font-size: 11px; }
 .ef-warranty-value { font-size: 10px; }
@@ -1530,17 +1536,17 @@ body {
 
 .excel-item-row td.col-itemno {
   text-align: center;
-  width: 60px;
+  width: 35px;
 }
 
 .excel-item-row td.col-qty {
   text-align: center;
-  width: 40px;
+  width: 36px;
 }
 
-.excel-item-row td.col-pc {
+.excel-item-row td.col-unit {
   text-align: center;
-  width: 35px;
+  width: 40px;
 }
 
 .excel-item-row td.col-desc {
@@ -1609,12 +1615,28 @@ body {
 
 .excel-payment-title {
   font-weight: 700;
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
 }
 
 .excel-payment-detail {
+  font-size: 12px;
+}
+
+.excel-qr-cell {
+  text-align: center;
+  padding: 10px !important;
+}
+
+.excel-qr-img {
+  width: 140px;
+  height: auto;
+}
+
+.excel-qr-label {
   font-size: 10px;
+  color: #666;
+  margin-top: 4px;
 }
 
 /* Warranty */

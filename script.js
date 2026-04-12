@@ -1256,7 +1256,11 @@ function renderQuotationItems() {
                value="${qty}"
                data-index="${index}" data-field="quantity">
       </td>
-      <td class="ef-col-pc">pc</td>
+      <td class="ef-col-unit">
+        <input type="text" value="${item.unit || 'set'}"
+               data-index="${index}" data-field="unit"
+               style="width:36px;text-align:center;">
+      </td>
       <td colspan="3" class="ef-col-desc">
         <input type="text" placeholder="Product name"
                value="${item.description}"
@@ -1496,7 +1500,7 @@ function updatePDFTemplate() {
             itemRows.push({
                 itemNo: itemIndex,
                 qty: qty,
-                pc: '',
+                unit: item.unit || 'set',
                 description: item.description,
                 unitPrice: unitPrice,
                 amount: amount
@@ -1514,7 +1518,7 @@ function updatePDFTemplate() {
         itemRows.push({
             itemNo: itemIndex,
             qty: 1,
-            pc: '',
+            unit: 'set',
             description: 'Installation Fee',
             unitPrice: installationPrice,
             amount: installationPrice
@@ -1529,7 +1533,7 @@ function updatePDFTemplate() {
         tr.innerHTML = `
             <td class="col-itemno">${r.itemNo}</td>
             <td class="col-qty">${r.qty}</td>
-            <td class="col-pc">${r.pc}</td>
+            <td class="col-unit">${r.unit}</td>
             <td colspan="4" class="col-desc">${r.description}</td>
             <td colspan="2" class="col-unitprice">${formatNumber(r.unitPrice)}</td>
             <td class="col-amount">\u20B1${formatNumber(r.amount)}</td>
