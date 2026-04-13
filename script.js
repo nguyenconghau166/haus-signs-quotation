@@ -1587,7 +1587,7 @@ function updatePDFTemplate() {
           <div class="pdf-image-label">Layout ${i + 1} of ${state.images.length}</div>
         </div>`
             ).join('');
-            imagesSection.style.display = 'block';
+            imagesSection.style.display = 'table-row';
         } else {
             layoutContainer.innerHTML = '';
             imagesSection.style.display = 'none';

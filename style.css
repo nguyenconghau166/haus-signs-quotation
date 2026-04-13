@@ -1375,6 +1375,7 @@ body {
   width: 100%;
   border-collapse: collapse;
   border: 1px solid #999;
+  table-layout: fixed;
 }
 
 .excel-sheet td {
@@ -1735,8 +1736,8 @@ body {
 }
 
 .pdf-image-row img {
-  max-width: 100%;
-  max-height: 400px;
+  width: 100%;
+  height: auto;
   border: 1px solid #c0c0c0;
 }
 
