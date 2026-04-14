@@ -209,7 +209,12 @@ function initSettingsForm(prices) {
     document.getElementById('priceAcrylicLogoSquare').value = prices.acrylicLogoSquare;
     document.getElementById('acrylicComplexMultiplier').value = prices.acrylicComplexMultiplier;
     document.getElementById('priceLogoRaised').value = prices.logoRaised;
-    document.getElementById('anchorMultiplier').value = prices.anchorMultiplier;
+
+    // Flashing Mode settings
+    document.getElementById('priceFlashingBox').value = prices.flashingBox;
+    document.getElementById('priceFlashingBoxBase').value = prices.flashingBoxBase;
+    document.getElementById('priceFlashingLedFull').value = prices.flashingLedFull;
+    document.getElementById('priceFlashingLedBorder').value = prices.flashingLedBorder;
 
     // Surcharge settings (with fallbacks to defaults if not present in saved settings)
     document.getElementById('surchargeThreshold1').value = prices.surchargeThreshold1 || DEFAULT_PRICES.surchargeThreshold1;
@@ -238,7 +243,12 @@ function getPricesFromForm() {
         acrylicLogoSquare: parseFloat(document.getElementById('priceAcrylicLogoSquare').value) || DEFAULT_PRICES.acrylicLogoSquare,
         acrylicComplexMultiplier: parseFloat(document.getElementById('acrylicComplexMultiplier').value) || DEFAULT_PRICES.acrylicComplexMultiplier,
         logoRaised: parseFloat(document.getElementById('priceLogoRaised').value) || DEFAULT_PRICES.logoRaised,
-        anchorMultiplier: parseFloat(document.getElementById('anchorMultiplier').value) || DEFAULT_PRICES.anchorMultiplier,
+
+        // Flashing Mode settings
+        flashingBox: parseFloat(document.getElementById('priceFlashingBox').value) || DEFAULT_PRICES.flashingBox,
+        flashingBoxBase: parseFloat(document.getElementById('priceFlashingBoxBase').value) || DEFAULT_PRICES.flashingBoxBase,
+        flashingLedFull: parseFloat(document.getElementById('priceFlashingLedFull').value) || DEFAULT_PRICES.flashingLedFull,
+        flashingLedBorder: parseFloat(document.getElementById('priceFlashingLedBorder').value) || DEFAULT_PRICES.flashingLedBorder,
 
         // Surcharge settings
         surchargeThreshold1: parseFloat(document.getElementById('surchargeThreshold1').value) || DEFAULT_PRICES.surchargeThreshold1,

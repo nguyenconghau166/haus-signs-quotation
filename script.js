@@ -94,7 +94,7 @@ async function init() {
     setupQuotationListeners();
     setupImageListeners();
     setupExportListeners();
-    setupAnchorPricingListeners(); // Anchor pricing comparison
+    setupFlashingListeners(); // Flashing Mode Haus Sign
     setupSecretSettingsAccess(); // Hidden settings access
 
     // Initial render
@@ -1811,488 +1811,268 @@ function updateAllCalculations() {
     updateSignageSummary();
 }
 
-// ==================== Anchor Pricing ====================
-function setupAnchorPricingListeners() {
-    // Generate quotation document button (only if it exists - removed old inputs)
-    const generateBtn = document.getElementById('generateAnchorQuotation');
-    if (generateBtn) {
-        generateBtn.addEventListener('click', generateAnchorQuotationDocument);
-    }
-
-    const copyBtn = document.getElementById('copyAnchorQuotation');
-    if (copyBtn) {
-        copyBtn.addEventListener('click', copyAnchorQuotationToClipboard);
-    }
-
-    // "Add to Quotation" buttons (if they still exist)
-    const addPremiumBtn = document.getElementById('addAnchorPremium');
-    if (addPremiumBtn) {
-        addPremiumBtn.addEventListener('click', () => addAnchorOption('premium'));
-    }
-
-    const addRecommendedBtn = document.getElementById('addAnchorRecommended');
-    if (addRecommendedBtn) {
-        addRecommendedBtn.addEventListener('click', () => addAnchorOption('recommended'));
-    }
-
-    const addBudgetBtn = document.getElementById('addAnchorBudget');
-    if (addBudgetBtn) {
-        addBudgetBtn.addEventListener('click', () => addAnchorOption('budget'));
-    }
-
-    const addAllBtn = document.getElementById('addAllAnchorOptions');
-    if (addAllBtn) {
-        addAllBtn.addEventListener('click', addAllAnchorOptions);
-    }
-
-    // Update anchor pricing when switching to the tab
-    const anchorTab = document.querySelector('[data-tab="anchor"]');
-    if (anchorTab) {
-        anchorTab.addEventListener('click', () => {
-            setTimeout(() => updateAnchorPricing(), 100);
-        });
-    }
-
-    // Customer information listeners (Anchor Tab)
-    const anchorCustomerName = document.getElementById('anchorCustomerName');
-    if (anchorCustomerName) {
-        anchorCustomerName.addEventListener('input', (e) => {
-            state.customer.name = e.target.value;
-            localStorage.setItem('customerName', e.target.value);
-            // Sync with Quotation tab input
-            const quoteInput = document.getElementById('customerName');
-            if (quoteInput) quoteInput.value = e.target.value;
-        });
-    }
-
-    const anchorCustomerCompany = document.getElementById('anchorCustomerCompany');
-    if (anchorCustomerCompany) {
-        anchorCustomerCompany.addEventListener('input', (e) => {
-            state.customer.company = e.target.value;
-            localStorage.setItem('customerCompany', e.target.value);
-        });
-    }
-
-    const anchorCustomerPhone = document.getElementById('anchorCustomerPhone');
-    if (anchorCustomerPhone) {
-        anchorCustomerPhone.addEventListener('input', (e) => {
-            state.customer.phone = e.target.value;
-            localStorage.setItem('customerPhone', e.target.value);
-            // Sync with Quotation tab input
-            const quoteInput = document.getElementById('phone');
-            if (quoteInput) quoteInput.value = e.target.value;
-        });
-    }
-
-    const anchorCustomerEmail = document.getElementById('anchorCustomerEmail');
-    if (anchorCustomerEmail) {
-        anchorCustomerEmail.addEventListener('input', (e) => {
-            state.customer.email = e.target.value;
-            localStorage.setItem('customerEmail', e.target.value);
-        });
-    }
-
-    // Initialize anchor input values from state
-    if (anchorCustomerName) anchorCustomerName.value = state.customer.name;
-    if (anchorCustomerCompany) anchorCustomerCompany.value = state.customer.company;
-    if (anchorCustomerPhone) anchorCustomerPhone.value = state.customer.phone;
-    if (anchorCustomerEmail) anchorCustomerEmail.value = state.customer.email;
-}
-
-function updateAnchorPricing() {
-    const hasLetters = state.letters && state.letters.length > 0;
-    const hasLogo = state.logo && state.logo.length > 0 && state.logo.width > 0;
-    const hasPanel = state.panel && state.panel.length > 0 && state.panel.width > 0;
-
-    if (!hasLetters && !hasLogo && !hasPanel) {
-        // Show empty state
-        document.getElementById('anchorProductList').innerHTML = `
-            <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
-                <div style="font-size: 3.5rem; margin-bottom: 1rem;">📦</div>
-                <div style="font-size: 1.1rem; font-weight: 500;">No products configured yet</div>
-                <div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Add letters, logo, or panel in the Signage tab first</div>
-            </div>
-        `;
-        document.getElementById('anchorComparisonCard').style.display = 'none';
-        return;
-    }
-
-    // Build product list HTML
-    let productListHTML = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
-
-    // Add letters
-    if (hasLetters) {
-        state.letters.forEach((letter, index) => {
-            const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productListHTML += `
-                <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
-                    <div style="font-weight: 600; margin-bottom: 0.5rem;">✍️ ${letter.name || `Letters #${index + 1}`}</div>
-                    <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
-                        <div><strong>Type:</strong> ${typeName}</div>
-                        <div><strong>Height:</strong> ${letter.height} cm</div>
-                        <div><strong>Option:</strong> ${letter.noLed ? 'No LED' : 'LED'}${letter.difficult ? ' | Difficult lettering' : ''}</div>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    // Add logo
-    if (hasLogo) {
-        const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        productListHTML += `
-            <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
-                <div style="font-weight: 600; margin-bottom: 0.5rem;">🎨 ${state.logo.name || 'Logo'}</div>
-                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
-                    <div><strong>Type:</strong> ${typeName}</div>
-                    <div><strong>Option:</strong> ${state.logo.noLed ? 'No LED' : 'LED'}${state.logo.difficult ? ' | Difficult lettering' : ''}</div>
-                </div>
-            </div>
-        `;
-    }
-
-    // Add panel
-    if (hasPanel) {
-        productListHTML += `
-            <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
-                <div style="font-weight: 600; margin-bottom: 0.5rem;">📋 ${state.panel.name || 'Background Panel'}</div>
-                <div style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;"><strong>Option:</strong> ${state.panel.hasSticker ? 'Sticker print included' : 'No sticker print'}</div>
-            </div>
-        `;
-    }
-
-    productListHTML += '</div>';
-    document.getElementById('anchorProductList').innerHTML = productListHTML;
-
-    // Calculate pricing for all products combined
-    let premiumTotal = 0;
-    let recommendedTotal = 0;
-    let budgetTotal = 0;
-    let productInfoHTML = '';
-
-    // Calculate letters
-    if (hasLetters) {
-        state.letters.forEach((letter, index) => {
-            // Recommended = Actual selected type
-            const recommendedResult = calculateLetterPrice(letter.height, letter.charCount, letter.type, state.prices, {
-                noLed: letter.noLed,
-                difficult: letter.difficult
-            });
-            recommendedTotal += recommendedResult.price;
-
-            // Calculate acrylic-based LED price for premium reference
-            const acrylicResult = calculateLetterPrice(letter.height, letter.charCount, 'fullAcrylic', state.prices);
-
-            // Premium (Inox) = 2.2x Acrylic price - User request
-            premiumTotal += acrylicResult.price * (state.prices.anchorMultiplier || 2.2);
-
-            // Budget = Cut-out letters
-            const budgetResult = calculateLetterPrice(letter.height, letter.charCount, 'cutOut', state.prices);
-            budgetTotal += budgetResult.price;
-
-            const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productInfoHTML += `
-                <div style="margin-bottom: 0.5rem;">
-                    <strong>${letter.name || `Letters #${index + 1}`}:</strong><br>
-                    ${typeName} - ${letter.height}cm × ${letter.charCount} letters${letter.noLed ? ' - No LED' : ''}${letter.difficult ? ' - Difficult lettering' : ''}
-                </div>
-            `;
-        });
-    }
-
-    // Calculate logo
-    if (hasLogo) {
-        // Recommended = Actual selected type
-        const recommendedResult = calculateLogoPrice(state.logo.length, state.logo.width, state.logo.type, state.prices, {
-            noLed: state.logo.noLed,
-            difficult: state.logo.difficult
-        });
-        recommendedTotal += recommendedResult.price;
-
-        // Premium = Same as Recommended (User request: only letters get 1.9x multiplier)
-        premiumTotal += recommendedResult.price;
-
-        // Budget = 75% of Best Value
-        budgetTotal += recommendedResult.price * 0.75;
-
-        const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        const area = ((state.logo.length * state.logo.width) / 10000).toFixed(2);
-        productInfoHTML += `
-            <div style="margin-bottom: 0.5rem;">
-                <strong>${state.logo.name || 'Logo'}:</strong><br>
-                ${typeName} - ${state.logo.length}cm × ${state.logo.width}cm (${area}m²)${state.logo.noLed ? ' - No LED' : ''}${state.logo.difficult ? ' - Difficult lettering' : ''}
-            </div>
-        `;
-    }
-
-    // Calculate panel
-    if (hasPanel) {
-        const panelResult = calculatePanelPrice(state.panel.length, state.panel.width, state.prices, state.panel.hasSticker);
-        const panelPrice = panelResult.price;
-
-        // Premium = Same as Recommended (User request: only letters get multiplier)
-        premiumTotal += panelPrice;
-
-        // Recommended = Actual panel price
-        recommendedTotal += panelPrice;
-
-        // Budget = 75% of Best Value
-        budgetTotal += panelPrice * 0.75;
-
-        const area = ((state.panel.length * state.panel.width) / 10000).toFixed(2);
-        productInfoHTML += `
-            <div style="margin-bottom: 0.5rem;">
-                <strong>${state.panel.name || 'Background Panel'}:</strong><br>
-                Aluminum Panel - ${state.panel.length}cm × ${state.panel.width}cm (${area}m²)${state.panel.hasSticker ? ' - Sticker print included' : ''}
-            </div>
-        `;
-    }
-
-    // Update pricing display
-    document.getElementById('anchorPricePremium').textContent = `${formatNumber(premiumTotal)} ₱`;
-    document.getElementById('anchorPriceRecommended').textContent = `${formatNumber(recommendedTotal)} ₱`;
-    document.getElementById('anchorPriceBudget').textContent = `${formatNumber(budgetTotal)} ₱`;
-
-    const savings = premiumTotal - recommendedTotal;
-    document.getElementById('anchorSavings').textContent = savings > 0 ? `Save ${formatNumber(savings)} ₱ vs Inox!` : '';
-
-    // Update product info in Best Value card
-    const productInfoDiv = document.getElementById('anchorProductInfo');
-    if (productInfoDiv) {
-        productInfoDiv.innerHTML = `
-            <div style="font-weight: 600; color: #16a34a; margin-bottom: 0.5rem;">📦 PRODUCT DETAILS:</div>
-            ${productInfoHTML}
-        `;
-    }
-
-    // Show comparison card
-    document.getElementById('anchorComparisonCard').style.display = 'block';
-}
-
-function addAnchorOption(optionType) {
-    const premiumPriceText = document.getElementById('anchorPricePremium').textContent;
-    const recommendedPriceText = document.getElementById('anchorPriceRecommended').textContent;
-    const budgetPriceText = document.getElementById('anchorPriceBudget').textContent;
-
-    let description = '';
-    let price = 0;
-    let optionName = '';
-
-    if (optionType === 'premium') {
-        optionName = 'Premium Stainless Steel (Inox)';
-        description = 'Stainless Steel (Inox) - Premium Option';
-        price = parseFloat(premiumPriceText.replace(/[^\d.-]/g, ''));
-    } else if (optionType === 'recommended') {
-        optionName = 'Recommended Acrylic';
-        description = 'Acrylic - Best Value ⭐';
-        price = parseFloat(recommendedPriceText.replace(/[^\d.-]/g, ''));
-    } else if (optionType === 'budget') {
-        optionName = 'Budget 3D';
-        description = '3D Non-LED - Budget Option';
-        price = parseFloat(budgetPriceText.replace(/[^\d.-]/g, ''));
-    }
-
-    if (price > 0) {
-        state.quotationItems.push({ description, price, quantity: 1 });
-        renderQuotationItems();
-
-        // Scroll quotation panel to top to show new items
-        const qPanel = document.querySelector('.quotation-panel');
-        if (qPanel) qPanel.scrollTop = 0;
-
-        showNotification(`${optionName} added to quotation!`, 'success');
-    }
-}
-
-function addAllAnchorOptions() {
-    const premiumPriceText = document.getElementById('anchorPricePremium').textContent;
-    const recommendedPriceText = document.getElementById('anchorPriceRecommended').textContent;
-    const budgetPriceText = document.getElementById('anchorPriceBudget').textContent;
-
-    const premiumPrice = parseFloat(premiumPriceText.replace(/[^\d.-]/g, ''));
-    const recommendedPrice = parseFloat(recommendedPriceText.replace(/[^\d.-]/g, ''));
-    const budgetPrice = parseFloat(budgetPriceText.replace(/[^\d.-]/g, ''));
-
-    if (premiumPrice > 0) {
-        state.quotationItems.push({ description: 'Option 1: Stainless Steel (Inox) - Premium', price: premiumPrice, quantity: 1 });
-        state.quotationItems.push({ description: 'Option 2: Acrylic - Best Value ⭐', price: recommendedPrice, quantity: 1 });
-        state.quotationItems.push({ description: 'Option 3: 3D Non-LED - Budget', price: budgetPrice, quantity: 1 });
-
-        renderQuotationItems();
-
-        // Scroll quotation panel to top to show new items
-        const qPanel = document.querySelector('.quotation-panel');
-        if (qPanel) qPanel.scrollTop = 0;
-
-        showNotification('All 3 options added to quotation!', 'success');
-    } else {
-        showNotification('Please configure products in Signage tab first!', 'error');
-    }
-}
-
-function generateAnchorQuotationDocument() {
-    const hasProducts = (state.letters && state.letters.length > 0) ||
-        (state.logo && state.logo.length > 0 && state.logo.width > 0) ||
-        (state.panel && state.panel.length > 0 && state.panel.width > 0);
-
-    if (!hasProducts) {
-        showNotification('Please add products in the Signage tab first!', 'error');
-        return;
-    }
-
-    // Validate customer information
-    if (!state.customer.name) {
-        showNotification('Please enter customer name!', 'error');
-        return;
-    }
-
-    // Update calculations
-    updateAnchorPricing();
-
-    // Populate customer information in QUOTATION TO section
-    const customerInfoHTML = `
-        <div><strong>Name:</strong> ${state.customer.name}</div>
-        ${state.customer.company ? `<div><strong>Company:</strong> ${state.customer.company}</div>` : ''}
-        <div><strong>Phone:</strong> ${state.customer.phone}</div>
-        ${state.customer.email ? `<div><strong>Email:</strong> ${state.customer.email}</div>` : ''}
-    `;
-    document.getElementById('anchorCustomerInfo').innerHTML = customerInfoHTML;
-
-    // Build product specification (without customer information)
-    let productSpec = '';
-
-    // Add products section
-    productSpec += '<div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; color: #2563eb;">📦 Products</div>';
-    productSpec += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
-
-    if (state.letters && state.letters.length > 0) {
-        state.letters.forEach((letter, index) => {
-            const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productSpec += `
-                <div><strong>${index + 1}. ${letter.name || `Letters #${index + 1}`}:</strong> ${typeName} - ${letter.height}cm height${letter.noLed ? ' - No LED' : ''}${letter.difficult ? ' - Difficult lettering' : ''}</div>
-            `;
-        });
-    }
-
-    if (state.logo && state.logo.length > 0 && state.logo.width > 0) {
-        const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        const area = ((state.logo.length * state.logo.width) / 10000).toFixed(2);
-        productSpec += `
-            <div><strong>Logo:</strong> ${state.logo.name || 'Logo'} - ${typeName} - ${state.logo.length}cm × ${state.logo.width}cm (${area}m²)${state.logo.noLed ? ' - No LED' : ''}${state.logo.difficult ? ' - Difficult lettering' : ''}</div>
-        `;
-    }
-
-    if (state.panel && state.panel.length > 0 && state.panel.width > 0) {
-        const area = ((state.panel.length * state.panel.width) / 10000).toFixed(2);
-        productSpec += `
-            <div><strong>Panel:</strong> ${state.panel.name || 'Background Panel'} - ${state.panel.length}cm × ${state.panel.width}cm (${area}m²)${state.panel.hasSticker ? ' - Sticker print included' : ''}</div>
-        `;
-    }
-
-    productSpec += '</div>';
-
-    // Get calculated prices
-    const premiumPriceText = document.getElementById('anchorPricePremium').textContent;
-    const recommendedPriceText = document.getElementById('anchorPriceRecommended').textContent;
-    const budgetPriceText = document.getElementById('anchorPriceBudget').textContent;
-    const savingsText = document.getElementById('anchorSavings').textContent;
-
-    // Update quotation document
-    document.getElementById('anchorProductSpec').innerHTML = productSpec;
-
-    // Populate product details in the Best Value card
-    let productDetailsHTML = '';
-    if (state.letters && state.letters.length > 0) {
-        state.letters.forEach((letter, index) => {
-            const typeName = LETTER_TYPES.find(t => t.id === letter.type)?.name || letter.type;
-            productDetailsHTML += `<div><strong>${letter.name || `#${index + 1}`}:</strong><br>${typeName} - ${letter.height}cm${letter.noLed ? ' - No LED' : ''}${letter.difficult ? ' - Difficult lettering' : ''}</div>`;
-        });
-    }
-    if (state.logo && state.logo.length > 0 && state.logo.width > 0) {
-        const typeName = LETTER_TYPES.find(t => t.id === state.logo.type)?.name || state.logo.type;
-        productDetailsHTML += `<div><strong>Logo:</strong><br>${typeName} - ${state.logo.length}cm × ${state.logo.width}cm${state.logo.noLed ? ' - No LED' : ''}${state.logo.difficult ? ' - Difficult lettering' : ''}</div>`;
-    }
-    if (state.panel && state.panel.length > 0 && state.panel.width > 0) {
-        productDetailsHTML += `<div><strong>Panel:</strong><br>${state.panel.length}cm × ${state.panel.width}cm${state.panel.hasSticker ? ' - Sticker print included' : ''}</div>`;
-    }
-    document.getElementById('anchorDocProductDetails').innerHTML = productDetailsHTML;
-
-    document.getElementById('anchorDocPricePremium').textContent = premiumPriceText;
-    document.getElementById('anchorDocPriceRecommended').textContent = recommendedPriceText;
-    document.getElementById('anchorDocPriceBudget').textContent = budgetPriceText;
-    document.getElementById('anchorDocSavings').textContent = savingsText || '';
-
-    // Update date and quotation number
-    const today = new Date();
-    const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-    const validUntil = new Date(today);
-    validUntil.setDate(validUntil.getDate() + 10); // Changed from 30 to 10 days
-    const validUntilStr = validUntil.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-
-    const quoteNumber = `QT-${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-
-    document.getElementById('anchorQuoteDate').textContent = dateStr;
-    document.getElementById('anchorQuoteValidUntil').textContent = validUntilStr;
-    document.getElementById('anchorQuoteNumber').textContent = quoteNumber;
-
-    // Show quotation preview
-    document.getElementById('anchorQuotationPreview').style.display = 'block';
-
-    // Scroll to preview
-    document.getElementById('anchorQuotationPreview').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    showNotification('Quotation document generated! You can now copy it to clipboard.', 'success');
-}
-
-function copyAnchorQuotationToClipboard() {
-    // Check for file protocol limitation
-    if (window.location.protocol === 'file:') {
-        alert('⚠️ BROWSER SECURITY LIMITATION\n\nCannot copy image when opening file directly (file://).\n\nPlease open this app via Localhost to use this feature.\n(Check your terminal for the localhost link, usually http://localhost:8080)');
-        return;
-    }
-
-    const quotationDoc = document.getElementById('anchorQuotationDocument');
-
-    if (!quotationDoc) {
-        showNotification('No quotation to copy!', 'error');
-        return;
-    }
-
-    const btn = document.getElementById('copyAnchorQuotation');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="icon">⏳</span> Copying...';
-
-    // Use html2canvas to convert to image and copy to clipboard
-    html2canvas(quotationDoc, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-    }).then(canvas => {
-        canvas.toBlob(async blob => {
-            try {
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        'image/png': blob
-                    })
-                ]);
-
-                btn.disabled = false;
-                btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
-                showNotification('Quotation image copied to clipboard!', 'success');
-            } catch (err) {
-                console.error('Failed to copy image:', err);
-                btn.disabled = false;
-                btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
-                showNotification('Failed to copy. Try "Export Image" button instead.', 'error');
-            }
-        }, 'image/png');
-    }).catch(error => {
-        console.error('Error generating image:', error);
-        btn.disabled = false;
-        btn.innerHTML = '<span class="icon">📋</span> Copy to Clipboard';
-        showNotification('Error generating image. Please try again!', 'error');
+// ==================== Flashing Mode Haus Sign ====================
+
+// Flashing letters state
+if (!state.flashingLetters) state.flashingLetters = [];
+
+function addFlashingLetterRow() {
+    state.flashingLetters.push({
+        id: Date.now(),
+        name: '',
+        height: 0,
+        heightInches: 0,
+        charCount: 0,
+        ledType: 'border'
     });
+    renderFlashingLetterRows();
+}
+
+function removeFlashingLetterRow(id) {
+    if (state.flashingLetters.length === 1) return;
+    state.flashingLetters = state.flashingLetters.filter(l => l.id !== id);
+    renderFlashingLetterRows();
+    updateFlashingCalculation();
+}
+
+function renderFlashingLetterRows() {
+    const container = document.getElementById('flashingLetterRows');
+    container.innerHTML = state.flashingLetters.map((letter, index) => `
+    <div class="letter-row" data-id="${letter.id}">
+      <div class="form-group letter-name-group">
+        <label>Letter Content</label>
+        <input type="text" class="flashing-letter-name" data-id="${letter.id}"
+               value="${letter.name || ''}" placeholder="E.g: HAUS SIGNS">
+      </div>
+      <div class="form-group">
+        <label>LED Option</label>
+        <select class="flashing-letter-led" data-id="${letter.id}">
+          <option value="border" ${letter.ledType === 'border' ? 'selected' : ''}>Acrylic letter (no raised)</option>
+          <option value="full" ${letter.ledType === 'full' ? 'selected' : ''}>LED Point Letter</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Height (inches) min 3.1"</label>
+        <input type="number" class="flashing-letter-height-inches" data-id="${letter.id}"
+               value="${letter.heightInches || ''}" placeholder="3.1" min="0" step="0.1">
+      </div>
+      <div class="form-group">
+        <label>Height (cm) min 8</label>
+        <input type="number" class="flashing-letter-height" data-id="${letter.id}"
+               value="${letter.height || ''}" placeholder="8" min="0" step="0.1">
+      </div>
+      <div class="form-group result-display">
+        <label>Price</label>
+        <div class="result-value flashing-letter-price" data-id="${letter.id}">0 ₱</div>
+      </div>
+      <button class="btn-remove" onclick="removeFlashingLetterRow(${letter.id})" ${state.flashingLetters.length <= 1 ? 'disabled' : ''}>✕</button>
+    </div>
+    `).join('');
+
+    // Attach event listeners
+    container.querySelectorAll('.flashing-letter-name').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const id = parseInt(e.target.dataset.id);
+            const letter = state.flashingLetters.find(l => l.id === id);
+            if (letter) {
+                letter.name = e.target.value;
+                letter.charCount = countCharacters(e.target.value);
+                updateFlashingCalculation();
+            }
+        });
+    });
+
+    container.querySelectorAll('.flashing-letter-led').forEach(select => {
+        select.addEventListener('change', (e) => {
+            const id = parseInt(e.target.dataset.id);
+            const letter = state.flashingLetters.find(l => l.id === id);
+            if (letter) {
+                letter.ledType = e.target.value;
+                updateFlashingCalculation();
+            }
+        });
+    });
+
+    container.querySelectorAll('.flashing-letter-height-inches').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const id = parseInt(e.target.dataset.id);
+            const letter = state.flashingLetters.find(l => l.id === id);
+            if (letter) {
+                const inches = parseFloat(e.target.value) || 0;
+                letter.heightInches = inches;
+                letter.height = Math.round(inches * INCH_TO_CM * 10) / 10;
+                const cmInput = container.querySelector(`.flashing-letter-height[data-id="${id}"]`);
+                if (cmInput) cmInput.value = letter.height || '';
+                updateFlashingCalculation();
+            }
+        });
+    });
+
+    container.querySelectorAll('.flashing-letter-height').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const id = parseInt(e.target.dataset.id);
+            const letter = state.flashingLetters.find(l => l.id === id);
+            if (letter) {
+                const cm = parseFloat(e.target.value) || 0;
+                letter.height = cm;
+                letter.heightInches = Math.round(cm / INCH_TO_CM * 10) / 10;
+                const inchInput = container.querySelector(`.flashing-letter-height-inches[data-id="${id}"]`);
+                if (inchInput) inchInput.value = letter.heightInches || '';
+                updateFlashingCalculation();
+            }
+        });
+    });
+}
+
+function setupFlashingListeners() {
+    // Box dimension inches -> cm
+    document.getElementById('flashingHInches').addEventListener('input', (e) => {
+        const inches = parseFloat(e.target.value) || 0;
+        document.getElementById('flashingH').value = inches ? Math.round(inches * INCH_TO_CM * 10) / 10 : '';
+        updateFlashingCalculation();
+    });
+    document.getElementById('flashingLInches').addEventListener('input', (e) => {
+        const inches = parseFloat(e.target.value) || 0;
+        document.getElementById('flashingL').value = inches ? Math.round(inches * INCH_TO_CM * 10) / 10 : '';
+        updateFlashingCalculation();
+    });
+    document.getElementById('flashingDInches').addEventListener('input', (e) => {
+        const inches = parseFloat(e.target.value) || 0;
+        document.getElementById('flashingD').value = inches ? Math.round(inches * INCH_TO_CM * 10) / 10 : '';
+        updateFlashingCalculation();
+    });
+
+    // Box dimension cm -> inches
+    document.getElementById('flashingH').addEventListener('input', (e) => {
+        const cm = parseFloat(e.target.value) || 0;
+        document.getElementById('flashingHInches').value = cm ? Math.round(cm / INCH_TO_CM * 10) / 10 : '';
+        updateFlashingCalculation();
+    });
+    document.getElementById('flashingL').addEventListener('input', (e) => {
+        const cm = parseFloat(e.target.value) || 0;
+        document.getElementById('flashingLInches').value = cm ? Math.round(cm / INCH_TO_CM * 10) / 10 : '';
+        updateFlashingCalculation();
+    });
+    document.getElementById('flashingD').addEventListener('input', (e) => {
+        const cm = parseFloat(e.target.value) || 0;
+        document.getElementById('flashingDInches').value = cm ? Math.round(cm / INCH_TO_CM * 10) / 10 : '';
+        updateFlashingCalculation();
+    });
+
+    // Add letter row button
+    document.getElementById('addFlashingLetterBtn').addEventListener('click', addFlashingLetterRow);
+
+    // Add to Quotation
+    document.getElementById('addFlashingToQuotationBtn').addEventListener('click', addFlashingToQuotation);
+
+    // Clear
+    document.getElementById('clearFlashingBtn').addEventListener('click', clearFlashing);
+
+    // Initialize with one letter row
+    addFlashingLetterRow();
+}
+
+function updateFlashingCalculation() {
+    const hRaw = parseFloat(document.getElementById('flashingH').value) || 0;
+    const lRaw = parseFloat(document.getElementById('flashingL').value) || 0;
+    const dRaw = parseFloat(document.getElementById('flashingD').value) || 0;
+    const prices = state.prices;
+
+    // Enforce minimum dimensions for box
+    const h = hRaw > 0 ? Math.max(hRaw, 30) : 0;
+    const l = lRaw > 0 ? Math.max(lRaw, 30) : 0;
+    const d = dRaw > 0 ? Math.max(dRaw, 10) : 0;
+
+    // Calculate box
+    const boxArea = calculateFlashingBoxArea(h, l, d);
+    const boxBase = prices.flashingBoxBase || DEFAULT_PRICES.flashingBoxBase;
+    const boxPerSqm = prices.flashingBox || DEFAULT_PRICES.flashingBox;
+    const boxPrice = boxArea > 0 ? boxBase + boxArea * boxPerSqm : 0;
+
+    document.getElementById('flashingBoxPrice').textContent = `${formatNumber(boxPrice)} ₱`;
+
+    // Calculate each letter row (LED option per row)
+    let totalLetterPrice = 0;
+    state.flashingLetters.forEach(letter => {
+        const ledPricePerSqm = letter.ledType === 'full'
+            ? (prices.flashingLedFull || DEFAULT_PRICES.flashingLedFull)
+            : (prices.flashingLedBorder || DEFAULT_PRICES.flashingLedBorder);
+        // Enforce minimum letter height of 8cm
+        const letterHeight = letter.height > 0 ? Math.max(letter.height, 8) : 0;
+        const letterArea = calculateFlashingLetterArea(letterHeight, letter.charCount);
+        const letterPrice = letterArea * ledPricePerSqm;
+        totalLetterPrice += letterPrice;
+
+        const priceEl = document.querySelector(`.flashing-letter-price[data-id="${letter.id}"]`);
+        if (priceEl) priceEl.textContent = `${formatNumber(letterPrice)} ₱`;
+    });
+
+    const total = boxPrice + totalLetterPrice;
+    document.getElementById('flashingSummaryBoxPrice').textContent = `${formatNumber(boxPrice)} ₱`;
+    document.getElementById('flashingSummaryLetterPrice').textContent = `${formatNumber(totalLetterPrice)} ₱`;
+    document.getElementById('flashingTotalPrice').textContent = `${formatNumber(total)} ₱`;
+}
+
+function addFlashingToQuotation() {
+    const hRaw = parseFloat(document.getElementById('flashingH').value) || 0;
+    const lRaw = parseFloat(document.getElementById('flashingL').value) || 0;
+    const dRaw = parseFloat(document.getElementById('flashingD').value) || 0;
+    const prices = state.prices;
+
+    // Enforce minimum dimensions
+    const h = hRaw > 0 ? Math.max(hRaw, 30) : 0;
+    const l = lRaw > 0 ? Math.max(lRaw, 30) : 0;
+    const d = dRaw > 0 ? Math.max(dRaw, 10) : 0;
+
+    // Recalculate totals
+    const boxArea = calculateFlashingBoxArea(h, l, d);
+    const boxBase = prices.flashingBoxBase || DEFAULT_PRICES.flashingBoxBase;
+    const boxPerSqm = prices.flashingBox || DEFAULT_PRICES.flashingBox;
+    const boxPrice = boxArea > 0 ? boxBase + boxArea * boxPerSqm : 0;
+
+    let totalLetterPrice = 0;
+    state.flashingLetters.forEach(letter => {
+        const ledPricePerSqm = letter.ledType === 'full'
+            ? (prices.flashingLedFull || DEFAULT_PRICES.flashingLedFull)
+            : (prices.flashingLedBorder || DEFAULT_PRICES.flashingLedBorder);
+        const letterHeight = letter.height > 0 ? Math.max(letter.height, 8) : 0;
+        const letterArea = calculateFlashingLetterArea(letterHeight, letter.charCount);
+        totalLetterPrice += letterArea * ledPricePerSqm;
+    });
+
+    const total = boxPrice + totalLetterPrice;
+
+    if (total <= 0) {
+        showNotification('Please enter dimensions first!', 'error');
+        return;
+    }
+
+    let description = `Flashing Mode Haus Sign - Box: ${h}×${l}×${d}cm`;
+    const letterNames = state.flashingLetters.filter(l => l.name).map(l => {
+        const ledLabel = l.ledType === 'full' ? 'LED Point Letter' : 'Acrylic';
+        return `${l.name}(${ledLabel})`;
+    }).join(' + ');
+    if (letterNames) description += ` | ${letterNames}`;
+
+    state.quotationItems.push({ description, price: total, quantity: 1 });
+    renderQuotationItems();
+
+    const qPanel = document.querySelector('.quotation-panel');
+    if (qPanel) qPanel.scrollTop = 0;
+
+    showNotification('Flashing Mode Haus Sign added to quotation!', 'success');
+}
+
+function clearFlashing() {
+    document.getElementById('flashingH').value = '';
+    document.getElementById('flashingHInches').value = '';
+    document.getElementById('flashingL').value = '';
+    document.getElementById('flashingLInches').value = '';
+    document.getElementById('flashingD').value = '';
+    document.getElementById('flashingDInches').value = '';
+    state.flashingLetters = [];
+    addFlashingLetterRow();
+    updateFlashingCalculation();
 }
 
 
