@@ -18,7 +18,6 @@ const DEFAULT_PRICES = {
   flashingBoxBase: 2000,     // Flashing box base price
   flashingLedBorder: 4000,   // Acrylic letter (no raised) per sqm
   flashingLedFull: 6000,     // LED Point Letter per sqm
-  logoRaised: 25000,        // Raised Logo (per m²)
   noLedMultiplier: 0.8,     // No LED option multiplier
   difficultMultiplier: 1.2, // Difficult lettering multiplier
   acrylicComplexMultiplier: 1.2, // Complex acrylic logo multiplier

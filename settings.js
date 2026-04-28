@@ -208,7 +208,6 @@ function initSettingsForm(prices) {
     document.getElementById('priceAcrylicLogoRound').value = prices.acrylicLogoRound;
     document.getElementById('priceAcrylicLogoSquare').value = prices.acrylicLogoSquare;
     document.getElementById('acrylicComplexMultiplier').value = prices.acrylicComplexMultiplier;
-    document.getElementById('priceLogoRaised').value = prices.logoRaised;
 
     // Flashing Mode settings
     document.getElementById('priceFlashingBox').value = prices.flashingBox;
@@ -242,7 +241,6 @@ function getPricesFromForm() {
         acrylicLogoRound: parseFloat(document.getElementById('priceAcrylicLogoRound').value) || DEFAULT_PRICES.acrylicLogoRound,
         acrylicLogoSquare: parseFloat(document.getElementById('priceAcrylicLogoSquare').value) || DEFAULT_PRICES.acrylicLogoSquare,
         acrylicComplexMultiplier: parseFloat(document.getElementById('acrylicComplexMultiplier').value) || DEFAULT_PRICES.acrylicComplexMultiplier,
-        logoRaised: parseFloat(document.getElementById('priceLogoRaised').value) || DEFAULT_PRICES.logoRaised,
 
         // Flashing Mode settings
         flashingBox: parseFloat(document.getElementById('priceFlashingBox').value) || DEFAULT_PRICES.flashingBox,
