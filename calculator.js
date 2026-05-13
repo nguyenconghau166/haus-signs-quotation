@@ -217,6 +217,15 @@ function calculateFlashingBoxArea(hCm, wCm) {
 }
 
 /**
+ * Calculate flashing letter area in m²
+ * Formula: 1.8 * heightCm * heightCm per character, converted to m²
+ */
+function calculateFlashingLetterArea(heightCm, charCount) {
+    if (!heightCm || !charCount) return 0;
+    return 1.8 * heightCm * heightCm * charCount / 10000;
+}
+
+/**
  * Format number with thousand separators
  * @param {number} num - Number to format
  * @returns {string} Formatted number

@@ -344,6 +344,20 @@
           </div>
         </div>
 
+        <!-- Part 2: Letters & Border -->
+        <div class="card">
+          <h2 class="card-title">✍️ Letters & Border LED</h2>
+          <p class="card-subtitle">Add letter lines for the flashing sign</p>
+
+          <div class="letter-rows" id="flashingLetterRows">
+            <!-- Flashing letter rows will be added here by JS -->
+          </div>
+
+          <button id="addFlashingLetterBtn" class="btn btn-ghost">
+            <span class="icon">➕</span> Add Letter Row
+          </button>
+        </div>
+
         <!-- Summary -->
         <div class="card summary-card">
           <h2 class="card-title">📊 Flashing Mode Summary</h2>
@@ -351,6 +365,10 @@
             <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border);">
               <span>Box Price</span>
               <span id="flashingSummaryBoxPrice">0 ₱</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border);">
+              <span>Letter & LED Price</span>
+              <span id="flashingSummaryLetterPrice">0 ₱</span>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; font-weight: 700; font-size: 1.2rem; border-top: 2px solid var(--primary);">
               <span>TOTAL</span>
@@ -758,6 +776,20 @@
                   <span class="unit">×</span>
                 </div>
                 <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Multiplier applied to box price when LED option = "LED Point Letter"</small>
+              </div>
+              <div class="form-group">
+                <label for="priceFlashingLedFull">LED Point Letter</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceFlashingLedFull" value="6000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="priceFlashingLedBorder">Acrylic letter (no raised)</label>
+                <div class="input-with-unit">
+                  <input type="number" id="priceFlashingLedBorder" value="4000" min="0">
+                  <span class="unit">₱/m²</span>
+                </div>
               </div>
             </div>
 
