@@ -213,8 +213,6 @@ function initSettingsForm(prices) {
     document.getElementById('priceFlashingBox').value = prices.flashingBox;
     document.getElementById('priceFlashingBoxBase').value = prices.flashingBoxBase;
     document.getElementById('flashingBoxLedFullMultiplier').value = prices.flashingBoxLedFullMultiplier || DEFAULT_PRICES.flashingBoxLedFullMultiplier;
-    document.getElementById('priceFlashingLedFull').value = prices.flashingLedFull;
-    document.getElementById('priceFlashingLedBorder').value = prices.flashingLedBorder;
 
     // Surcharge settings (with fallbacks to defaults if not present in saved settings)
     document.getElementById('surchargeThreshold1').value = prices.surchargeThreshold1 || DEFAULT_PRICES.surchargeThreshold1;
@@ -247,8 +245,6 @@ function getPricesFromForm() {
         flashingBox: parseFloat(document.getElementById('priceFlashingBox').value) || DEFAULT_PRICES.flashingBox,
         flashingBoxBase: parseFloat(document.getElementById('priceFlashingBoxBase').value) || DEFAULT_PRICES.flashingBoxBase,
         flashingBoxLedFullMultiplier: parseFloat(document.getElementById('flashingBoxLedFullMultiplier').value) || DEFAULT_PRICES.flashingBoxLedFullMultiplier,
-        flashingLedFull: parseFloat(document.getElementById('priceFlashingLedFull').value) || DEFAULT_PRICES.flashingLedFull,
-        flashingLedBorder: parseFloat(document.getElementById('priceFlashingLedBorder').value) || DEFAULT_PRICES.flashingLedBorder,
 
         // Surcharge settings
         surchargeThreshold1: parseFloat(document.getElementById('surchargeThreshold1').value) || DEFAULT_PRICES.surchargeThreshold1,
