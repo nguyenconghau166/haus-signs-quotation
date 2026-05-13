@@ -209,11 +209,11 @@ function calculateLightboxPrice(styleId, size, quantity, customDimensions, price
 
 /**
  * Calculate flashing box area in m²
- * Formula: 2 * (H*L + L*D + D*H) / 10000
+ * Formula: 2 * H * W / 10000
  */
-function calculateFlashingBoxArea(hCm, lCm, dCm) {
-    if (!hCm || !lCm || !dCm) return 0;
-    return 2 * (hCm * lCm + lCm * dCm + dCm * hCm) / 10000;
+function calculateFlashingBoxArea(hCm, wCm) {
+    if (!hCm || !wCm) return 0;
+    return 2 * hCm * wCm / 10000;
 }
 
 /**
