@@ -14,9 +14,8 @@ const DEFAULT_PRICES = {
   lightbox: 10000,          // Lightbox (all styles)
   acrylicLogoRound: 11000,  // Illuminated Acrylic Logo (Round)
   acrylicLogoSquare: 10000, // Illuminated Acrylic Logo (Square)
-  flashingBox: 15000,        // Flashing box price per sqm
-  flashingBoxBase: 1500,     // Flashing box base price
-  flashingBoxLedFullMultiplier: 1.2, // Multiplier for box when LED option = LED Point Letter
+  flashingBox: 11000,        // Flashing box price per sqm
+  flashingBoxBase: 2000,     // Flashing box base price
   flashingLedBorder: 4000,   // Acrylic letter (no raised) per sqm
   flashingLedFull: 6000,     // LED Point Letter per sqm
   noLedMultiplier: 0.8,     // No LED option multiplier

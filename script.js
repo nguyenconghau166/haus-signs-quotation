@@ -1936,6 +1936,11 @@ function setupFlashingListeners() {
         document.getElementById('flashingL').value = inches ? Math.round(inches * INCH_TO_CM * 10) / 10 : '';
         updateFlashingCalculation();
     });
+    document.getElementById('flashingDInches').addEventListener('input', (e) => {
+        const inches = parseFloat(e.target.value) || 0;
+        document.getElementById('flashingD').value = inches ? Math.round(inches * INCH_TO_CM * 10) / 10 : '';
+        updateFlashingCalculation();
+    });
 
     // Box dimension cm -> inches
     document.getElementById('flashingH').addEventListener('input', (e) => {
@@ -1948,9 +1953,11 @@ function setupFlashingListeners() {
         document.getElementById('flashingLInches').value = cm ? Math.round(cm / INCH_TO_CM * 10) / 10 : '';
         updateFlashingCalculation();
     });
-
-    // Box LED option
-    document.getElementById('flashingBoxLedType').addEventListener('change', updateFlashingCalculation);
+    document.getElementById('flashingD').addEventListener('input', (e) => {
+        const cm = parseFloat(e.target.value) || 0;
+        document.getElementById('flashingDInches').value = cm ? Math.round(cm / INCH_TO_CM * 10) / 10 : '';
+        updateFlashingCalculation();
+    });
 
     // Add letter row button
     document.getElementById('addFlashingLetterBtn').addEventListener('click', addFlashingLetterRow);
@@ -1967,22 +1974,20 @@ function setupFlashingListeners() {
 
 function updateFlashingCalculation() {
     const hRaw = parseFloat(document.getElementById('flashingH').value) || 0;
-    const wRaw = parseFloat(document.getElementById('flashingL').value) || 0;
-    const boxLedType = document.getElementById('flashingBoxLedType').value;
+    const lRaw = parseFloat(document.getElementById('flashingL').value) || 0;
+    const dRaw = parseFloat(document.getElementById('flashingD').value) || 0;
     const prices = state.prices;
 
     // Enforce minimum dimensions for box
     const h = hRaw > 0 ? Math.max(hRaw, 30) : 0;
-    const w = wRaw > 0 ? Math.max(wRaw, 30) : 0;
+    const l = lRaw > 0 ? Math.max(lRaw, 30) : 0;
+    const d = dRaw > 0 ? Math.max(dRaw, 10) : 0;
 
     // Calculate box
-    const boxArea = calculateFlashingBoxArea(h, w);
+    const boxArea = calculateFlashingBoxArea(h, l, d);
     const boxBase = prices.flashingBoxBase || DEFAULT_PRICES.flashingBoxBase;
     const boxPerSqm = prices.flashingBox || DEFAULT_PRICES.flashingBox;
-    const boxLedMultiplier = boxLedType === 'full'
-        ? (prices.flashingBoxLedFullMultiplier || DEFAULT_PRICES.flashingBoxLedFullMultiplier)
-        : 1;
-    const boxPrice = boxArea > 0 ? (boxBase + boxArea * boxPerSqm) * boxLedMultiplier : 0;
+    const boxPrice = boxArea > 0 ? boxBase + boxArea * boxPerSqm : 0;
 
     document.getElementById('flashingBoxPrice').textContent = `${formatNumber(boxPrice)} ₱`;
 
@@ -2010,22 +2015,20 @@ function updateFlashingCalculation() {
 
 function addFlashingToQuotation() {
     const hRaw = parseFloat(document.getElementById('flashingH').value) || 0;
-    const wRaw = parseFloat(document.getElementById('flashingL').value) || 0;
-    const boxLedType = document.getElementById('flashingBoxLedType').value;
+    const lRaw = parseFloat(document.getElementById('flashingL').value) || 0;
+    const dRaw = parseFloat(document.getElementById('flashingD').value) || 0;
     const prices = state.prices;
 
     // Enforce minimum dimensions
     const h = hRaw > 0 ? Math.max(hRaw, 30) : 0;
-    const w = wRaw > 0 ? Math.max(wRaw, 30) : 0;
+    const l = lRaw > 0 ? Math.max(lRaw, 30) : 0;
+    const d = dRaw > 0 ? Math.max(dRaw, 10) : 0;
 
     // Recalculate totals
-    const boxArea = calculateFlashingBoxArea(h, w);
+    const boxArea = calculateFlashingBoxArea(h, l, d);
     const boxBase = prices.flashingBoxBase || DEFAULT_PRICES.flashingBoxBase;
     const boxPerSqm = prices.flashingBox || DEFAULT_PRICES.flashingBox;
-    const boxLedMultiplier = boxLedType === 'full'
-        ? (prices.flashingBoxLedFullMultiplier || DEFAULT_PRICES.flashingBoxLedFullMultiplier)
-        : 1;
-    const boxPrice = boxArea > 0 ? (boxBase + boxArea * boxPerSqm) * boxLedMultiplier : 0;
+    const boxPrice = boxArea > 0 ? boxBase + boxArea * boxPerSqm : 0;
 
     let totalLetterPrice = 0;
     state.flashingLetters.forEach(letter => {
@@ -2044,8 +2047,7 @@ function addFlashingToQuotation() {
         return;
     }
 
-    const boxLedLabel = boxLedType === 'full' ? 'LED Point Letter' : 'Acrylic';
-    let description = `Flashing Mode Haus Sign - Box: ${h}×${w}cm (${boxLedLabel})`;
+    let description = `Flashing Mode Haus Sign - Box: ${h}×${l}×${d}cm`;
     const letterNames = state.flashingLetters.filter(l => l.name).map(l => {
         const ledLabel = l.ledType === 'full' ? 'LED Point Letter' : 'Acrylic';
         return `${l.name}(${ledLabel})`;
@@ -2066,7 +2068,8 @@ function clearFlashing() {
     document.getElementById('flashingHInches').value = '';
     document.getElementById('flashingL').value = '';
     document.getElementById('flashingLInches').value = '';
-    document.getElementById('flashingBoxLedType').value = 'border';
+    document.getElementById('flashingD').value = '';
+    document.getElementById('flashingDInches').value = '';
     state.flashingLetters = [];
     addFlashingLetterRow();
     updateFlashingCalculation();

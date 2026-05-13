@@ -212,7 +212,6 @@ function initSettingsForm(prices) {
     // Flashing Mode settings
     document.getElementById('priceFlashingBox').value = prices.flashingBox;
     document.getElementById('priceFlashingBoxBase').value = prices.flashingBoxBase;
-    document.getElementById('flashingBoxLedFullMultiplier').value = prices.flashingBoxLedFullMultiplier || DEFAULT_PRICES.flashingBoxLedFullMultiplier;
     document.getElementById('priceFlashingLedFull').value = prices.flashingLedFull;
     document.getElementById('priceFlashingLedBorder').value = prices.flashingLedBorder;
 
@@ -246,7 +245,6 @@ function getPricesFromForm() {
         // Flashing Mode settings
         flashingBox: parseFloat(document.getElementById('priceFlashingBox').value) || DEFAULT_PRICES.flashingBox,
         flashingBoxBase: parseFloat(document.getElementById('priceFlashingBoxBase').value) || DEFAULT_PRICES.flashingBoxBase,
-        flashingBoxLedFullMultiplier: parseFloat(document.getElementById('flashingBoxLedFullMultiplier').value) || DEFAULT_PRICES.flashingBoxLedFullMultiplier,
         flashingLedFull: parseFloat(document.getElementById('priceFlashingLedFull').value) || DEFAULT_PRICES.flashingLedFull,
         flashingLedBorder: parseFloat(document.getElementById('priceFlashingLedBorder').value) || DEFAULT_PRICES.flashingLedBorder,
 
