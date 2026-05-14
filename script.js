@@ -1807,6 +1807,9 @@ function updateAllCalculations() {
     // Update lightbox
     updateLightboxCalculation();
 
+    // Update flashing mode (so suggested-size prices refresh when settings change)
+    updateFlashingCalculation();
+
     // Update summary
     updateSignageSummary();
 }
@@ -1856,6 +1859,9 @@ function setupFlashingListeners() {
 
     // Clear
     document.getElementById('clearFlashingBtn').addEventListener('click', clearFlashing);
+
+    // Initial render of suggested-size prices
+    updateFlashingSizeSuggestions();
 }
 
 function getFlashingBoxState() {
@@ -1867,7 +1873,7 @@ function getFlashingBoxState() {
 
     const h = hRaw > 0 ? Math.max(hRaw, 30) : 0;
     const l = lRaw > 0 ? Math.max(lRaw, 30) : 0;
-    const d = dRaw > 0 ? Math.max(dRaw, 10) : 0;
+    const d = dRaw > 0 ? Math.max(dRaw, 15) : 0;
 
     const boxArea = calculateFlashingBoxArea(h, l, d);
     const boxBase = prices.flashingBoxBase || DEFAULT_PRICES.flashingBoxBase;
@@ -1884,6 +1890,29 @@ function updateFlashingCalculation() {
     const { boxPrice } = getFlashingBoxState();
     document.getElementById('flashingBoxPrice').textContent = `${formatNumber(boxPrice)} ₱`;
     document.getElementById('flashingTotalPrice').textContent = `${formatNumber(boxPrice)} ₱`;
+    updateFlashingSizeSuggestions();
+}
+
+function updateFlashingSizeSuggestions() {
+    const prices = state.prices;
+    const ledOptionEl = document.getElementById('flashingLedOption');
+    const ledOption = ledOptionEl ? ledOptionEl.value : 'border';
+    const boxBase = prices.flashingBoxBase || DEFAULT_PRICES.flashingBoxBase;
+    const pricePerSqm = ledOption === 'full'
+        ? (prices.flashingLedFull || DEFAULT_PRICES.flashingLedFull)
+        : (prices.flashingLedBorder || DEFAULT_PRICES.flashingLedBorder);
+
+    const sizes = [
+        { id: '40_60_15', h: 40, l: 60, d: 15 },
+        { id: '50_70_15', h: 50, l: 70, d: 15 },
+        { id: '60_80_15', h: 60, l: 80, d: 15 },
+    ];
+    sizes.forEach(({ id, h, l, d }) => {
+        const area = calculateFlashingBoxArea(h, l, d);
+        const price = boxBase + area * pricePerSqm;
+        const el = document.getElementById(`flashingSuggestPrice_${id}`);
+        if (el) el.textContent = `${formatNumber(price)} ₱`;
+    });
 }
 
 function addFlashingToQuotation() {
