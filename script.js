@@ -1813,117 +1813,6 @@ function updateAllCalculations() {
 
 // ==================== Flashing Mode Haus Sign ====================
 
-// Flashing letters state
-if (!state.flashingLetters) state.flashingLetters = [];
-
-function addFlashingLetterRow() {
-    state.flashingLetters.push({
-        id: Date.now(),
-        name: '',
-        height: 0,
-        heightInches: 0,
-        charCount: 0,
-        ledType: 'border'
-    });
-    renderFlashingLetterRows();
-}
-
-function removeFlashingLetterRow(id) {
-    if (state.flashingLetters.length === 1) return;
-    state.flashingLetters = state.flashingLetters.filter(l => l.id !== id);
-    renderFlashingLetterRows();
-    updateFlashingCalculation();
-}
-
-function renderFlashingLetterRows() {
-    const container = document.getElementById('flashingLetterRows');
-    container.innerHTML = state.flashingLetters.map((letter, index) => `
-    <div class="letter-row" data-id="${letter.id}">
-      <div class="form-group letter-name-group">
-        <label>Letter Content</label>
-        <input type="text" class="flashing-letter-name" data-id="${letter.id}"
-               value="${letter.name || ''}" placeholder="E.g: HAUS SIGNS">
-      </div>
-      <div class="form-group">
-        <label>LED Option</label>
-        <select class="flashing-letter-led" data-id="${letter.id}">
-          <option value="border" ${letter.ledType === 'border' ? 'selected' : ''}>Acrylic letter (no raised)</option>
-          <option value="full" ${letter.ledType === 'full' ? 'selected' : ''}>LED Point Letter</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Height (inches) min 3.1"</label>
-        <input type="number" class="flashing-letter-height-inches" data-id="${letter.id}"
-               value="${letter.heightInches || ''}" placeholder="3.1" min="0" step="0.1">
-      </div>
-      <div class="form-group">
-        <label>Height (cm) min 8</label>
-        <input type="number" class="flashing-letter-height" data-id="${letter.id}"
-               value="${letter.height || ''}" placeholder="8" min="0" step="0.1">
-      </div>
-      <div class="form-group result-display">
-        <label>Price</label>
-        <div class="result-value flashing-letter-price" data-id="${letter.id}">0 ₱</div>
-      </div>
-      <button class="btn-remove" onclick="removeFlashingLetterRow(${letter.id})" ${state.flashingLetters.length <= 1 ? 'disabled' : ''}>✕</button>
-    </div>
-    `).join('');
-
-    // Attach event listeners
-    container.querySelectorAll('.flashing-letter-name').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const letter = state.flashingLetters.find(l => l.id === id);
-            if (letter) {
-                letter.name = e.target.value;
-                letter.charCount = countCharacters(e.target.value);
-                updateFlashingCalculation();
-            }
-        });
-    });
-
-    container.querySelectorAll('.flashing-letter-led').forEach(select => {
-        select.addEventListener('change', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const letter = state.flashingLetters.find(l => l.id === id);
-            if (letter) {
-                letter.ledType = e.target.value;
-                updateFlashingCalculation();
-            }
-        });
-    });
-
-    container.querySelectorAll('.flashing-letter-height-inches').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const letter = state.flashingLetters.find(l => l.id === id);
-            if (letter) {
-                const inches = parseFloat(e.target.value) || 0;
-                letter.heightInches = inches;
-                letter.height = Math.round(inches * INCH_TO_CM * 10) / 10;
-                const cmInput = container.querySelector(`.flashing-letter-height[data-id="${id}"]`);
-                if (cmInput) cmInput.value = letter.height || '';
-                updateFlashingCalculation();
-            }
-        });
-    });
-
-    container.querySelectorAll('.flashing-letter-height').forEach(input => {
-        input.addEventListener('input', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            const letter = state.flashingLetters.find(l => l.id === id);
-            if (letter) {
-                const cm = parseFloat(e.target.value) || 0;
-                letter.height = cm;
-                letter.heightInches = Math.round(cm / INCH_TO_CM * 10) / 10;
-                const inchInput = container.querySelector(`.flashing-letter-height-inches[data-id="${id}"]`);
-                if (inchInput) inchInput.value = letter.heightInches || '';
-                updateFlashingCalculation();
-            }
-        });
-    });
-}
-
 function setupFlashingListeners() {
     // Box dimension inches -> cm
     document.getElementById('flashingHInches').addEventListener('input', (e) => {
@@ -1959,102 +1848,54 @@ function setupFlashingListeners() {
         updateFlashingCalculation();
     });
 
-    // Add letter row button
-    document.getElementById('addFlashingLetterBtn').addEventListener('click', addFlashingLetterRow);
+    // LED option dropdown
+    document.getElementById('flashingLedOption').addEventListener('change', updateFlashingCalculation);
 
     // Add to Quotation
     document.getElementById('addFlashingToQuotationBtn').addEventListener('click', addFlashingToQuotation);
 
     // Clear
     document.getElementById('clearFlashingBtn').addEventListener('click', clearFlashing);
+}
 
-    // Initialize with one letter row
-    addFlashingLetterRow();
+function getFlashingBoxState() {
+    const hRaw = parseFloat(document.getElementById('flashingH').value) || 0;
+    const lRaw = parseFloat(document.getElementById('flashingL').value) || 0;
+    const dRaw = parseFloat(document.getElementById('flashingD').value) || 0;
+    const ledOption = document.getElementById('flashingLedOption').value;
+    const prices = state.prices;
+
+    const h = hRaw > 0 ? Math.max(hRaw, 30) : 0;
+    const l = lRaw > 0 ? Math.max(lRaw, 30) : 0;
+    const d = dRaw > 0 ? Math.max(dRaw, 10) : 0;
+
+    const boxArea = calculateFlashingBoxArea(h, l, d);
+    const boxBase = prices.flashingBoxBase || DEFAULT_PRICES.flashingBoxBase;
+    const pricePerSqm = ledOption === 'full'
+        ? (prices.flashingLedFull || DEFAULT_PRICES.flashingLedFull)
+        : (prices.flashingLedBorder || DEFAULT_PRICES.flashingLedBorder);
+    const boxPrice = boxArea > 0 ? boxBase + boxArea * pricePerSqm : 0;
+    const ledLabel = ledOption === 'full' ? 'LED Point Letter' : 'Acrylic letter (no raised)';
+
+    return { h, l, d, ledOption, ledLabel, boxArea, boxPrice };
 }
 
 function updateFlashingCalculation() {
-    const hRaw = parseFloat(document.getElementById('flashingH').value) || 0;
-    const lRaw = parseFloat(document.getElementById('flashingL').value) || 0;
-    const dRaw = parseFloat(document.getElementById('flashingD').value) || 0;
-    const prices = state.prices;
-
-    // Enforce minimum dimensions for box
-    const h = hRaw > 0 ? Math.max(hRaw, 30) : 0;
-    const l = lRaw > 0 ? Math.max(lRaw, 30) : 0;
-    const d = dRaw > 0 ? Math.max(dRaw, 10) : 0;
-
-    // Calculate box
-    const boxArea = calculateFlashingBoxArea(h, l, d);
-    const boxBase = prices.flashingBoxBase || DEFAULT_PRICES.flashingBoxBase;
-    const boxPerSqm = prices.flashingBox || DEFAULT_PRICES.flashingBox;
-    const boxPrice = boxArea > 0 ? boxBase + boxArea * boxPerSqm : 0;
-
+    const { boxPrice } = getFlashingBoxState();
     document.getElementById('flashingBoxPrice').textContent = `${formatNumber(boxPrice)} ₱`;
-
-    // Calculate each letter row (LED option per row)
-    let totalLetterPrice = 0;
-    state.flashingLetters.forEach(letter => {
-        const ledPricePerSqm = letter.ledType === 'full'
-            ? (prices.flashingLedFull || DEFAULT_PRICES.flashingLedFull)
-            : (prices.flashingLedBorder || DEFAULT_PRICES.flashingLedBorder);
-        // Enforce minimum letter height of 8cm
-        const letterHeight = letter.height > 0 ? Math.max(letter.height, 8) : 0;
-        const letterArea = calculateFlashingLetterArea(letterHeight, letter.charCount);
-        const letterPrice = letterArea * ledPricePerSqm;
-        totalLetterPrice += letterPrice;
-
-        const priceEl = document.querySelector(`.flashing-letter-price[data-id="${letter.id}"]`);
-        if (priceEl) priceEl.textContent = `${formatNumber(letterPrice)} ₱`;
-    });
-
-    const total = boxPrice + totalLetterPrice;
-    document.getElementById('flashingSummaryBoxPrice').textContent = `${formatNumber(boxPrice)} ₱`;
-    document.getElementById('flashingSummaryLetterPrice').textContent = `${formatNumber(totalLetterPrice)} ₱`;
-    document.getElementById('flashingTotalPrice').textContent = `${formatNumber(total)} ₱`;
+    document.getElementById('flashingTotalPrice').textContent = `${formatNumber(boxPrice)} ₱`;
 }
 
 function addFlashingToQuotation() {
-    const hRaw = parseFloat(document.getElementById('flashingH').value) || 0;
-    const lRaw = parseFloat(document.getElementById('flashingL').value) || 0;
-    const dRaw = parseFloat(document.getElementById('flashingD').value) || 0;
-    const prices = state.prices;
+    const { h, l, d, ledLabel, boxPrice } = getFlashingBoxState();
 
-    // Enforce minimum dimensions
-    const h = hRaw > 0 ? Math.max(hRaw, 30) : 0;
-    const l = lRaw > 0 ? Math.max(lRaw, 30) : 0;
-    const d = dRaw > 0 ? Math.max(dRaw, 10) : 0;
-
-    // Recalculate totals
-    const boxArea = calculateFlashingBoxArea(h, l, d);
-    const boxBase = prices.flashingBoxBase || DEFAULT_PRICES.flashingBoxBase;
-    const boxPerSqm = prices.flashingBox || DEFAULT_PRICES.flashingBox;
-    const boxPrice = boxArea > 0 ? boxBase + boxArea * boxPerSqm : 0;
-
-    let totalLetterPrice = 0;
-    state.flashingLetters.forEach(letter => {
-        const ledPricePerSqm = letter.ledType === 'full'
-            ? (prices.flashingLedFull || DEFAULT_PRICES.flashingLedFull)
-            : (prices.flashingLedBorder || DEFAULT_PRICES.flashingLedBorder);
-        const letterHeight = letter.height > 0 ? Math.max(letter.height, 8) : 0;
-        const letterArea = calculateFlashingLetterArea(letterHeight, letter.charCount);
-        totalLetterPrice += letterArea * ledPricePerSqm;
-    });
-
-    const total = boxPrice + totalLetterPrice;
-
-    if (total <= 0) {
+    if (boxPrice <= 0) {
         showNotification('Please enter dimensions first!', 'error');
         return;
     }
 
-    let description = `Flashing Mode Haus Sign - Box: ${h}×${l}×${d}cm`;
-    const letterNames = state.flashingLetters.filter(l => l.name).map(l => {
-        const ledLabel = l.ledType === 'full' ? 'LED Point Letter' : 'Acrylic';
-        return `${l.name}(${ledLabel})`;
-    }).join(' + ');
-    if (letterNames) description += ` | ${letterNames}`;
-
-    state.quotationItems.push({ description, price: total, quantity: 1 });
+    const description = `Flashing Mode Haus Sign - ${ledLabel} - ${h}×${l}×${d}cm`;
+    state.quotationItems.push({ description, price: boxPrice, quantity: 1 });
     renderQuotationItems();
 
     const qPanel = document.querySelector('.quotation-panel');
@@ -2070,8 +1911,7 @@ function clearFlashing() {
     document.getElementById('flashingLInches').value = '';
     document.getElementById('flashingD').value = '';
     document.getElementById('flashingDInches').value = '';
-    state.flashingLetters = [];
-    addFlashingLetterRow();
+    document.getElementById('flashingLedOption').value = 'border';
     updateFlashingCalculation();
 }
 

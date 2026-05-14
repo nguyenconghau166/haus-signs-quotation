@@ -209,20 +209,11 @@ function calculateLightboxPrice(styleId, size, quantity, customDimensions, price
 
 /**
  * Calculate flashing box area in m²
- * Formula: 2 * (H*L + L*D + D*H) / 10000
+ * Formula: (2 * H * L + D * (H + L)) / 10000
  */
 function calculateFlashingBoxArea(hCm, lCm, dCm) {
     if (!hCm || !lCm || !dCm) return 0;
-    return 2 * (hCm * lCm + lCm * dCm + dCm * hCm) / 10000;
-}
-
-/**
- * Calculate flashing letter area in m²
- * Formula: 1.8 * heightCm * heightCm per character, converted to m²
- */
-function calculateFlashingLetterArea(heightCm, charCount) {
-    if (!heightCm || !charCount) return 0;
-    return 1.8 * heightCm * heightCm * charCount / 10000;
+    return (2 * hCm * lCm + dCm * (hCm + lCm)) / 10000;
 }
 
 /**
