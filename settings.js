@@ -210,7 +210,6 @@ function initSettingsForm(prices) {
     document.getElementById('acrylicComplexMultiplier').value = prices.acrylicComplexMultiplier;
 
     // Flashing Mode settings
-    document.getElementById('priceFlashingBox').value = prices.flashingBox;
     document.getElementById('priceFlashingBoxBase').value = prices.flashingBoxBase;
     document.getElementById('priceFlashingLedFull').value = prices.flashingLedFull;
     document.getElementById('priceFlashingLedBorder').value = prices.flashingLedBorder;
@@ -243,7 +242,6 @@ function getPricesFromForm() {
         acrylicComplexMultiplier: parseFloat(document.getElementById('acrylicComplexMultiplier').value) || DEFAULT_PRICES.acrylicComplexMultiplier,
 
         // Flashing Mode settings
-        flashingBox: parseFloat(document.getElementById('priceFlashingBox').value) || DEFAULT_PRICES.flashingBox,
         flashingBoxBase: parseFloat(document.getElementById('priceFlashingBoxBase').value) || DEFAULT_PRICES.flashingBoxBase,
         flashingLedFull: parseFloat(document.getElementById('priceFlashingLedFull').value) || DEFAULT_PRICES.flashingLedFull,
         flashingLedBorder: parseFloat(document.getElementById('priceFlashingLedBorder').value) || DEFAULT_PRICES.flashingLedBorder,
